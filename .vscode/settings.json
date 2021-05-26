@@ -1,0 +1,10 @@
+{
+    "pawn.compileOptions": [
+
+        "-d1",
+        "-O1",
+        "-(",
+        "-;"
+    ],
+    "pawn.compilerPath": "F:\\SAMP-SCRIPTS\\2013_sql_hzdb\\2013 sql hzdb\\pawno"
+}

@@ -4541,3 +4541,270 @@ v0.3.7-R2, (C)2005-2015 SA-MP Team
 [20/05/2021 08:32:08]lagcompemode 0 [chat] [Camel_Donatello]: do some magic bitch
 [20/05/2021 08:32:17]lagcompemode 0 [chat] [Camel_Donatello]: AHAHAHAH
 [20/05/2021 08:32:23]lagcompemode 0 [chat] [Camel_Donatello]: send me that shitt
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[18:20:58] filterscripts = ""  (string)
+[25/05/2021 18:20:58]lagcompemode 0 
+[25/05/2021 18:20:58]lagcompemode 0 Server Plugins
+[25/05/2021 18:20:58]lagcompemode 0 --------------
+[25/05/2021 18:20:58]lagcompemode 0  Loading plugin: mysql
+[25/05/2021 18:20:58]lagcompemode 0 
+
+  > MySQL plugin R6-2 successfully loaded.
+
+[25/05/2021 18:20:58]lagcompemode 0   Loaded.
+[25/05/2021 18:20:58]lagcompemode 0  Loading plugin: streamer
+[25/05/2021 18:20:58]lagcompemode 0 
+
+*** Streamer Plugin v2.9.5 by Incognito loaded ***
+
+[25/05/2021 18:20:58]lagcompemode 0   Loaded.
+[25/05/2021 18:20:58]lagcompemode 0  Loading plugin: Whirlpool
+[25/05/2021 18:20:58]lagcompemode 0  
+[25/05/2021 18:20:58]lagcompemode 0  ==================
+[25/05/2021 18:20:58]lagcompemode 0  
+[25/05/2021 18:20:58]lagcompemode 0   Whirlpool loaded
+[25/05/2021 18:20:58]lagcompemode 0  
+[25/05/2021 18:20:58]lagcompemode 0  ==================
+[25/05/2021 18:20:58]lagcompemode 0  
+[25/05/2021 18:20:58]lagcompemode 0   Loaded.
+[25/05/2021 18:20:58]lagcompemode 0  Loading plugin: sscanf
+[25/05/2021 18:20:58]lagcompemode 0 
+
+[25/05/2021 18:20:58]lagcompemode 0  ===============================
+
+[25/05/2021 18:20:58]lagcompemode 0       sscanf plugin loaded.     
+
+[25/05/2021 18:20:58]lagcompemode 0          Version:  2.8.3        
+
+[25/05/2021 18:20:58]lagcompemode 0   (c) 2018 Alex "Y_Less" Cole  
+
+[25/05/2021 18:20:58]lagcompemode 0  ===============================
+
+[25/05/2021 18:20:58]lagcompemode 0   Loaded.
+[25/05/2021 18:20:58]lagcompemode 0  Loaded 4 plugins.
+
+[25/05/2021 18:20:58]lagcompemode 0 
+[25/05/2021 18:20:58]lagcompemode 0 Filterscripts
+[25/05/2021 18:20:58]lagcompemode 0 ---------------
+[25/05/2021 18:20:58]lagcompemode 0   Loaded 0 filterscripts.
+
+[25/05/2021 18:21:14]lagcompemode 0 
+----------------------------------
+[25/05/2021 18:21:14]lagcompemode 0 Next Generation Roleplay
+[25/05/2021 18:21:14]lagcompemode 0 ----------------------------------
+
+[25/05/2021 18:21:14]lagcompemode 0 Number of vehicle models: 67
+[25/05/2021 18:21:59]lagcompemode 0 [connection] 192.168.29.204:54786 requests connection cookie.
+[25/05/2021 18:22:00]lagcompemode 0 [connection] incoming connection: 192.168.29.204:54786 id: 0
+[25/05/2021 18:22:00]lagcompemode 0 [join] Upender_Lakhwan has joined the server (0:192.168.29.204)
+[25/05/2021 18:22:13]lagcompemode 0 errorid: 1146 | error: Table 'ngrp.connections' doesn't exist | callback: OnQueryFinish | query: UPDATE connections SET AccountID = 3 WHERE PlayerID = 0 | connection handle: 1 | resultid: 1 | extraid: 0
+[25/05/2021 18:22:21]lagcompemode 0 [cmd] [Upender Lakhwan]: /createpvehicle
+[25/05/2021 18:22:24]lagcompemode 0 [cmd] [Upender Lakhwan]: /lakhwanisop
+[25/05/2021 18:22:26]lagcompemode 0 [cmd] [Upender Lakhwan]: /lakhwanop
+[25/05/2021 18:22:30]lagcompemode 0 [cmd] [Upender Lakhwan]: /createpvehicle
+[25/05/2021 18:22:34]lagcompemode 0 [cmd] [Upender Lakhwan]: /createpvehicle upender 522 2 2
+[25/05/2021 18:22:36]lagcompemode 0 [cmd] [Upender Lakhwan]: /engine
+[25/05/2021 18:23:20]lagcompemode 0 [part] Upender_Lakhwan has left the server (0:1)
+[25/05/2021 18:23:21]lagcompemode 0 errorid: 1146 | error: Table 'ngrp.connections' doesn't exist | callback: OnQueryFinish | query: DELETE FROM connections WHERE PlayerID = 0 | connection handle: 1 | resultid: 1 | extraid: 0
+[25/05/2021 18:23:21]lagcompemode 0 errorid: 1054 | error: Unknown column 'Rankk' in 'field list' | callback: OnQueryFinish | query: UPDATE players SET Password = 'FF79037E6780FD109E67A016B69052E546B58646126BBFFB25070E33438E8CF760D2BE4F8724F6D2973F60193CFD30381DAE17AAABA94355F07B64A26EA427D7', Level = 1, AdminLevel = 6, AdminName = '0', BanAppealer = 0, Donator = 0, Banned = 0, Permabanned = 0, Disabled = 0, LastIP = '192.168.29.204', Registered = 1, Tutorial = 1, Sex = 1, Age = 20, Skin = 299, PosX = '1530.605834', PosY = '-1601.808593', PosZ = '12.956585', PosR = '304.061859', ConnectTime = 0, Respect = 0, PhoneNumber = 0, Warnings = 0, Gang = 255, Faction = 0, Leader = 0, Rankk = 0 WHERE Username = 'Upender_Lakhwan' | connection handle: 1 | resultid: 5 | extraid: 0
+[25/05/2021 18:25:25]lagcompemode 0 [connection] 192.168.29.204:51869 requests connection cookie.
+[25/05/2021 18:25:26]lagcompemode 0 [connection] incoming connection: 192.168.29.204:51869 id: 0
+[25/05/2021 18:25:26]lagcompemode 0 [join] Upender_Lakhwan has joined the server (0:192.168.29.204)
+[25/05/2021 18:25:35]lagcompemode 0 errorid: 1146 | error: Table 'ngrp.connections' doesn't exist | callback: OnQueryFinish | query: UPDATE connections SET AccountID = 2 WHERE PlayerID = 0 | connection handle: 1 | resultid: 1 | extraid: 0
+[25/05/2021 18:25:52]lagcompemode 0 [cmd] [Upender Lakhwan]: /jetpack upender
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[18:27:36] filterscripts = ""  (string)
+[25/05/2021 18:27:36]lagcompemode 0 
+[25/05/2021 18:27:36]lagcompemode 0 Server Plugins
+[25/05/2021 18:27:36]lagcompemode 0 --------------
+[25/05/2021 18:27:36]lagcompemode 0  Loading plugin: mysql
+[25/05/2021 18:27:36]lagcompemode 0 
+
+  > MySQL plugin R6-2 successfully loaded.
+
+[25/05/2021 18:27:36]lagcompemode 0   Loaded.
+[25/05/2021 18:27:36]lagcompemode 0  Loading plugin: streamer
+[25/05/2021 18:27:36]lagcompemode 0 
+
+*** Streamer Plugin v2.9.5 by Incognito loaded ***
+
+[25/05/2021 18:27:36]lagcompemode 0   Loaded.
+[25/05/2021 18:27:36]lagcompemode 0  Loading plugin: Whirlpool
+[25/05/2021 18:27:36]lagcompemode 0  
+[25/05/2021 18:27:36]lagcompemode 0  ==================
+[25/05/2021 18:27:36]lagcompemode 0  
+[25/05/2021 18:27:36]lagcompemode 0   Whirlpool loaded
+[25/05/2021 18:27:36]lagcompemode 0  
+[25/05/2021 18:27:36]lagcompemode 0  ==================
+[25/05/2021 18:27:36]lagcompemode 0  
+[25/05/2021 18:27:36]lagcompemode 0   Loaded.
+[25/05/2021 18:27:36]lagcompemode 0  Loading plugin: sscanf
+[25/05/2021 18:27:36]lagcompemode 0 
+
+[25/05/2021 18:27:36]lagcompemode 0  ===============================
+
+[25/05/2021 18:27:36]lagcompemode 0       sscanf plugin loaded.     
+
+[25/05/2021 18:27:36]lagcompemode 0          Version:  2.8.3        
+
+[25/05/2021 18:27:36]lagcompemode 0   (c) 2018 Alex "Y_Less" Cole  
+
+[25/05/2021 18:27:36]lagcompemode 0  ===============================
+
+[25/05/2021 18:27:36]lagcompemode 0   Loaded.
+[25/05/2021 18:27:36]lagcompemode 0  Loaded 4 plugins.
+
+[25/05/2021 18:27:36]lagcompemode 0 
+[25/05/2021 18:27:36]lagcompemode 0 Filterscripts
+[25/05/2021 18:27:36]lagcompemode 0 ---------------
+[25/05/2021 18:27:36]lagcompemode 0   Loaded 0 filterscripts.
+
+[25/05/2021 18:27:54]lagcompemode 0 
+----------------------------------
+[25/05/2021 18:27:54]lagcompemode 0 Next Generation Roleplay
+[25/05/2021 18:27:54]lagcompemode 0 ----------------------------------
+
+[25/05/2021 18:27:54]lagcompemode 0 Number of vehicle models: 67
+[25/05/2021 18:29:05]lagcompemode 0 [connection] 192.168.29.204:58817 requests connection cookie.
+[25/05/2021 18:29:06]lagcompemode 0 [connection] incoming connection: 192.168.29.204:58817 id: 0
+[25/05/2021 18:29:06]lagcompemode 0 [join] Upender_Lakhwan has joined the server (0:192.168.29.204)
+[25/05/2021 18:29:09]lagcompemode 0 errorid: 1146 | error: Table 'ngrp.connections' doesn't exist | callback: OnQueryFinish | query: UPDATE connections SET AccountID = 2 WHERE PlayerID = 0 | connection handle: 1 | resultid: 1 | extraid: 0
+[25/05/2021 18:29:16]lagcompemode 0 [cmd] [Upender Lakhwan]: /jetpack
+[25/05/2021 18:29:18]lagcompemode 0 [cmd] [Upender Lakhwan]: /jetpack upender
+[25/05/2021 18:29:38]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 2574.33300781 1405.45104980 7705.39
+[25/05/2021 18:29:41]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 2574.33300781 1405.45104980 7705.39 0
+[25/05/2021 18:29:47]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 2574.33300781 1405.45104980 7705.39 0
+[25/05/2021 18:29:54]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 2574.33300781 1405.45104980 7710.39 0
+[25/05/2021 18:29:58]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 2574.33300781 1405.45104980 7710.39 1
+[25/05/2021 18:30:18]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 2508.76733398 1398.05688477 7696.57 0
+[25/05/2021 18:30:25]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 2508.76733398 1390.05688477 7696.57 0
+[25/05/2021 18:30:34]lagcompemode 0 [cmd] [Upender Lakhwan]: /int 1
+[25/05/2021 18:30:40]lagcompemode 0 [cmd] [Upender Lakhwan]: /setint upender 1
+[25/05/2021 18:30:43]lagcompemode 0 [cmd] [Upender Lakhwan]: /setint upender 0
+[25/05/2021 18:30:46]lagcompemode 0 [cmd] [Upender Lakhwan]: /setint upender 1
+[25/05/2021 18:30:50]lagcompemode 0 [cmd] [Upender Lakhwan]: /setint upender 3
+[25/05/2021 18:30:51]lagcompemode 0 [cmd] [Upender Lakhwan]: /setint upender 2
+[25/05/2021 18:31:21]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 2508.76733398 1390.05688477 7696.57 0
+[25/05/2021 18:31:26]lagcompemode 0 [cmd] [Upender Lakhwan]: /slap upender
+[25/05/2021 18:31:28]lagcompemode 0 [cmd] [Upender Lakhwan]: /slap upender
+[25/05/2021 18:31:29]lagcompemode 0 [cmd] [Upender Lakhwan]: /slap upender
+[25/05/2021 18:31:29]lagcompemode 0 [cmd] [Upender Lakhwan]: /slap upender
+[25/05/2021 18:31:30]lagcompemode 0 [cmd] [Upender Lakhwan]: /slap upender
+[25/05/2021 18:31:30]lagcompemode 0 [cmd] [Upender Lakhwan]: /slap upender
+[25/05/2021 18:31:31]lagcompemode 0 [cmd] [Upender Lakhwan]: /slap upender
+[25/05/2021 18:31:31]lagcompemode 0 [cmd] [Upender Lakhwan]: /slap upender
+[25/05/2021 18:31:31]lagcompemode 0 [cmd] [Upender Lakhwan]: /slap upender
+[25/05/2021 18:31:31]lagcompemode 0 [death] Upender_Lakhwan died 54
+[25/05/2021 18:31:32]lagcompemode 0 [cmd] [Upender Lakhwan]: /slap upender
+[25/05/2021 18:31:39]lagcompemode 0 [cmd] [Upender Lakhwan]: /revive upender
+[25/05/2021 18:31:48]lagcompemode 0 [cmd] [Upender Lakhwan]: /jetpack
+[25/05/2021 18:31:49]lagcompemode 0 [cmd] [Upender Lakhwan]: /jetpack upender
+[25/05/2021 18:32:09]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 2533.68457031 1416.85351562 7705 0
+[25/05/2021 18:32:12]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 2533.68457031 1416.85351562 7705 0
+[25/05/2021 18:32:14]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 2533.68457031 1416.85351562 7705 0
+[25/05/2021 18:32:15]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 2533.68457031 1416.85351562 7705 0
+[25/05/2021 18:32:15]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 2533.68457031 1416.85351562 7705 0
+[25/05/2021 18:32:16]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 2533.68457031 1416.85351562 7705 0
+[25/05/2021 18:32:16]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 2533.68457031 1416.85351562 7705 0
+[25/05/2021 18:32:17]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 2533.68457031 1416.85351562 7705 0
+[25/05/2021 18:32:17]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 2533.68457031 1416.85351562 7705 0
+[25/05/2021 18:32:17]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 2533.68457031 1416.85351562 7705 0
+[25/05/2021 18:32:22]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 2543.68457031 1416.85351562 7705 0
+[25/05/2021 18:32:23]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 2543.68457031 1416.85351562 7705 0
+[25/05/2021 18:32:29]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 2503.68457031 1416.85351562 7705 0
+[25/05/2021 18:32:39]lagcompemode 0 [cmd] [Upender Lakhwan]: /jetpack
+[25/05/2021 18:32:42]lagcompemode 0 [cmd] [Upender Lakhwan]: /jetpack 0
+[25/05/2021 18:32:55]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 2503.68457031 1416.85351562 7705 0
+[25/05/2021 18:33:04]lagcompemode 0 [cmd] [Upender Lakhwan]: /slap 0
+[25/05/2021 18:33:04]lagcompemode 0 [cmd] [Upender Lakhwan]: /slap 0t
+[25/05/2021 18:33:04]lagcompemode 0 [cmd] [Upender Lakhwan]: /slap 0t
+[25/05/2021 18:33:05]lagcompemode 0 [cmd] [Upender Lakhwan]: /slap 0t
+[25/05/2021 18:33:07]lagcompemode 0 [cmd] [Upender Lakhwan]: /slap 0
+[25/05/2021 18:33:10]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 2503.68457031 1416.85351562 7705 0
+[25/05/2021 18:33:31]lagcompemode 0 RCON (In-Game): Player #0 (Upender_Lakhwan) has logged in.
+[25/05/2021 18:33:37]lagcompemode 0 RCON (In-Game): Player [Upender_Lakhwan] sent command: loadfs part2
+[25/05/2021 18:33:38]lagcompemode 0   Filterscript 'part2.amx' loaded.
+[25/05/2021 18:34:00]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1177.23 2639.17 1
+[25/05/2021 18:34:02]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1177.23 2639.17 1 0
+[25/05/2021 18:34:05]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1177.23 2639.17 1 0
+[25/05/2021 18:34:06]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1177.23 2639.17 1 0
+[25/05/2021 18:34:19]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1186.30 2620.08 1051.35
+[25/05/2021 18:34:20]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1186.30 2620.08 1051.35 0
+[25/05/2021 18:34:24]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1186.30 2620.08 1051.35 -1
+[25/05/2021 18:34:32]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1186.30 2620.08 1051.35 1
+[25/05/2021 18:34:35]lagcompemode 0 [cmd] [Upender Lakhwan]: /setvw
+[25/05/2021 18:34:36]lagcompemode 0 [cmd] [Upender Lakhwan]: /setvw 0 1
+[25/05/2021 18:34:38]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1186.30 2620.08 1051.35 1
+[25/05/2021 18:34:40]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1186.30 2620.08 1051.35 0
+[25/05/2021 18:35:53]lagcompemode 0 [ForceSaveTimer] All player accounts updated successfully.
+[25/05/2021 18:35:53]lagcompemode 0 [ForceSaveTimer] All points updated successfully.
+[25/05/2021 18:36:58]lagcompemode 0 [cmd] [Upender Lakhwan]: /setvw 8101
+[25/05/2021 18:37:00]lagcompemode 0 [cmd] [Upender Lakhwan]: /setvw 0 8101
+[25/05/2021 18:37:14]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1646.59997559 -2932.69995117 10004.199999 1
+[25/05/2021 18:37:16]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1646.59997559 -2932.69995117 10004.199999 1
+[25/05/2021 18:37:16]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1646.59997559 -2932.69995117 10004.199999 1
+[25/05/2021 18:37:22]lagcompemode 0 [cmd] [Upender Lakhwan]: /slap 0
+[25/05/2021 18:37:50]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1646.59997559 -2932.69995117 10004.199999 1
+[25/05/2021 18:37:54]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1646.59997559 -2932.69995117 10005.199999 1
+[25/05/2021 18:38:53]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco  974.45941162 -1723.04077148 3375.346 1
+[25/05/2021 18:38:55]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco  974.45941162 -1723.04077148 3375.346 0
+[25/05/2021 18:39:01]lagcompemode 0 [cmd] [Upender Lakhwan]: /setvw 0 7245
+[25/05/2021 18:39:02]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco  974.45941162 -1723.04077148 3375.346 0
+[25/05/2021 18:39:03]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco  974.45941162 -1723.04077148 3375.346 0
+[25/05/2021 18:39:06]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco  974.45941162 -1723.04077148 3375.346 0
+[25/05/2021 18:39:10]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco  974.45941162 -1723.04077148 3376.346 0
+[25/05/2021 18:40:50]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco  2713.43 -1830.98 9161.6 1
+[25/05/2021 18:40:54]lagcompemode 0 [cmd] [Upender Lakhwan]: /setvw upender 123031
+[25/05/2021 18:40:55]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco  2713.43 -1830.98 9161.6 1
+[25/05/2021 18:41:07]lagcompemode 0 [cmd] [Upender Lakhwan]: /setvw upender 123031
+[25/05/2021 18:41:09]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco  2713.43 -1830.98 9161.6 1
+[25/05/2021 18:41:11]lagcompemode 0 [ForceSaveTimer] All player accounts updated successfully.
+[25/05/2021 18:41:11]lagcompemode 0 [ForceSaveTimer] All points updated successfully.
+[25/05/2021 18:41:15]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco  2713.43 -1833.98 9161.6 1
+[25/05/2021 18:41:20]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco  2713.43 -1823.98 9161.6 1
+[25/05/2021 18:41:28]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco  2713.43 -1825.98 9161.6 1
+[25/05/2021 18:41:34]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco  2713.43 -1826.98 9161.6 1
+[25/05/2021 18:43:02]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1501.11 -1601.54 -54.5 1
+[25/05/2021 18:43:06]lagcompemode 0 [cmd] [Upender Lakhwan]: /setvw upender 8124
+[25/05/2021 18:43:07]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1501.11 -1601.54 -54.5 1
+[25/05/2021 18:43:09]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1501.11 -1601.54 -54.5 0
+[25/05/2021 18:43:14]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1501.11 -1601.54 -54.5 0
+[25/05/2021 18:43:19]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1505.11 -1601.54 -54.5 0
+[25/05/2021 18:43:20]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1505.11 -1601.54 -54.5 0
+[25/05/2021 18:43:25]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1515.11 -1601.54 -54.5 0
+[25/05/2021 18:43:28]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1515.11 -1601.54 -54.5 0
+[25/05/2021 18:43:46]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1504.32 -1601.52 -57.9 1
+[25/05/2021 18:43:49]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1504.32 -1601.52 -57.9 1
+[25/05/2021 18:43:55]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1504.32 -1601.52 -58.9 1
+[25/05/2021 18:44:00]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1505.32 -1601.52 -58.9 1
+[25/05/2021 18:44:03]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1505.32 -1603.52 -58.9 1
+[25/05/2021 18:44:07]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1505.32 -1600.52 -58.9 1
+[25/05/2021 18:44:10]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1505.32 -1600.52 -58.9 1
+[25/05/2021 18:44:14]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1505.32 -1600.52 -59.9 1
+[25/05/2021 18:44:19]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1505.32 -1600.52 -60.9 1
+[25/05/2021 18:44:25]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1505.32 -1600.52 -57.9 1
+[25/05/2021 18:44:29]lagcompemode 0 [cmd] [Upender Lakhwan]: /gotoco 1505.32 -1600.52 -54.9 1
+[25/05/2021 18:44:57]lagcompemode 0 [part] Upender_Lakhwan has left the server (0:1)
+[25/05/2021 18:44:57]lagcompemode 0 errorid: 1146 | error: Table 'ngrp.connections' doesn't exist | callback: OnQueryFinish | query: DELETE FROM connections WHERE PlayerID = 0 | connection handle: 1 | resultid: 1 | extraid: 0
+[25/05/2021 18:45:27]lagcompemode 0 [connection] 192.168.29.204:58711 requests connection cookie.
+[25/05/2021 18:45:28]lagcompemode 0 [connection] incoming connection: 192.168.29.204:58711 id: 0
+[25/05/2021 18:45:28]lagcompemode 0 [join] Upender_Lakhwan has joined the server (0:192.168.29.204)
+[25/05/2021 18:45:42]lagcompemode 0 errorid: 1146 | error: Table 'ngrp.connections' doesn't exist | callback: OnQueryFinish | query: UPDATE connections SET AccountID = 2 WHERE PlayerID = 0 | connection handle: 1 | resultid: 1 | extraid: 0
+[25/05/2021 18:46:18]lagcompemode 0 [part] Upender_Lakhwan has left the server (0:1)
+[25/05/2021 18:46:18]lagcompemode 0 errorid: 1146 | error: Table 'ngrp.connections' doesn't exist | callback: OnQueryFinish | query: DELETE FROM connections WHERE PlayerID = 0 | connection handle: 1 | resultid: 1 | extraid: 0

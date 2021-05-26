@@ -1,5 +1,9 @@
 /*
 																			*/
+
+																			
+#pragma warning disable 239
+#pragma warning disable 214
 //--------------------------[ SCRIPT VERSION INFO ]--------------------------
 #define 					SERVER_VERSION 						"v1.9"
 #define 					TEAMSPEAK 							"NA"
@@ -315,6 +319,14 @@
 #define						DIALOG_LOADTRUCKI 					(18303)
 #define						SOUND_MUSIC1 		 				(1097)
 #define						SOUND_OFF 		 					(1098)
+#define 					DIALOG_VIPLOCKER 					(7832)
+#define 					DIALOG_VWEAPONS 					(7833)
+#define                     DIALOG_TOKENSHOP                    (18340)
+#define                     DIALOG_VJOBS                        (18341)
+#define 					COLOR_VIP 							0xC93CCE00
+
+new VIPColor[MAX_PLAYERS];
+new VIPmembers;
 			/*  ---------------- COLORS ----------------- */
 #define						TEAM_HIT_COLOR						0xFFFFFF00
 #define						COLOR_GRAD1							0xB4B5B7FF
@@ -2011,7 +2023,7 @@ enum pInfo
 	pAdminName[32],
 	pBanAppealer,
 	pGangMod,
-	pDonator,
+	pVIP,
 	pBanned,
 	pPermaBanned,
 	pDisabled,
@@ -2168,7 +2180,11 @@ enum pInfo
 	pReferredBy[MAX_PLAYER_NAME],
 	pRefTokens,
 	pRefTokensOffline,
-	pWalkStyle
+	pWalkStyle,
+	pVIPTokens,
+	pVip,
+	ddVIP,
+	pVMuted,
 };
 new PlayerInfo[MAX_PLAYERS + 1][pInfo];
 
@@ -2310,6 +2326,11 @@ enum bbInfo
 	bbObject,
 };
 new BoomboxInfo[MAX_PLAYERS][bbInfo];
+
+
+new BuddyInvite[MAX_PLAYERS];
+new BuddyTimer[MAX_PLAYERS];
+
 
 new OneSeatVehicles[38] =
 {
@@ -2661,7 +2682,14 @@ stock IsAtATM(playerid)
 	}
 	return 0;
 }
-
+stock SendVIPMessage(color, string[])
+{
+    foreach(Player, i) {
+        if((PlayerInfo[i][pVip] >= 1 || PlayerInfo[i][pAdmin] >= 2) && GetPVarType(i, "togVIP")) {
+            SendClientMessageEx(i, color, string);
+        }
+    }
+}
 // Anti Dialog ID spoofing
 stock ShowPlayerDialogEx(playerid, dialogid, style, caption[], info[], button1[], button2[]) {
 	SetPVarInt(playerid, "dialog", dialogid);
@@ -2973,7 +3001,7 @@ stock FindFreeAttachedObjectSlot(playerid)
 
 stock player_remove_vip_toys(iTargetID)
 {
-	if(PlayerInfo[iTargetID][pDonator] >= 3) return 1;
+	if(PlayerInfo[iTargetID][pVIP] >= 3) return 1;
 	else for(new iToyIter; iToyIter < MAX_PLAYER_ATTOBJECTS; ++iToyIter) {
 		for(new LoopRapist; LoopRapist < sizeof(HoldingObjectsCop); ++LoopRapist) {
 			if(HoldingObjectsCop[LoopRapist][holdingmodelid] == PlayerToyInfo[iTargetID][iToyIter][ptModelID]) {
@@ -7661,12 +7689,16 @@ stock ShowStats(playerid,targetid)
 		if(PlayerInfo[targetid][pSex] == 1) { sext = "Male"; } else { sext = "Female"; }
 		new age = PlayerInfo[targetid][pAge];
 
-		new donatortxt[16];
-		if(PlayerInfo[targetid][pDonator] == 0) { donatortxt = "No"; }
-		else if(PlayerInfo[targetid][pDonator] == 1) { donatortxt = "Ruby"; }
-		else if(PlayerInfo[targetid][pDonator] == 2) { donatortxt = "Sapphire"; }
-		else if(PlayerInfo[targetid][pDonator] == 3) { donatortxt = "Diamond"; }
-		else { donatortxt = "No"; }
+  		new drank[20];
+		if(PlayerInfo[targetid][pVip] == 1)
+		{ drank = "Bronze"; }
+		if(PlayerInfo[targetid][pVip] == 2)
+		{ drank = "Silver"; }
+		if(PlayerInfo[targetid][pVip] == 3)
+		{ drank = "Gold"; }
+		else if(PlayerInfo[targetid][pVip] == 4)
+		{ drank = "Platinum"; }
+		else { drank = "None"; }
 
 		new nmutes = PlayerInfo[targetid][pNMuteTotal];
         new admutes = PlayerInfo[targetid][pADMuteTotal];
@@ -7690,7 +7722,7 @@ stock ShowStats(playerid,targetid)
 		}
    		format(coordsstring, sizeof(coordsstring),"(Crimes: %d) - (Arrests: %d) - (Wanted Level: %d) - (Materials: %d) - (Pot: %d) - (Crack: %d) - (Packages: %d) - (Crates: %d)", crimes, arrests, wanted, mats, pot, crack, packages, crates);
    		SendClientMessage(playerid, COLOR_WHITE, coordsstring);
-   		format(coordsstring, sizeof(coordsstring),"(Rope: %d) - (Cigars: %d) - (Sprunk: %d) - (Spray: %d) - (Seeds: %d) -  (Biggest fish: %d) - (Referral Tokens: %d) - (Donator: %s)", rope, cigars, sprunk, spray, PlayerInfo[targetid][pWSeeds], bigfish, reftokens, donatortxt);
+   		format(coordsstring, sizeof(coordsstring),"(Rope: %d) - (Cigars: %d) - (Sprunk: %d) - (Spray: %d) - (Seeds: %d) -  (Biggest fish: %d) - (Referral Tokens: %d) - (Donator: %s)", rope, cigars, sprunk, spray, PlayerInfo[targetid][pWSeeds], bigfish, reftokens, drank);
         SendClientMessage(playerid, COLOR_GREY, coordsstring);
 
 		if(PlayerInfo[playerid][pAdmin] >= 1) {
@@ -7937,12 +7969,12 @@ CMD:join(playerid, params[])
   			SendClientMessage(playerid, COLOR_GREY, "You're not even near a place to get a Job!");
      	}
 	}
-	else if(PlayerInfo[playerid][pJob] != 0 && PlayerInfo[playerid][pDonator] < 2 && PlayerInfo[playerid][pLevel] < 25)
+	else if(PlayerInfo[playerid][pJob] != 0 && PlayerInfo[playerid][pVIP] < 2 && PlayerInfo[playerid][pLevel] < 25)
  	{
   		SendClientMessage(playerid, COLOR_GREY, "You already have a Job, use /quitjob first!");
 		SendClientMessage(playerid, COLOR_GREY, "Only VIP and level 25+ can get two jobs!");
   	}
-	else if(PlayerInfo[playerid][pJob2] == 0 && (PlayerInfo[playerid][pDonator] >= 2 || PlayerInfo[playerid][pLevel] >= 25))
+	else if(PlayerInfo[playerid][pJob2] == 0 && (PlayerInfo[playerid][pVIP] >= 2 || PlayerInfo[playerid][pLevel] >= 25))
 	{
     	if(PlayerInfo[playerid][pJob2] == 0 && GetPlayerState(playerid) == 1 && IsPlayerInRangeOfPoint(playerid,3.0, 256.971954, 69.655586, 1003.640625))
 		{
@@ -8054,7 +8086,7 @@ CMD:join(playerid, params[])
 
 CMD:quitjob(playerid, params[])
 {
-	if(PlayerInfo[playerid][pDonator] >= 2)
+	if(PlayerInfo[playerid][pVIP] >= 2)
 	{
 		new jobid;
 		if(sscanf(params, "d", jobid))
@@ -8184,7 +8216,7 @@ CMD:getpizza(playerid, params[])
 	}
 
 	new rand = random(165);
-	while(!(HouseInfo[rand][hExteriorZ] < 150.0 && HouseInfo[rand][hExteriorX] > 17.59 && HouseInfo[rand][hExteriorX] < 3004.64 && HouseInfo[rand][hExteriorY] < -805.45 && HouseInfo[rand][hExteriorY] > -2736.25))
+	while(!(HouseInfo[rand][hExteriorZ] < 150.0 && HouseInfo[rand][hExteriorX] > 17.59 && HouseInfo[rand][hExteriorX] < -1711.64 && HouseInfo[rand][hExteriorY] < 1344.45 && HouseInfo[rand][hExteriorY] > 7.25))
 	{
 	    rand++;
 	    if(rand == 165) {
@@ -8407,23 +8439,23 @@ CMD:accept(playerid, params[])
                             new playervehicleid = GetPlayerFreeVehicleId(playerid),
 								totalvehicles = GetPlayerVehicleCountEx(playerid);
 
-							// (TEMPORARY - ZHAO NOTE) TempDonator not added yet
-			 				if(PlayerInfo[playerid][pDonator] == 0 && totalvehicles >= 5) //PlayerInfo[playerid][pTempDonator] > 0) && carsamount >= 5)
+							// (TEMPORARY - ZHAO NOTE) TempVIP not added yet
+			 				if(PlayerInfo[playerid][pVIP] == 0 && totalvehicles >= 5) //PlayerInfo[playerid][pTempVIP] > 0) && carsamount >= 5)
 							{
                 				SendClientMessage(playerid, COLOR_GREY, "ERROR: You can't have more cars, non-VIP can only own 5 cars.");
                 				return 1;
 							}
-            				if(PlayerInfo[playerid][pDonator] == 1 && totalvehicles >= 7)
+            				if(PlayerInfo[playerid][pVIP] == 1 && totalvehicles >= 7)
  					 		{
    					 			SendClientMessage(playerid, COLOR_GREY, "ERROR: You can't have more cars, Bronze VIP can only own 7 cars.");
                 				return 1;
             				}
-            				if(PlayerInfo[playerid][pDonator] == 2 && totalvehicles >= 8)
+            				if(PlayerInfo[playerid][pVIP] == 2 && totalvehicles >= 8)
             				{
           					 	SendClientMessage(playerid, COLOR_GREY, "ERROR: You can't have more cars, Silver VIP can only own 8 cars.");
            					 	return 1;
            					}
-            				if(PlayerInfo[playerid][pDonator] == 3 && totalvehicles >= 10)
+            				if(PlayerInfo[playerid][pVIP] == 3 && totalvehicles >= 10)
             				{
                 				SendClientMessage(playerid, COLOR_GREY, "ERROR: You can't have more cars, Diamond Donator can only own 10 cars.");
                 				return 1;
@@ -8433,27 +8465,27 @@ CMD:accept(playerid, params[])
 		        				SendClientMessage(playerid, COLOR_GREY, "ERROR: You can't have more cars.");
                 				return 1;
 		    				}
-   							if(PlayerInfo[playerid][pDonator] == 0 && VehicleSpawned[playerid] > 0)
+   							if(PlayerInfo[playerid][pVIP] == 0 && VehicleSpawned[playerid] > 0)
 							{
 								SendClientMessage(playerid, COLOR_GREY, "As non-donator you can only have 1 vehicle spawned. You must store a vehicle in order to spawn another one.");
 								return 1;
 							}
-							if(PlayerInfo[playerid][pDonator] == 1 && VehicleSpawned[playerid] > 1)
+							if(PlayerInfo[playerid][pVIP] == 1 && VehicleSpawned[playerid] > 1)
 				            {
 								SendClientMessage(playerid, COLOR_GREY, "As Bronze VIP you can only have 2 vehicles spawned. You must store a vehicle in order to spawn another one.");
 								return 1;
 							}
-							if(PlayerInfo[playerid][pDonator] == 2 && VehicleSpawned[playerid] > 2)
+							if(PlayerInfo[playerid][pVIP] == 2 && VehicleSpawned[playerid] > 2)
 							{
 								SendClientMessage(playerid, COLOR_GREY, "As Silver-VIP you can only have 3 vehicles spawned. You must store a vehicle in order to spawn another one.");
 								return 1;
 							}
-							if(PlayerInfo[playerid][pDonator] == 3 && VehicleSpawned[playerid] > 3)
+							if(PlayerInfo[playerid][pVIP] == 3 && VehicleSpawned[playerid] > 3)
 	 						{
 								SendClientMessage(playerid, COLOR_GREY, "As Gold VIP you can only have 4 vehicles spawned. You must store a vehicle in order to spawn another one.");
 								return 1;
 			 				}
-							if(PlayerInfo[playerid][pDonator] < 0 || PlayerInfo[playerid][pDonator] > 3)
+							if(PlayerInfo[playerid][pVIP] < 0 || PlayerInfo[playerid][pVIP] > 3)
 							{
 								SendClientMessage(playerid, COLOR_GREY, "You have an invalid Donator level.");
 								return 1;
@@ -10584,8 +10616,30 @@ CMD:refhelp(playerid, params[])
 CMD:destroycheckpoint(playerid, params[]) {
 	return cmd_killcheckpoint(playerid, params);
 }
+CMD:kcp(playerid,paramsp[])
+{
+	TaxiAccepted[playerid] = 999;
+	BusAccepted[playerid] = 999;
+	MedicAccepted[playerid] = 999;
+	MechanicCallTime[playerid] = 0;
+    DeletePVar(playerid, "TrackCar");
+    DeletePVar(playerid, "CrateDeliver");
+    DeletePVar(playerid, "Packages");
+    EMSAccepted[playerid] = INVALID_PLAYER_ID;
+    DisablePlayerCheckpoint(playerid);
+	gPlayerCheckpointStatus[playerid] = CHECKPOINT_NONE;
+ 	TaxiCallTime[playerid] = 0;
+  	BusCallTime[playerid] = 0;
+  	EMSCallTime[playerid] = 0;
+  	DeletePVar(playerid, "Pizza");
+  	CP[playerid] = 0;
+  	FindingJob[playerid] = 0;
+  	FindingDealership[playerid] = 0;
+    SendClientMessage(playerid,COLOR_WHITE,"All current checkpoints, trackers and accepted fares have been reset.");
+	return 1;
+}
 
-CMD:killcheckpoint(playerid, params[]) {
+CMD:killcheckpoint(playerid, params[]) { // xd xd
 	TaxiAccepted[playerid] = 999;
 	BusAccepted[playerid] = 999;
 	MedicAccepted[playerid] = 999;
@@ -10864,10 +10918,10 @@ CMD:help(playerid, params[])
 	if(PlayerInfo[playerid][pHelper] >= 2)
 		SendClientMessage(playerid, COLOR_WHITE, "*** HELPER *** /togc /c /accepthelp /helprequests /quithelp /acceptpm /quitpm /pm /nrn");
 
-	if(PlayerInfo[playerid][pDonator] >= 1)
+	if(PlayerInfo[playerid][pVIP] >= 1)
 	    SendClientMessage(playerid, COLOR_YELLOW, "*** VIP *** /changegender /changeage /changeplates /changeph");
 
-	if(PlayerInfo[playerid][pDonator] >= 3)
+	if(PlayerInfo[playerid][pVIP] >= 3)
 	    SendClientMessage(playerid, COLOR_YELLOW, "*** VIP (GOLD) *** /placebb /pickupbb");
 
 	SendClientMessage(playerid, COLOR_WHITE,"*** OTHER *** /cellphonehelp /carhelp /househelp /toyhelp /renthelp /jobhelp /leaderhelp /animhelp /fishhelp /insurehelp");
@@ -11275,7 +11329,7 @@ CMD:ah(playerid, params[]) {
 			SendClientMessage(playerid, COLOR_GRAD4,"*** LEVEL 4 ADMIN *** /listtoys /dd(edit/next/near/name) /leaders /givemoney /setmoney /setstat /skiptut /sethelper /toggletk /entercar");
 		}
 		if(PlayerInfo[playerid][pAdmin] >= 5) {
-			SendClientMessage(playerid, COLOR_GRAD5,"*** LEVEL 5 ADMIN *** /pedit /permaban /setcolor /paycheck /clearallreports /makeleader /changeuserpassword /setdonator");
+			SendClientMessage(playerid, COLOR_GRAD5,"*** LEVEL 5 ADMIN *** /pedit /permaban /setcolor /paycheck /clearallreports /makeleader /changeuserpassword /makevip");
 			SendClientMessage(playerid, COLOR_GRAD5,"*** LEVEL 5 ADMIN *** /amotd /restartserver /rmute /hedit /hname /setadminname /fixvehall /cnnn /gotodoor /dedit");
 		}
 		if(PlayerInfo[playerid][pAdmin] >= 6) {
@@ -15981,7 +16035,7 @@ CMD:wat(playerid, params[]) {
 
 	SendClientMessage(playerid, COLOR_WHITE, "* Attached all toys.");
 
-	if(PlayerInfo[playerid][pDonator] <= 0)
+	if(PlayerInfo[playerid][pVIP] <= 0)
 	{
 		for(new x;x<5;x++)
 		{
@@ -15993,7 +16047,7 @@ CMD:wat(playerid, params[]) {
 			if(PlayerToyInfo[playerid][x][ptModelID] != 0) SetPlayerAttachedObject(playerid, x, PlayerToyInfo[playerid][x][ptModelID], PlayerToyInfo[playerid][x][ptBone], PlayerToyInfo[playerid][x][ptPosX], PlayerToyInfo[playerid][x][ptPosY], PlayerToyInfo[playerid][x][ptPosZ], PlayerToyInfo[playerid][x][ptRotX], PlayerToyInfo[playerid][x][ptRotY], PlayerToyInfo[playerid][x][ptRotZ], PlayerToyInfo[playerid][x][ptScaleX], PlayerToyInfo[playerid][x][ptScaleY], PlayerToyInfo[playerid][x][ptScaleZ]);
 		}
 	}
-	else if(PlayerInfo[playerid][pDonator] == 1)
+	else if(PlayerInfo[playerid][pVIP] == 1)
 	{
 		for(new x;x<6;x++)
 		{
@@ -16005,7 +16059,7 @@ CMD:wat(playerid, params[]) {
 			if(PlayerToyInfo[playerid][x][ptModelID] != 0) SetPlayerAttachedObject(playerid, x, PlayerToyInfo[playerid][x][ptModelID], PlayerToyInfo[playerid][x][ptBone], PlayerToyInfo[playerid][x][ptPosX], PlayerToyInfo[playerid][x][ptPosY], PlayerToyInfo[playerid][x][ptPosZ], PlayerToyInfo[playerid][x][ptRotX], PlayerToyInfo[playerid][x][ptRotY], PlayerToyInfo[playerid][x][ptRotZ], PlayerToyInfo[playerid][x][ptScaleX], PlayerToyInfo[playerid][x][ptScaleY], PlayerToyInfo[playerid][x][ptScaleZ]);
 		}
 	}
-	else if(PlayerInfo[playerid][pDonator] == 2)
+	else if(PlayerInfo[playerid][pVIP] == 2)
 	{
 		for(new x;x<7;x++)
 		{
@@ -16017,7 +16071,7 @@ CMD:wat(playerid, params[]) {
 			if(PlayerToyInfo[playerid][x][ptModelID] != 0) SetPlayerAttachedObject(playerid, x, PlayerToyInfo[playerid][x][ptModelID], PlayerToyInfo[playerid][x][ptBone], PlayerToyInfo[playerid][x][ptPosX], PlayerToyInfo[playerid][x][ptPosY], PlayerToyInfo[playerid][x][ptPosZ], PlayerToyInfo[playerid][x][ptRotX], PlayerToyInfo[playerid][x][ptRotY], PlayerToyInfo[playerid][x][ptRotZ], PlayerToyInfo[playerid][x][ptScaleX], PlayerToyInfo[playerid][x][ptScaleY], PlayerToyInfo[playerid][x][ptScaleZ]);
 		}
 	}
-	else if(PlayerInfo[playerid][pDonator] >= 3)
+	else if(PlayerInfo[playerid][pVIP] >= 3)
 	{
 		for(new x;x<8;x++)
 		{
@@ -16802,17 +16856,17 @@ CMD:g(playerid, params[])
 	if(strlen(params) > 80)
 	    return SendClientMessage(playerid, COLOR_GREY, "Your message is too long - the limit is 80 characters.");
 
-	if(PlayerInfo[playerid][pAdmin] < 1 && PlayerInfo[playerid][pDonator] == 1)
+	if(PlayerInfo[playerid][pAdmin] < 1 && PlayerInfo[playerid][pVIP] == 1)
 	{
 		format(string, sizeof(string), "(( Bronze VIP %s: %s ))", GetPlayerNameEx(playerid), params);
 		GlobalChatTimer[playerid] = 5;
 	}
-	else if(PlayerInfo[playerid][pAdmin] < 1 && PlayerInfo[playerid][pDonator] == 2)
+	else if(PlayerInfo[playerid][pAdmin] < 1 && PlayerInfo[playerid][pVIP] == 2)
 	{
 		format(string, sizeof(string), "(( Silver VIP %s: %s ))", GetPlayerNameEx(playerid), params);
 		GlobalChatTimer[playerid] = 5;
 	}
-	else if(PlayerInfo[playerid][pAdmin] < 1 && PlayerInfo[playerid][pDonator] == 3)
+	else if(PlayerInfo[playerid][pAdmin] < 1 && PlayerInfo[playerid][pVIP] == 3)
 	{
 		format(string, sizeof(string), "(( Gold VIP %s: %s ))", GetPlayerNameEx(playerid), params);
 		GlobalChatTimer[playerid] = 5;
@@ -16827,12 +16881,12 @@ CMD:g(playerid, params[])
 		format(string, sizeof(string), "(( Senior Helper %s: %s ))", GetPlayerNameEx(playerid), params);
 		GlobalChatTimer[playerid] = 2;
 	}
-	else if(PlayerInfo[playerid][pAdmin] < 1 && PlayerInfo[playerid][pDonator] == 1)
+	else if(PlayerInfo[playerid][pAdmin] < 1 && PlayerInfo[playerid][pVIP] == 1)
 	{
 		format(string, sizeof(string), "(( Level %d Player %s: %s ))", PlayerInfo[playerid][pLevel], GetPlayerNameEx(playerid), params);
 		GlobalChatTimer[playerid] = 5;
 	}
-	else if(PlayerInfo[playerid][pAdmin] < 1 && PlayerInfo[playerid][pDonator] == 0)
+	else if(PlayerInfo[playerid][pAdmin] < 1 && PlayerInfo[playerid][pVIP] == 0)
 	{
 		format(string, sizeof(string), "(( Level %d Player %s: %s ))", PlayerInfo[playerid][pLevel], GetPlayerNameEx(playerid), params);
 		GlobalChatTimer[playerid] = 5;
@@ -17125,7 +17179,7 @@ CMD:c(playerid, params[]) {
 	}
 	return 1;
 }
-
+/*
 CMD:setdonator(playerid, params[]) {
 	if(PlayerInfo[playerid][pAdmin] >= 5) {
 		new string[128], giveplayerid, level;
@@ -17144,7 +17198,7 @@ CMD:setdonator(playerid, params[]) {
 					SendClientMessage(playerid, COLOR_GRAD1, "VIP Level can't be below 0 or above 3!");
 					return 1;
 				}
-				PlayerInfo[giveplayerid][pDonator] = level;
+				PlayerInfo[giveplayerid][pVIP] = level;
 
 				new playerip[32];
 				GetPlayerIp(giveplayerid, playerip, sizeof(playerip));
@@ -17201,7 +17255,7 @@ CMD:setdonator(playerid, params[]) {
 	}
 	return 1;
 }
-
+*/
 CMD:gcto(playerid, params[])
 {
 	if(PlayerInfo[playerid][pAdmin] >= 3)
@@ -17871,7 +17925,7 @@ public LoadTruck(playerid)
 
 CMD:mp3(playerid, params[])
 {
-    if(PlayerInfo[playerid][pDonator] < 2 && AdminDuty[playerid] == 0)
+    if(PlayerInfo[playerid][pVIP] < 2 && AdminDuty[playerid] == 0)
         return SendClientMessage(playerid, COLOR_WHITE, "You must be at least Silver-VIP to use this feature.");
 
    	if(PlayerCuffed[playerid] >= 1 || GetPVarInt(playerid, "Injured") == 1)
@@ -17887,7 +17941,7 @@ CMD:placeboombox(playerid, params[]) {
 
 CMD:placebb(playerid, params[])
 {
-    if(PlayerInfo[playerid][pDonator] < 3)
+    if(PlayerInfo[playerid][pVIP] < 3)
         return SendClientMessage(playerid, COLOR_WHITE, "You must be at least Gold VIP to use this feature.");
 
 	if(PlayerCuffed[playerid] >= 1 || GetPVarInt(playerid, "Injured") == 1)
@@ -18076,7 +18130,7 @@ CMD:awithdraw(playerid, params[])
 		SendClientMessage(playerid, COLOR_GRAD2, "   You don't have that much!");
 		return 1;
 	}
-	if(PlayerInfo[playerid][pDonator] == 0)
+	if(PlayerInfo[playerid][pVIP] == 0)
 	{
 		new fee;
 		fee = 3*amount/100;
@@ -18121,7 +18175,7 @@ CMD:adeposit(playerid, params[]) {
 		SendClientMessage(playerid, COLOR_GRAD2, "   You don't have that much.");
 		return 1;
 	}
-	if(PlayerInfo[playerid][pDonator] == 0)
+	if(PlayerInfo[playerid][pVIP] == 0)
 	{
 		new fee;
 		fee = 3*amount/100;
@@ -18183,7 +18237,7 @@ CMD:awiretransfer(playerid, params[])
 			new playermoney = PlayerInfo[playerid][pBank];
 			if(amount > 0 && playermoney >= amount)
 			{
-				if(PlayerInfo[playerid][pDonator] == 0)
+				if(PlayerInfo[playerid][pVIP] == 0)
 				{
 					new fee;
 					fee = 3*amount/100;
@@ -23218,7 +23272,7 @@ CMD:showmehq(playerid, params[])
         return 1;
     }
     if(PlayerInfo[playerid][pFaction] == 4 || PlayerInfo[playerid][pLeader] == 4) {
-        SetPlayerCheckpoint(playerid,-418.68, 1759.65, 6.22, 4.0);
+        SetPlayerCheckpoint(playerid,-418.68, -1759.65, 6.22, 4.0);
         GameTextForPlayer(playerid, "~w~Waypoint set ~r~HQ", 5000, 1);
         gPlayerCheckpointStatus[playerid] = CHECKPOINT_HITMAN;
     }
@@ -25781,7 +25835,7 @@ CMD:testsaving(playerid, params[]) {
 	PlayerInfo[playerid][pRank] = iValue;
 	PlayerInfo[playerid][pJob] = iValue;
 	PlayerInfo[playerid][pJob2] = iValue;
-	PlayerInfo[playerid][pDonator] = iValue;
+	PlayerInfo[playerid][pVIP] = iValue;
 	PlayerInfo[playerid][gPupgrade] = iValue;
 	PlayerInfo[playerid][pSarmor] = iValue;
 	PlayerInfo[playerid][pCash] = iValue;
@@ -26599,50 +26653,50 @@ CMD:createpvehicle(playerid, params[])
     if(modelid < 400 || modelid > 611) { SendClientMessage(playerid, COLOR_GREY, "   Vehicle Number can't be below 400 or above 611!"); return 1; }
     new playervehicleid = GetPlayerFreeVehicleId(giveplayerid),
 		totalvehicles = GetPlayerVehicleCountEx(playerid);
-	// (TEMPORARY - ZHAO NOTE) TempDonator not added yet
-	if(PlayerInfo[giveplayerid][pDonator] == 0 && totalvehicles >= 5) //PlayerInfo[giveplayerid][pTempDonator] > 0) && carsamount >= 5)
+	// (TEMPORARY - ZHAO NOTE) TempVIP not added yet
+	if(PlayerInfo[giveplayerid][pVIP] == 0 && totalvehicles >= 5) //PlayerInfo[giveplayerid][pTempVIP] > 0) && carsamount >= 5)
 	{
         SendClientMessage(playerid, COLOR_GREY, "That player can't have more cars, non-VIP can only own 5 cars.");
         return 1;
 	}
-    if(PlayerInfo[giveplayerid][pDonator] == 1 && totalvehicles >= 7)
+    if(PlayerInfo[giveplayerid][pVIP] == 1 && totalvehicles >= 7)
     {
         SendClientMessage(playerid, COLOR_GREY, "That player can't have more cars, Bronze VIP can only own 7 cars.");
         return 1;
     }
-    if(PlayerInfo[giveplayerid][pDonator] == 2 && totalvehicles >= 8)
+    if(PlayerInfo[giveplayerid][pVIP] == 2 && totalvehicles >= 8)
     {
         SendClientMessage(playerid, COLOR_GREY, "That player can't have more cars, Silver VIP can only own 8 cars.");
         return 1;
     }
-    if(PlayerInfo[giveplayerid][pDonator] == 3 && totalvehicles >= 10)
+    if(PlayerInfo[giveplayerid][pVIP] == 3 && totalvehicles >= 10)
     {
         SendClientMessage(playerid, COLOR_GREY, "That player can't have more cars, Gold VIP can only own 10 cars.");
         return 1;
     }
 
     if(playervehicleid == -1) return SendClientMessage(playerid, COLOR_GREY, "ERROR: That player can't have more cars.");
-    if(PlayerInfo[giveplayerid][pDonator] == 0 && VehicleSpawned[giveplayerid] > 0)
+    if(PlayerInfo[giveplayerid][pVIP] == 0 && VehicleSpawned[giveplayerid] > 0)
     {
 		SendClientMessage(playerid, COLOR_GREY, "That player is non-VIP and can only have 1 vehicle spawned. The player must store that vehicle in order to create a new one.");
 		return 1;
     }
-   	if(PlayerInfo[giveplayerid][pDonator] == 1 && VehicleSpawned[giveplayerid] > 1)
+   	if(PlayerInfo[giveplayerid][pVIP] == 1 && VehicleSpawned[giveplayerid] > 1)
    	{
 		SendClientMessage(playerid, COLOR_GREY, "That player is Bronze VIP and can only have 2 vehicles spawned. The player must store that vehicle in order to create a new one.");
 		return 1;
     }
-   	if(PlayerInfo[giveplayerid][pDonator] == 2 && VehicleSpawned[giveplayerid] > 2)
+   	if(PlayerInfo[giveplayerid][pVIP] == 2 && VehicleSpawned[giveplayerid] > 2)
    	{
 		SendClientMessage(playerid, COLOR_GREY, "That player is Silver VIP and can only have 3 vehicles spawned. The player must store a vehicle in order to create a new one.");
 		return 1;
     }
-   	if(PlayerInfo[giveplayerid][pDonator] == 3 && VehicleSpawned[giveplayerid] > 3)
+   	if(PlayerInfo[giveplayerid][pVIP] == 3 && VehicleSpawned[giveplayerid] > 3)
    	{
 		SendClientMessage(playerid, COLOR_GREY, "That player is Gold VIP and can only have 4 vehicles spawned. The player must store a vehicle in order to create a new one.");
 		return 1;
     }
-    if(PlayerInfo[giveplayerid][pDonator] < 0 || PlayerInfo[giveplayerid][pDonator] > 3)
+    if(PlayerInfo[giveplayerid][pVIP] < 0 || PlayerInfo[giveplayerid][pVIP] > 3)
     {
     	SendClientMessage(playerid, COLOR_GREY, "ERROR: That player has an invalid VIP level.");
 		return 1;
@@ -27021,12 +27075,12 @@ CMD:sellmycar(playerid, params[]) {
             if(!IsPlayerConnected(giveplayerid)) return SendClientMessage(playerid, COLOR_GREY, "Player is currently not connected to the server.");
             if(ProxDetectorS(8.0, playerid, giveplayerid))
 		 	{
-		 	    if((PlayerInfo[giveplayerid][pDonator] < 2) && (GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 610  || GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 611 || GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 608 || GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 607))
+		 	    if((PlayerInfo[giveplayerid][pVIP] < 2) && (GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 610  || GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 611 || GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 608 || GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 607))
 				{
 				    SendClientMessage(playerid, COLOR_GREY, "You can't sell silver VIP vehicles to non-silver VIP.");
 				    return 1;
 				}
-    			if((PlayerInfo[giveplayerid][pDonator] < 3) && (GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 606 || GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 594 || GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 441))
+    			if((PlayerInfo[giveplayerid][pVIP] < 3) && (GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 606 || GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 594 || GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 441))
 				{
 				    SendClientMessage(playerid, COLOR_GREY, "You can't sell Gold VIP vehicles to non-Gold VIP.");
 				    return 1;
@@ -29058,7 +29112,7 @@ public StopaniTimer(playerid)
 
 CMD:buyclothes(playerid, params[]) {
 	if(IsAtClothShop(playerid)) {
-		if(PlayerInfo[playerid][pFaction] == 0 && PlayerInfo[playerid][pLeader] == 0 && PlayerInfo[playerid][pDonator] == 0)
+		if(PlayerInfo[playerid][pFaction] == 0 && PlayerInfo[playerid][pLeader] == 0 && PlayerInfo[playerid][pVIP] == 0)
 			ShowPlayerDialogEx(playerid, 3495, DIALOG_STYLE_INPUT, "Skin Selection","Please enter a Skin ID!\n\nNote: Skin Changes cost $250.", "Buy", "Cancel");
 		else
 		    ShowPlayerDialogEx(playerid, 3495, DIALOG_STYLE_INPUT, "Skin Selection","Please enter a Skin ID!\n\nNote: Your skin changes are free.", "Buy", "Cancel");
@@ -30293,7 +30347,7 @@ CMD:getcrack(playerid, params[])
 			GivePlayerCash(playerid, -price);
 			PlayerInfo[playerid][pCrack] += amount;
 
-			//if(PlayerInfo[playerid][pDonator] < 1) Points[mypoint][Stock] = Points[mypoint][Stock]-amount;
+			//if(PlayerInfo[playerid][pVIP] < 1) Points[mypoint][Stock] = Points[mypoint][Stock]-amount;
 			Points[mypoint][Stock] = Points[mypoint][Stock]-amount;
 
 			format(string, sizeof(string), " CRACK AVAILABLE: %d grams.", Points[mypoint][Stock]);
@@ -31769,7 +31823,7 @@ CMD:fstoregun(playerid, params[]) {
 		SendClientMessage(playerid, COLOR_GREY, "You can't use this while you're in an event.");
 		return 1;
 	}
-	/*if(PlayerInfo[playerid][pDonator] > 2)
+	/*if(PlayerInfo[playerid][pVIP] > 2)
 	{
 		SendClientMessage(playerid, COLOR_GRAD1, "You can't give away weapons if you're Gold+ VIP!");
 		return 1;
@@ -32238,7 +32292,7 @@ CMD:safedeposit(playerid, params[]) {
 }
 
 CMD:changeage(playerid, params[]) {
-	if(PlayerInfo[playerid][pDonator] < 1)
+	if(PlayerInfo[playerid][pVIP] < 1)
 	    return SendClientMessage(playerid, COLOR_GREY, "This command is only available to VIP right now.");
 
 	if(isnull(params))
@@ -32258,7 +32312,7 @@ CMD:changeage(playerid, params[]) {
 }
 
 CMD:changeph(playerid, params[]) {
-	if(PlayerInfo[playerid][pDonator] < 1)
+	if(PlayerInfo[playerid][pVIP] < 1)
 	    return SendClientMessage(playerid, COLOR_GREY, "This command is only available to VIP right now.");
 
 	if(isnull(params))
@@ -32296,7 +32350,7 @@ CMD:changeph(playerid, params[]) {
 }
 
 CMD:changegender(playerid, params[]) {
-	if(PlayerInfo[playerid][pDonator] < 1)
+	if(PlayerInfo[playerid][pVIP] < 1)
 	    return SendClientMessage(playerid, COLOR_GREY, "This command is only available to VIP right now.");
 
 	if(isnull(params))
@@ -32661,7 +32715,7 @@ CMD:adjustrank(playerid, params[])
 
 CMD:phoneprivacy(playerid, params[])
 {
-    if(PlayerInfo[playerid][pNumber] != 0 && PlayerInfo[playerid][pDonator] >= 1)
+    if(PlayerInfo[playerid][pNumber] != 0 && PlayerInfo[playerid][pVIP] >= 1)
 	{
         if(PhonePrivacy[playerid] == 1)
 		{
@@ -32678,7 +32732,7 @@ CMD:phoneprivacy(playerid, params[])
 }
 
 CMD:changeplates(playerid, params[]) {
-	if(PlayerInfo[playerid][pDonator] < 1)
+	if(PlayerInfo[playerid][pVIP] < 1)
 	    return SendClientMessage(playerid, COLOR_GREY, "This command is only available to VIP right now.");
 
 	new
@@ -36221,7 +36275,7 @@ CMD:buyhouse(playerid, params[])
 				}
 				/*else if(PlayerInfo[playerid][pHouse2] == INVALID_HOUSE_ID)
 				{
-				    if(PlayerInfo[playerid][pDonator] == 0)
+				    if(PlayerInfo[playerid][pVIP] == 0)
 				        return SendClientMessage(playerid, COLOR_GREY, "You already own a house!");
 
 					if(GetPlayerCash(playerid) > HouseInfo[h][hValue])
@@ -38605,15 +38659,15 @@ CMD:ddedit(playerid, params[])
 		format(string, sizeof(string), "%s has edited DoorID %d's Exterior.", GetPlayerNameEx(playerid), doorid);
 		Log("logs/ddedit.log", string);
 	}
-	else if(strcmp(choice, "donator", true) == 0)
+	else if(strcmp(choice, "vip", true) == 0)
 	{
 		DDoorsInfo[doorid][ddVIP] = amount;
 
-		format(string, sizeof(string), "You have changed the Donator Level to %d.", amount);
+		format(string, sizeof(string), "You have changed the VIP Level to %d.", amount);
 		SendClientMessage(playerid, COLOR_WHITE, string);
 
 		SaveDynamicDoors();
-		format(string, sizeof(string), "%s has edited DoorID %d's Donator Level.", GetPlayerNameEx(playerid), doorid);
+		format(string, sizeof(string), "%s has edited DoorID %d's VIP Level.", GetPlayerNameEx(playerid), doorid);
 		Log("logs/ddedit.log", string);
 		return 1;
 	}
@@ -38945,7 +38999,7 @@ CMD:enter(playerid, params[])
 	{
         if(IsPlayerInRangeOfPoint(playerid,3.0,DDoorsInfo[i][ddExteriorX], DDoorsInfo[i][ddExteriorY], DDoorsInfo[i][ddExteriorZ]) && PlayerInfo[playerid][pVW] == DDoorsInfo[i][ddExteriorVW])
 		{
-            if(DDoorsInfo[i][ddVIP] > 0 && PlayerInfo[playerid][pDonator] < DDoorsInfo[i][ddVIP]) {
+            if(DDoorsInfo[i][ddVIP] > 0 && PlayerInfo[playerid][pVIP] < DDoorsInfo[i][ddVIP]) {
                 SendClientMessage(playerid, COLOR_GRAD2, "You can't enter, you're not a high enough VIP level.");
                 return 1;
             }
@@ -39073,22 +39127,21 @@ CMD:enter(playerid, params[])
     }
 
     // Hitman HQ
-    if(IsPlayerInRangeOfPoint(playerid, 2.0,  -418.68, 1759.65, 6.22))
-	{
-        if(PlayerInfo[playerid][pFaction] == 4 || PlayerInfo[playerid][pLeader] == 4)
-		{
-            SetPlayerVirtualWorld(playerid, 666420);
-            PlayerInfo[playerid][pVW] = 666420;
+    if(IsPlayerInRangeOfPoint(playerid, 2.0,  -418.68, -1759.65, 6.22)) {
+    	if(PlayerInfo[playerid][pFaction] == 4 || PlayerInfo[playerid][pLeader] == 4) {
+        	SetPlayerVirtualWorld(playerid, 42);
+            PlayerInfo[playerid][pVW] = 42;
             SetPlayerInterior(playerid, 42);
             PlayerInfo[playerid][pInt] = 42;
             SetPlayerPos(playerid, 1277.019165, -758.428771, 5080.750000);
             SetPlayerFacingAngle(playerid, 358.16);
             SetCameraBehindPlayer(playerid);
 
-    		LoadObjectsForPlayer(playerid);
-   			SendClientMessage(playerid, COLOR_WHITE, "You can /order weaponry in the armory room.");
-        }
-    }
+            LoadObjectsForPlayer(playerid);
+            SendClientMessage(playerid, COLOR_WHITE, "You can /order weaponry in the armory room.");
+            return 1;
+		}
+	}
 
     // The Lubu Gentlemen's Club
     else if(IsPlayerInRangeOfPoint(playerid, 3.0,  511.817230, -1510.971679, 14.566996))
@@ -39159,13 +39212,13 @@ CMD:enter(playerid, params[])
 		format(string, sizeof(string), "* %s has entered Santa Maria Surfer's Lounge.", GetPlayerNameEx(playerid));
 		ProxDetector(25.0, playerid, string, COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE);
 
- 		SetPlayerVirtualWorld(playerid, 353535);
-   		PlayerInfo[playerid][pVW] = 353535;
-     	SetPlayerInterior(playerid, 35);
-      	PlayerInfo[playerid][pInt] = 35;
-       	SetPlayerPos(playerid, 271.742034, 1074.419677, 5096.750000);
-        SetPlayerFacingAngle(playerid, 86.54);
-        SetCameraBehindPlayer(playerid);
+ 		SetPlayerVirtualWorld(playerid, 363636+1);
+		PlayerInfo[playerid][pVW] = 363636+1;
+		SetPlayerInterior(playerid, 36);
+		PlayerInfo[playerid][pInt] = 36;
+		SetPlayerPos(playerid, 293.066436, 1029.785278, 1104.560058);
+		SetPlayerFacingAngle(playerid, 352.47);
+		SetCameraBehindPlayer(playerid);
 
 		LoadObjectsForPlayer(playerid);
 
@@ -39261,15 +39314,15 @@ CMD:exit(playerid, params[])
     }
 
     // Hitman HQ
-    if(IsPlayerInRangeOfPoint(playerid, 2.0, 1277.019165, -758.428771, 5080.750000) && (GetPlayerVirtualWorld(playerid) == 666420))
-	{
+    if(IsPlayerInRangeOfPoint(playerid, 2.0, 1277.019165, -758.428771, 5080.750000) && (GetPlayerVirtualWorld(playerid) == 42))
+    {
         if(PlayerInfo[playerid][pFaction] == 4 || PlayerInfo[playerid][pLeader] == 4)
-		{
+        {
             SetPlayerVirtualWorld(playerid, 0);
             PlayerInfo[playerid][pVW] = 0;
             SetPlayerInterior(playerid, 0);
             PlayerInfo[playerid][pInt] = 0;
-            SetPlayerPos(playerid, -418.68, 1759.65, 6.22);
+            SetPlayerPos(playerid, -418.68, -1759.65, 6.22);
             SetPlayerFacingAngle(playerid, 338.54);
             SetCameraBehindPlayer(playerid);
         }
@@ -39499,8 +39552,8 @@ public OnGameModeInit()
 	/*if(!IsBETAServer()) {
 		g_MySQLConnections[0] = mysql_connect("localhost", "root", "horizonrp", "");
 	} else*/
-	// g_MySQLConnections[0] = mysql_connect("localhost", "root", "ngrp", "");
-	g_MySQLConnections[0] = mysql_connect("localhost", "NextGenerati", "zNextGenerati0", "xPsMFjjB");
+	g_MySQLConnections[0] = mysql_connect("localhost", "root", "ngrp", "");
+	// g_MySQLConnections[0] = mysql_connect("localhost", "NextGenerati", "zNextGenerati0", "xPsMFjjB");
 
 	mysql_debug(1);
 
@@ -39845,49 +39898,50 @@ public OnGameModeInit()
 	}
 
     // Trucker Vehicles
-   	TruckerVehicles[0] = AddStaticVehicleEx(456,-1631.98,63.79,3.55,0.00000000,-1,-1,300); //Yankee
-	TruckerVehicles[1] = AddStaticVehicleEx(456,-1634.98,63.79,3.55,0.00000000,-1,-1,300); //Yankee
-	TruckerVehicles[2] = AddStaticVehicleEx(456,-1636.98,63.79,3.55,0.00000000,-1,-1,300); //Yankee
-	TruckerVehicles[3] = AddStaticVehicleEx(414,-1638.98,63.79,3.55,0.00000000,-1,-1,300); //Mule
-	TruckerVehicles[4] = AddStaticVehicleEx(414,-1640.98,63.79,3.55,0.00000000,-1,-1,300); //Mule
-	TruckerVehicles[5] = AddStaticVehicleEx(414,-1642.98,63.79,3.55,0.00000000,-1,-1,300); //Mule
-	TruckerVehicles[6] = AddStaticVehicleEx(456,-1644.98,63.79,3.55,270.00000000,-1,-1,300); //Yankee
-	TruckerVehicles[7] = AddStaticVehicleEx(456,-1647.98,63.79,3.55,270.00000000,-1,-1,300); //Yankee
-	TruckerVehicles[8] = AddStaticVehicleEx(456,-1649.98,63.79,3.55,270.00000000,-1,-1,300); //Yankee
-	TruckerVehicles[9] = AddStaticVehicleEx(499,-1651.98,63.79,3.55,180.00000000,-1,-1,300); //Benson
-	TruckerVehicles[10] = AddStaticVehicleEx(499,2180.41625977,-2638.07910156,13.64687538,180.00000000,-1,-1,300); //Benson
-	TruckerVehicles[11] = AddStaticVehicleEx(499,2185.71166992,-2638.12036133,13.64687538,180.00000000,-1,-1,300); //Benson
-	TruckerVehicles[12] = AddStaticVehicleEx(414,2205.19726562,-2597.21484375,13.69090652,270.00000000,-1,-1,300); //Mule
-	TruckerVehicles[13] = AddStaticVehicleEx(499,2213.06250000,-2583.26538086,13.64687538,0.00000000,-1,-1,300); //Benson
-	TruckerVehicles[14] = AddStaticVehicleEx(456,2204.75000000,-2569.27026367,13.79687500,270.00000000,-1,-1,300); //Yankee
-	TruckerVehicles[15] = AddStaticVehicleEx(456,2239.31396484,-2644.32055664,13.79451466,90.00000000,-1,-1,300); //Yankee
-	TruckerVehicles[16] = AddStaticVehicleEx(456,2239.52050781,-2638.99414062,13.79451466,90.00000000,-1,-1,300); //Yankee
-	TruckerVehicles[17] = AddStaticVehicleEx(456,2239.46142578,-2633.49414062,13.79451466,90.00000000,-1,-1,300); //Yankee
-	TruckerVehicles[18] = AddStaticVehicleEx(456,2239.34033203,-2627.85107422,13.79451466,90.00000000,-1,-1,300); //Yankee
-	TruckerVehicles[19] = AddStaticVehicleEx(456,2206.29296875,-2530.18920898,13.79687500,270.00000000,-1,-1,300); //Yankee
-	TruckerVehicles[20] = AddStaticVehicleEx(456,2206.20117188,-2524.10937500,13.79687500,270.00000000,-1,-1,300); //Yankee
-	TruckerVehicles[21] = AddStaticVehicleEx(456,2206.03466797,-2518.52441406,13.79687500,270.00000000,-1,-1,300); //Yankee
+   	// Trucker Vehicles
+    TruckerVehicles[0] = AddStaticVehicleEx(456,-1666.42,34.28,3.65,200.00000000,-1,-1,300); //Yankee
+   	TruckerVehicles[1] = AddStaticVehicleEx(456,-1663.42,36.71,3.65,200.00000000,-1,-1,300); //Yankee
+   	TruckerVehicles[2] = AddStaticVehicleEx(456,-1661.53,39.08,3.55,200.00000000,-1,-1,300); //Yankee
+   	TruckerVehicles[3] = AddStaticVehicleEx(414,-1659.14,41.43,3.55,200.00000000,-1,-1,300); //Mule
+   	TruckerVehicles[4] = AddStaticVehicleEx(414,-1659.14,41.43,3.55,200.00000000,-1,-1,300); //Mule
+   	TruckerVehicles[5] = AddStaticVehicleEx(414,-1656.75,43.79,3.55,200.00000000,-1,-1,300); //Mule
+	TruckerVehicles[6] = AddStaticVehicleEx(456,-1654.30,46.18,3.55,200.00000000,-1,-1,300); //Yankee
+    TruckerVehicles[7] = AddStaticVehicleEx(456,-1649.49,50.90,3.55,200.00000000,-1,-1,300); //Yankee
+   	TruckerVehicles[8] = AddStaticVehicleEx(456,-1644.63,55.38,3.55,200.00000000,-1,-1,300); //Yankee
+   	TruckerVehicles[9] = AddStaticVehicleEx(499,-1642.20,58.06,3.55,200.00000000,-1,-1,300); //Benson
+	//TruckerVehicles[10] = AddStaticVehicleEx(499,2180.41625977,-2638.07910156,13.64687538,180.00000000,-1,-1,300); //Benson
+	//TruckerVehicles[11] = AddStaticVehicleEx(499,2185.71166992,-2638.12036133,13.64687538,180.00000000,-1,-1,300); //Benson
+	//TruckerVehicles[12] = AddStaticVehicleEx(414,2205.19726562,-2597.21484375,13.69090652,270.00000000,-1,-1,300); //Mule
+	//TruckerVehicles[13] = AddStaticVehicleEx(499,2213.06250000,-2583.26538086,13.64687538,0.00000000,-1,-1,300); //Benson
+	//TruckerVehicles[14] = AddStaticVehicleEx(456,2204.75000000,-2569.27026367,13.79687500,270.00000000,-1,-1,300); //Yankee
+	//TruckerVehicles[15] = AddStaticVehicleEx(456,2239.31396484,-2644.32055664,13.79451466,90.00000000,-1,-1,300); //Yankee
+	//TruckerVehicles[16] = AddStaticVehicleEx(456,2239.52050781,-2638.99414062,13.79451466,90.00000000,-1,-1,300); //Yankee
+	//TruckerVehicles[17] = AddStaticVehicleEx(456,2239.46142578,-2633.49414062,13.79451466,90.00000000,-1,-1,300); //Yankee
+	//TruckerVehicles[18] = AddStaticVehicleEx(456,2239.34033203,-2627.85107422,13.79451466,90.00000000,-1,-1,300); //Yankee
+	//TruckerVehicles[19] = AddStaticVehicleEx(456,2206.29296875,-2530.18920898,13.79687500,270.00000000,-1,-1,300); //Yankee
+	//TruckerVehicles[20] = AddStaticVehicleEx(456,2206.20117188,-2524.10937500,13.79687500,270.00000000,-1,-1,300); //Yankee
+	//TruckerVehicles[21] = AddStaticVehicleEx(456,2206.03466797,-2518.52441406,13.79687500,270.00000000,-1,-1,300); //Yankee
 
     // Paintball (pickup + 3dtextlabel)
     CreateDynamic3DTextLabel("Paintball - Type /paintball to play",COLOR_WHITE, 1295.90, -1424.05, 14.95+0.5,10.0);
     CreatePickup(1254, 23, 1295.90, -1424.05, 14.95, -1);
 
 	// Added by Calgon (extra vehicles really needed)
-	TruckerVehicles[22] = AddStaticVehicle(456,-1578.82,127.74,3.55,270.4689,102,300); // Ocean Docks 1
-	TruckerVehicles[23] = AddStaticVehicle(456,-1581.66,121.87,3.55,268.3057,102,300); // Ocean Docks 2
-	TruckerVehicles[24] = AddStaticVehicle(456,-1585.80,116.94,3.55,271.3797,102,300); // Ocean Docks 3
-	TruckerVehicles[25] = AddStaticVehicle(456,-1588.52,114.57,3.55,269.0897,102,300); // Ocean Docks 4
-	TruckerVehicles[26] = AddStaticVehicle(456,-1592.96,111.66,3.55,89.5815,102,300); // Ocean Docks 5
-	TruckerVehicles[27] = AddStaticVehicle(456,-1596.75,102.65,3.55,358.5510,102,300); // Ocean Docks 6
-	TruckerVehicles[28] = AddStaticVehicle(456,-1599.80,101.57,3.55,358.5483,102,300); // Ocean Docks 7
-	TruckerVehicles[29] = AddStaticVehicle(456,-1602.77,99.15,3.55,91.2853,53,300); // Ocean Docks Truck
-	TruckerVehicles[30] = AddStaticVehicle(456,-1605.88,96.85,3.55,356.8250,53,300); // Ocean Docks Truck
-	TruckerVehicles[31] = AddStaticVehicle(456,-1609.35,93.86,3.55,356.8441,53,300); // Ocean Docks Truck
-	TruckerVehicles[32] = AddStaticVehicle(456,-1611.35,93.87,3.55,359.6938,53,300); // Ocean Docks Truck
-	TruckerVehicles[33] = AddStaticVehicle(456,-1613.35,93.89,3.55,359.6888,53,300); // Ocean Docks Truck
-	TruckerVehicles[34] = AddStaticVehicle(456,-1615.35,93.91,3.55,359.6818,53,300); // Ocean Docks Truck
-	TruckerVehicles[35] = AddStaticVehicle(456,-1617.35,93.90,3.55,359.7150,53,300); // Ocean Docks Truck
-	TruckerVehicles[36] = AddStaticVehicle(456,-1618.35,93.88,3.55,261.9050,53,300); // Ocean Docks Truck
+    TruckerVehicles[22] = AddStaticVehicle(456,-1578.82,127.74,3.55,200.4689,102,300); // Ocean Docks 1
+    TruckerVehicles[23] = AddStaticVehicle(456,-1581.66,121.87,3.55,200.3057,102,300); // Ocean Docks 2
+    TruckerVehicles[24] = AddStaticVehicle(456,-1585.80,116.94,3.55,200.3797,102,300); // Ocean Docks 3
+    TruckerVehicles[25] = AddStaticVehicle(456,-1588.52,114.57,3.55,200.0897,102,300); // Ocean Docks 4
+    TruckerVehicles[26] = AddStaticVehicle(456,-1592.96,111.66,3.55,200.5815,102,300); // Ocean Docks 5
+    TruckerVehicles[27] = AddStaticVehicle(456,-1596.75,102.65,3.55,200.5510,102,300); // Ocean Docks 6
+    TruckerVehicles[28] = AddStaticVehicle(456,-1599.80,101.57,3.55,200.5483,102,300); // Ocean Docks 7
+    TruckerVehicles[29] = AddStaticVehicle(456,-1602.77,99.15,3.55,200.2853,53,300); // Ocean Docks Truck
+    TruckerVehicles[30] = AddStaticVehicle(456,-1605.88,96.85,3.55,200.8250,53,300); // Ocean Docks Truck
+    TruckerVehicles[31] = AddStaticVehicle(456,-1609.35,93.86,3.55,200.8441,53,300); // Ocean Docks Truck
+    TruckerVehicles[32] = AddStaticVehicle(456,-1611.35,93.87,3.55,200.6938,53,300); // Ocean Docks Truck
+    TruckerVehicles[33] = AddStaticVehicle(456,-1613.35,93.89,3.55,200.6888,53,300); // Ocean Docks Truck
+    TruckerVehicles[34] = AddStaticVehicle(456,-1615.35,93.91,3.55,200.6818,53,300); // Ocean Docks Truck
+    TruckerVehicles[35] = AddStaticVehicle(456,-1617.35,93.90,3.55,200.7150,53,300); // Ocean Docks Truck
+    TruckerVehicles[36] = AddStaticVehicle(456,-1618.35,93.88,3.55,200.9050,53,300); // Ocean Docks Truck
 
 	//LSPD - LSFMD - All Saints
     CreateDynamicObject(18030, 2092.279296875, 2817.1181640625, -14.807208061218, 0.000000, 0.000000, 0.000000); //
@@ -41200,7 +41254,149 @@ public OnGameModeInit()
 	CreateDynamicObject(2602,212.45510864,1808.80895996,1609.50891113,0.00000000,0.00000000,0.00000000, .interiorid = 69); //object(police_cell_toilet) (19)
 	CreateDynamicObject(2602,216.65698242,1808.81689453,1609.50891113,0.00000000,0.00000000,0.00000000, .interiorid = 69); //object(police_cell_toilet) (20)
 	CreateDynamicObject(3388,204.12251282,1788.69470215,1608.96325684,0.00000000,0.00000000,270.00000000, .interiorid = 69); //object(a51_srack4_) (1)
+	// Streamer_Update()
 
+	//VIP
+	Create3DTextLabel("{FFFFFF}VIP Locker\n{EEE72A}(/viplocker to access the locker)", 0x008080FF, 2561.32519531,1403.24609375,7699.56640625,5.0, 0, 0);
+	CreateDynamicObject(14614,2533.68457031,1416.85351562,7705.11816406,0.00000000,0.00000000,0.00000000, .interiorid = 89); //object(triad_main3) (1)
+	CreateDynamicObject(14607,2533.54492188,1417.93652344,7705.11572266,0.00000000,0.00000000,359.74731445, .interiorid = 89); //object(triad_main2) (2)
+	CreateDynamicObject(14563,2533.70019531,1419.26757812,7705.11376953,0.00000000,0.00000000,0.00000000, .interiorid = 89); //object(triad_main) (1)
+	CreateDynamicObject(3533,2544.49926758,1432.28100586,7702.83007812,0.00000000,0.00000000,0.00000000, .interiorid = 89); //object(trdpillar01) (1)
+	CreateDynamicObject(3533,2544.46289062,1403.82421875,7702.83007812,0.00000000,0.00000000,0.00000000, .interiorid = 89); //object(trdpillar01) (2)
+	CreateDynamicObject(14561,2584.83007812,1417.66503906,7704.10937500,0.00000000,0.00000000,179.74731445, .interiorid = 89); //object(triad_neon) (2)
+	CreateDynamicObject(3533,2569.09399414,1406.85668945,7705.23632812,0.00000000,0.00000000,0.00000000, .interiorid = 89); //object(trdpillar01) (2)
+	CreateDynamicObject(3533,2569.12109375,1428.65820312,7705.23632812,0.00000000,0.00000000,0.00000000, .interiorid = 89); //object(trdpillar01) (2)
+	CreateDynamicObject(1846,2502.62304688,1391.47949219,7699.94970703,90.00000000,90.00000000,269.98901367, .interiorid = 89); //object(shop_shelf04) (1)
+	CreateDynamicObject(8664,2470.62500000,1449.24902344,7707.08886719,0.00000000,179.99450684,269.98901367, .interiorid = 89); //object(casrylegrnd_lvs) (2)
+	CreateDynamicObject(3534,2522.69213867,1427.96093750,7705.81347656,179.99450684,0.00000000,0.00000000); //object(trdlamp01) (1)
+	CreateDynamicObject(3534,2520.36645508,1407.96240234,7705.81347656,179.99450684,0.00000000,0.00000000); //object(trdlamp01) (2)
+	CreateDynamicObject(3534,2505.93945312,1408.00488281,7705.81347656,179.99450684,0.00000000,0.00000000); //object(trdlamp01) (3)
+	CreateDynamicObject(3534,2507.41162109,1428.69897461,7705.81347656,179.99450684,0.00000000,0.00000000); //object(trdlamp01) (4)
+	CreateDynamicObject(14537,2555.20019531,1417.82421875,7700.75244141,0.00000000,0.00000000,269.74731445); //object(pdomesbar) (1)
+	CreateDynamicObject(1703,2561.78857422,1430.46569824,7698.58447266,0.00000000,0.00000000,0.00000000); //object(kb_couch02) (1)
+	CreateDynamicObject(1703,2565.56933594,1429.20166016,7698.58447266,0.00000000,0.00000000,269.75000000); //object(kb_couch02) (2)
+	CreateDynamicObject(1703,2560.29028320,1427.15185547,7698.58447266,0.00000000,0.00000000,89.49731445); //object(kb_couch02) (3)
+	CreateDynamicObject(2126,2562.40576172,1427.81384277,7698.58447266,0.00000000,0.00000000,0.00000000); //object(coffee_swank_5) (1)
+	CreateDynamicObject(644,2565.03710938,1431.16113281,7698.78466797,0.00000000,0.00000000,0.00000000); //object(pot_02) (1)
+	CreateDynamicObject(1703,2549.62744141,1430.27490234,7698.58447266,0.00000000,0.00000000,0.00000000); //object(kb_couch02) (4)
+	CreateDynamicObject(1703,2548.02905273,1427.33349609,7698.58447266,0.00000000,0.00000000,89.49462891); //object(kb_couch02) (5)
+	CreateDynamicObject(1703,2553.11743164,1429.18188477,7698.58447266,0.00000000,0.00000000,269.74731445); //object(kb_couch02) (6)
+	CreateDynamicObject(2126,2550.10009766,1427.68005371,7698.58447266,0.00000000,0.00000000,0.00000000); //object(coffee_swank_5) (2)
+	CreateDynamicObject(2208,2556.58935547,1430.02514648,7698.58447266,0.00000000,0.00000000,269.99996948); //object(med_office7_unit_1) (1)
+	CreateDynamicObject(644,2556.64257812,1432.07714844,7698.78466797,0.00000000,0.00000000,0.00000000); //object(pot_02) (3)
+	CreateDynamicObject(644,2545.51367188,1430.76379395,7698.78466797,0.00000000,0.00000000,0.00000000); //object(pot_02) (4)
+	CreateDynamicObject(3528,2542.58496094,1414.42236328,7707.52832031,0.00000000,0.00000000,81.75000000); //object(vgsedragon) (1)
+	CreateDynamicObject(13656,2549.15917969,1425.01318359,7691.92236328,0.00000000,0.00000000,0.00000000); //object(fuckknows) (1)
+	CreateDynamicObject(1702,2500.81054688,1398.09545898,7696.57470703,0.00000000,0.00000000,0.00000000); //object(kb_couch06) (1)
+	CreateDynamicObject(1702,2497.05859375,1398.17089844,7696.57470703,0.00000000,0.00000000,0.00000000); //object(kb_couch06) (2)
+	CreateDynamicObject(1822,2499.40185547,1397.70947266,7696.57470703,0.00000000,0.00000000,0.00000000); //object(coffee_swank_6) (1)
+	CreateDynamicObject(1705,2496.42871094,1395.96105957,7696.57470703,0.00000000,0.00000000,90.00000000); //object(kb_chair04) (1)
+	CreateDynamicObject(1702,2508.76733398,1398.05688477,7696.57470703,0.00000000,0.00000000,269.99996948); //object(kb_couch06) (3)
+	CreateDynamicObject(1702,2508.77172852,1391.88793945,7696.57470703,0.00000000,0.00000000,269.99450684); //object(kb_couch06) (4)
+	CreateDynamicObject(1705,2508.75927734,1394.53845215,7696.57470703,0.00000000,0.00000000,269.74996948); //object(kb_chair04) (2)
+	CreateDynamicObject(2010,2496.33740234,1398.38879395,7696.60791016,0.00000000,0.00000000,0.00000000); //object(nu_plant3_ofc) (1)
+	CreateDynamicObject(3528,2541.61718750,1421.13610840,7707.52832031,0.00000000,0.00000000,284.00000000); //object(vgsedragon) (1)
+	CreateDynamicObject(1557,2581.77954102,1416.19738770,7700.99072266,0.00000000,0.00000000,89.75000000); //object(gen_doorext19) (1)
+	CreateDynamicObject(1557,2581.77709961,1419.24938965,7700.99072266,0.00000000,0.00000000,269.74731445); //object(gen_doorext19) (2)
+	CreateDynamicObject(3533,2525.58374023,1403.63500977,7700.82812500,0.00000000,0.00000000,0.00000000); //object(trdpillar01) (2)
+	CreateDynamicObject(3533,2525.65917969,1433.01574707,7700.82812500,0.00000000,0.00000000,0.00000000); //object(trdpillar01) (2)
+	CreateDynamicObject(3533,2502.09692383,1403.54077148,7700.82812500,0.00000000,0.00000000,0.00000000); //object(trdpillar01) (2)
+	CreateDynamicObject(3533,2502.05957031,1432.68359375,7700.82812500,0.00000000,0.00000000,0.00000000); //object(trdpillar01) (2)
+	CreateDynamicObject(2232,2502.62475586,1404.12939453,7701.62158203,29.99816895,0.00000000,137.49841309); //object(med_speaker_4) (2)
+	CreateDynamicObject(2232,2502.66284180,1432.12524414,7701.79736328,29.99267578,0.00000000,49.99328613); //object(med_speaker_4) (3)
+	CreateDynamicObject(2232,2525.13916016,1432.33178711,7703.54345703,29.98718262,0.00000000,319.73925781); //object(med_speaker_4) (4)
+	CreateDynamicObject(2232,2524.96215820,1404.17626953,7703.54345703,29.98168945,0.00000000,225.48889160); //object(med_speaker_4) (5)
+	CreateDynamicObject(14434,2511.20556641,1425.14147949,7706.56093750,0.00000000,0.00000000,0.00000000); //object(carter-spotlight42) (1)
+	CreateDynamicObject(14434,2517.55908203,1412.60461426,7706.56103516,0.00000000,0.00000000,179.74731445); //object(carter-spotlight42) (2)
+	CreateDynamicObject(2802,2496.60351562,1452.96240234,7696.91699219,0.00000000,0.00000000,0.00000000); //object(castable1) (1)
+	CreateDynamicObject(2802,2500.60888672,1455.75598145,7696.91699219,0.00000000,0.00000000,83.75000000); //object(castable1) (2)
+	CreateDynamicObject(2802,2505.04809570,1455.83142090,7696.91699219,0.00000000,0.00000000,83.74877930); //object(castable1) (3)
+	CreateDynamicObject(2802,2508.61010742,1453.67211914,7696.91699219,0.00000000,0.00000000,185.49877930); //object(castable1) (4)
+	CreateDynamicObject(2802,2508.56738281,1444.14099121,7696.91699219,0.00000000,0.00000000,185.49865723); //object(castable1) (5)
+	CreateDynamicObject(2802,2508.53784180,1439.81018066,7696.91699219,0.00000000,0.00000000,10.24865723); //object(castable1) (6)
+	CreateDynamicObject(2802,2496.62451172,1448.15747070,7696.91699219,0.00000000,0.00000000,0.00000000); //object(castable1) (7)
+	CreateDynamicObject(2802,2496.67675781,1443.45410156,7696.91699219,0.00000000,0.00000000,0.00000000); //object(castable1) (8)
+	CreateDynamicObject(2802,2496.61523438,1438.70251465,7696.91699219,0.00000000,0.00000000,0.00000000); //object(castable1) (9)
+	CreateDynamicObject(2802,2500.53320312,1452.66955566,7696.91699219,0.00000000,0.00000000,0.00000000); //object(castable1) (10)
+	CreateDynamicObject(2802,2504.76513672,1452.47546387,7696.91699219,0.00000000,0.00000000,0.00000000); //object(castable1) (11)
+	CreateDynamicObject(2802,2504.43212891,1447.91577148,7696.91699219,0.00000000,0.00000000,0.00000000); //object(castable1) (12)
+	CreateDynamicObject(2802,2504.61816406,1442.34155273,7696.91699219,0.00000000,0.00000000,0.00000000); //object(castable1) (13)
+	CreateDynamicObject(2802,2500.46679688,1442.34082031,7696.91699219,0.00000000,0.00000000,0.00000000); //object(castable1) (14)
+	CreateDynamicObject(2802,2500.64111328,1447.44116211,7696.91699219,0.00000000,0.00000000,0.00000000); //object(castable1) (15)
+	CreateDynamicObject(8664,2460.33349609,1334.99987793,7705.18896484,0.00000000,179.99450684,358.98901367); //object(casrylegrnd_lvs) (2)
+	CreateDynamicObject(8664,2466.37988281,1506.99414062,7705.18896484,0.00000000,179.99450684,269.98352051); //object(casrylegrnd_lvs) (2)
+	CreateDynamicObject(1702,2496.41601562,1392.63623047,7696.57470703,0.00000000,0.00000000,90.00000000); //object(kb_couch06) (2)
+	CreateDynamicObject(1702,2496.45556641,1388.72924805,7696.57470703,0.00000000,0.00000000,90.00000000); //object(kb_couch06) (2)
+	CreateDynamicObject(1702,2496.42236328,1382.17553711,7696.57470703,0.00000000,0.00000000,90.00000000); //object(kb_couch06) (2)
+	CreateDynamicObject(1702,2499.56835938,1379.86389160,7696.57470703,0.00000000,0.00000000,180.25000000); //object(kb_couch06) (2)
+	CreateDynamicObject(1702,2503.86328125,1379.84350586,7696.57470703,0.00000000,0.00000000,180.24719238); //object(kb_couch06) (2)
+	CreateDynamicObject(1702,2508.63720703,1379.85156250,7696.57470703,0.00000000,0.00000000,180.24719238); //object(kb_couch06) (2)
+	CreateDynamicObject(1702,2508.78320312,1384.55676270,7696.57470703,0.00000000,0.00000000,270.24722290); //object(kb_couch06) (2)
+	CreateDynamicObject(1822,2495.96850586,1391.05432129,7696.58007812,0.00000000,0.00000000,0.00000000); //object(coffee_swank_6) (2)
+	CreateDynamicObject(1822,2500.17749023,1379.41052246,7696.58007812,0.00000000,0.00000000,0.00000000); //object(coffee_swank_6) (4)
+	CreateDynamicObject(1822,2504.73486328,1379.36376953,7696.58007812,0.00000000,0.00000000,0.00000000); //object(coffee_swank_6) (5)
+	CreateDynamicObject(1822,2508.29492188,1381.23937988,7696.58007812,0.00000000,0.00000000,0.00000000); //object(coffee_swank_6) (6)
+	CreateDynamicObject(2592,2502.65625000,1385.34570312,7697.48876953,0.00000000,0.00000000,0.00000000); //object(ab_slottable) (1)
+	CreateDynamicObject(14391,2518.39965820,1395.66064453,7697.63281250,0.00000000,0.00000000,137.75000000); //object(dr_gsnew07) (1)
+	CreateDynamicObject(2773,2513.80834961,1391.35119629,7697.49023438,0.00000000,0.00000000,287.00000000); //object(cj_airprt_bar) (1)
+	CreateDynamicObject(2773,2511.01782227,1390.83972168,7697.49023438,0.00000000,0.00000000,273.74584961); //object(cj_airprt_bar) (2)
+	CreateDynamicObject(2773,2511.01586914,1398.82482910,7697.49023438,0.00000000,0.00000000,285.49584961); //object(cj_airprt_bar) (3)
+	CreateDynamicObject(2773,2513.54321289,1400.46667480,7697.47998047,0.00000000,0.00000000,322.49072266); //object(cj_airprt_bar) (4)
+	CreateDynamicObject(2773,2514.37133789,1402.14062500,7697.49023438,0.00000000,0.00000000,345.23721313); //object(cj_airprt_bar) (5)
+	CreateDynamicObject(2773,2516.00585938,1403.10449219,7697.49023438,0.00000000,358.50000000,270.74584961); //object(cj_airprt_bar) (6)
+	CreateDynamicObject(2773,2518.39916992,1403.09533691,7697.49023438,0.00000000,358.49487305,269.99157715); //object(cj_airprt_bar) (7)
+	CreateDynamicObject(2773,2521.51806641,1403.08837891,7697.49023438,0.00000000,358.49487305,269.98901367); //object(cj_airprt_bar) (8)
+	CreateDynamicObject(2773,2522.30200195,1401.77014160,7697.49023438,0.00000000,358.49487305,173.23901367); //object(cj_airprt_bar) (9)
+	CreateDynamicObject(2773,2521.81201172,1399.49047852,7697.49023438,0.00000000,358.49487305,163.23791504); //object(cj_airprt_bar) (10)
+	CreateDynamicObject(1541,2503.42236328,1385.51770020,7698.08593750,0.00000000,0.00000000,179.75000000); //object(cj_beer_taps_1) (1)
+	CreateDynamicObject(1545,2501.91772461,1385.48803711,7698.16455078,0.00000000,0.00000000,0.00000000); //object(cj_b_optic1) (1)
+	CreateDynamicObject(14562,2487.84570312,1418.30541992,7699.85156250,0.00000000,0.00000000,0.00000000); //object(triad_lion) (1)
+	CreateDynamicObject(16101,2517.80395508,1435.93750000,7696.97753906,0.00000000,0.00000000,0.00000000); //object(des_windsockpole) (1)
+	CreateDynamicObject(3533,2511.56665039,1388.92163086,7700.82812500,0.00000000,0.00000000,0.00000000); //object(trdpillar01) (2)
+	CreateDynamicObject(1703,2533.08276367,1399.54919434,7696.58251953,0.00000000,0.00000000,259.00000000); //object(kb_couch02) (7)
+	CreateDynamicObject(1703,2529.77880859,1391.14709473,7696.58251953,0.00000000,0.00000000,234.99719238); //object(kb_couch02) (8)
+	CreateDynamicObject(1753,2518.78100586,1441.38500977,7696.97753906,0.00000000,0.49987793,308.24658203); //object(swank_couch_1) (3)
+	CreateDynamicObject(1753,2521.59692383,1436.83740234,7696.97753906,0.00000000,0.49987793,283.99334717); //object(swank_couch_1) (4)
+	CreateDynamicObject(14809,2514.50146484,1439.01867676,7698.00341797,0.00000000,0.00000000,269.75000000); //object(strip2_platforms) (1)
+	CreateDynamicObject(16101,2517.80371094,1435.93750000,7705.97753906,0.00000000,180.00000000,0.00000000); //object(des_windsockpole) (3)
+	CreateDynamicObject(2004,2547.08203125,1402.87194824,7700.60693359,0.00000000,0.00000000,180.75000000); //object(cr_safe_door) (1)
+	CreateDynamicObject(18648,2574.30322266,1430.06726074,7705.38964844,0.00000000,0.00000000,90.00000000); //object(trdpillar01) (1)
+	CreateDynamicObject(18648,2574.33300781,1405.45104980,7705.39013672,0.00000000,0.00000000,90.00000000); //object(trdpillar01) (1)
+	CreateDynamicObject(18655,2523.20751953,1431.59301758,7696.54589844,0.00000000,0.00000000,50.00000000); //object(trdpillar01) (1)
+	CreateDynamicObject(18655,2502.90087891,1404.33312988,7696.14160156,0.00000000,0.00000000,210.00000000); //object(trdpillar01) (1)
+	CreateDynamicObject(18655,2523.31250000,1404.46948242,7696.14160156,0.00000000,0.00000000,310.00000000); //object(trdpillar01) (2)
+	CreateDynamicObject(18655,2502.92797852,1431.71264648,7696.14599609,0.00000000,0.00000000,150.00000000); //object(trdpillar01) (1)
+	CreateDynamicObject(18648,2514.53857422,1431.92138672,7706.11523438,0.00000000,0.00000000,264.49768066); //object(whiten) (1)
+	CreateDynamicObject(18648,2502.94531250,1418.95727539,7705.86865234,0.00000000,0.00000000,358.25000000); //object(whiten) (1)
+	CreateDynamicObject(18648,2512.54833984,1404.22753906,7706.46093750,0.00000000,0.00000000,88.24768066); //object(pinkn) (1)
+	CreateDynamicObject(18648,2524.80029297,1417.05432129,7705.85693359,0.00000000,0.00000000,175.49768066); //object(pinkn) (1)
+	CreateDynamicObject(19129,2513.15600586,1418.46594238,7696.64794922,0.00000000,0.00000000,0.00000000); //object(dancefloor) (1)
+	CreateDynamicObject(18885,2561.32519531,1403.24609375,7699.56640625,0.00000000,0.00000000,179.50000000); //object(gunlocker) (1)
+	CreateDynamicObject(14782,2555.62255859,1403.19152832,7699.47363281,0.00000000,0.00000000,179.49462891); //object(pdomesbar) (1)
+	CreateDynamicObject(18885,2549.56079102,1403.30615234,7699.56640625,0.00000000,0.00000000,179.49462891); //object(gunlocker) (1)
+	CreateDynamicObject(18646,2524.76708984,1404.45544434,7706.96542969,0.00000000,0.00000000,0.00000000); //object(pd light) (2)
+	CreateDynamicObject(18646,2524.73706055,1431.57739258,7706.96777344,0.00000000,0.00000000,0.00000000); //object(pd light) (2)
+	CreateDynamicObject(18646,2503.03784180,1431.67236328,7706.96777344,0.00000000,0.00000000,0.00000000); //object(pd light) (2)
+	CreateDynamicObject(18646,2503.04516602,1404.47290039,7706.96337891,0.00000000,0.00000000,0.00000000); //object(pd light) (2)
+	CreateDynamicObject(18646,2555.37280273,1413.67517090,7702.10400391,0.00000000,0.00000000,0.00000000); //object(pd light) (2)
+	CreateDynamicObject(18646,2555.36938477,1421.85681152,7702.10400391,0.00000000,0.00000000,0.00000000); //object(pd light) (2)
+
+
+//vip ls garage
+	CreateObject(10010,-4398.91894531,871.42370605,985.81781006,0.00000000,0.00000000,356.03002930); //object(ugcarpark_sfe) (1)
+	CreateDynamicObject(7891,-4432.70019531,906.73614502,988.49066162,0.00000000,0.00000000,90.00000000); //object(vgwspry1) (2)
+	CreateDynamicObject(7891,-4425.47021484,906.73535156,988.49066162,0.00000000,0.00000000,90.00000000); //object(vgwspry1) (4)
+	CreateDynamicObject(7891,-4432.70019531,906.73535156,993.03997803,0.00000000,0.00000000,90.00000000); //object(vgwspry1) (5)
+	CreateDynamicObject(7891,-4425.46972656,906.73535156,993.03997803,0.00000000,0.00000000,90.00000000); //object(vgwspry1) (6)
+
+//sf vip exterior
+	RemoveBuildingForPlayer(-1, 10662, -2453.6563, 514.5000, 24.4375, 0.25);
+	RemoveBuildingForPlayer(-1, 966, -2436.8516, 495.4531, 28.9531, 0.25);
+	RemoveBuildingForPlayer(-1, 967, -2438.7266, 495.0078, 29.1016, 0.25);
+	RemoveBuildingForPlayer(-1, 968, -2436.8125, 495.4688, 29.6797, 0.25);
+	RemoveBuildingForPlayer(-1, 10611, -2453.6563, 514.5000, 24.4375, 0.25);
+
+	
 	//Anim stopper message
 	txtAnimHelper = TextDrawCreate(630.0, 420.0, "~r~~k~~PED_SPRINT~ ~w~to stop the animation");
 	TextDrawUseBox(txtAnimHelper, 0);
@@ -41529,32 +41725,18 @@ public OnGameModeInit()
 	TextDrawSetProportional(ObjectsLoadingTD[6], 1);
 	TextDrawSetShadow(ObjectsLoadingTD[6], 3);
 
-	PizzaVehicles[0] = AddStaticVehicleEx(448,2121.60009766,-1788.00000000,13.19999981,0.00000000,3,6,300); //Pizzaboy
-	PizzaVehicles[1] = AddStaticVehicleEx(448,2120.30004883,-1788.00000000,13.19999981,0.00000000,3,6,300); //Pizzaboy
-	PizzaVehicles[2] = AddStaticVehicleEx(448,2119.10009766,-1788.00000000,13.19999981,358.00000000,3,6,300); //Pizzaboy
-	PizzaVehicles[3] = AddStaticVehicleEx(448,2117.80004883,-1788.00000000,13.19999981,357.99499512,3,6,300); //Pizzaboy
-	PizzaVehicles[4] = AddStaticVehicleEx(448,2116.30004883,-1788.00000000,13.19999981,357.99499512,3,6,300); //Pizzaboy
-	PizzaVehicles[5] = AddStaticVehicleEx(448,2122.80004883,-1788.00000000,13.19999981,357.99499512,3,6,300); //Pizzaboy
-	PizzaVehicles[6] = AddStaticVehicleEx(448,2113.69995117,-1788.09997559,13.19999981,357.99499512,3,6,300); //Pizzaboy
-	PizzaVehicles[7] = AddStaticVehicleEx(448,2112.39990234,-1788.09997559,13.19999981,357.99499512,3,6,300); //Pizzaboy
-	PizzaVehicles[8] = AddStaticVehicleEx(448,2111.10009766,-1788.09997559,13.19999981,357.99499512,3,6,300); //Pizzaboy
-	PizzaVehicles[9] = AddStaticVehicleEx(448,2109.60009766,-1788.09997559,13.19999981,357.99499512,3,6,300); //Pizzaboy
-	PizzaVehicles[10] = AddStaticVehicleEx(448,2108.30004883,-1788.09997559,13.19999981,357.99499512,3,6,300); //Pizzaboy
-	PizzaVehicles[11] = AddStaticVehicleEx(448,2107.00000000,-1788.09997559,13.19999981,357.99499512,3,6,300); //Pizzaboy
-
-	/*PizzaVehicles[12] = AddStaticVehicleEx(448,2125.72778320,-1821.16296387,13.22481918,270.00000000,-1,-1,300); //Pizzaboy
-	PizzaVehicles[13] = AddStaticVehicleEx(448,2125.58886719,-1819.16699219,13.22481918,270.00000000,-1,-1,300); //Pizzaboy
-	PizzaVehicles[14] = AddStaticVehicleEx(448,2125.53417969,-1817.41784668,13.22481918,270.00000000,-1,-1,300); //Pizzaboy
-	PizzaVehicles[15] = AddStaticVehicleEx(448,2125.59228516,-1815.41772461,13.22481918,270.00000000,-1,-1,300); //Pizzaboy
-	PizzaVehicles[16] = AddStaticVehicleEx(448,2125.63085938,-1813.41699219,13.22481918,270.00000000,-1,-1,300); //Pizzaboy
-	PizzaVehicles[17] = AddStaticVehicleEx(448,2125.65161133,-1811.47399902,13.22481918,270.00000000,-1,-1,300); //Pizzaboy
-	PizzaVehicles[18] = AddStaticVehicleEx(448,2125.63940430,-1809.86132812,13.22481918,270.00000000,-1,-1,300); //Pizzaboy
-	PizzaVehicles[19] = AddStaticVehicleEx(448,2125.61669922,-1807.59777832,13.22481918,270.00000000,-1,-1,300); //Pizzaboy
-	PizzaVehicles[20] = AddStaticVehicleEx(448,2125.77197266,-1805.30444336,13.22481918,270.00000000,-1,-1,300); //Pizzaboy
-	PizzaVehicles[21] = AddStaticVehicleEx(448,2125.79687500,-1802.72937012,13.22481918,270.00000000,-1,-1,300); //Pizzaboy
-	PizzaVehicles[22] = AddStaticVehicleEx(448,2125.77929688,-1799.91442871,13.22481918,270.00000000,-1,-1,300); //Pizzaboy
-	PizzaVehicles[23] = AddStaticVehicleEx(448,2125.85205078,-1797.00598145,13.22481918,270.00000000,-1,-1,300); //Pizzaboy
-	PizzaVehicles[24] = AddStaticVehicleEx(448,2125.74169922,-1794.25805664,13.22481918,270.00000000,-1,-1,300); //Pizzaboy*/
+    PizzaVehicles[0] = AddStaticVehicleEx(448,-1713.27, 1366.98, 7.19,0.00000000,3,6,300); //Pizzaboy
+    PizzaVehicles[1] = AddStaticVehicleEx(448,-1712.27, 1366.98, 7.19,0.00000000,3,6,300); //Pizzaboy
+    PizzaVehicles[2] = AddStaticVehicleEx(448,-1711.27, 1366.98, 7.19,358.00000000,3,6,300); //Pizzaboy
+    PizzaVehicles[3] = AddStaticVehicleEx(448,-1710.27, 1366.98, 7.19,357.99499512,3,6,300); //Pizzaboy
+    PizzaVehicles[4] = AddStaticVehicleEx(448,-1709.27, 1366.98, 7.19,357.99499512,3,6,300); //Pizzaboy
+    PizzaVehicles[5] = AddStaticVehicleEx(448,-1707.27, 1366.98, 7.19,357.99499512,3,6,300); //Pizzaboy
+    PizzaVehicles[6] = AddStaticVehicleEx(448,-1706.27, 1366.98, 7.19,357.99499512,3,6,300); //Pizzaboy
+    PizzaVehicles[7] = AddStaticVehicleEx(448,-1705.27, 1366.98, 7.19,357.99499512,3,6,300); //Pizzaboy
+    PizzaVehicles[8] = AddStaticVehicleEx(448,-1704.27, 1366.98, 7.19,357.99499512,3,6,300); //Pizzaboy
+    PizzaVehicles[9] = AddStaticVehicleEx(448,-1703.27, 1366.98, 7.19,357.99499512,3,6,300); //Pizzaboy
+    PizzaVehicles[10] = AddStaticVehicleEx(448,-1702.27, 1366.98, 7.19,357.99499512,3,6,300); //Pizzaboy
+    PizzaVehicles[11] = AddStaticVehicleEx(448,-1701.27, 1366.98, 7.19,357.99499512,3,6,300); //Pizzaboy
 
 
 	EventInfo[EventFamily] = 255;
@@ -42043,7 +42225,7 @@ stock ResetPlayerVariables(playerid) {
 	PlayerInfo[playerid][pRank] = 0;
 	PlayerInfo[playerid][pJob] = 0;
 	PlayerInfo[playerid][pJob2] = 0;
-	PlayerInfo[playerid][pDonator] = 0;
+	PlayerInfo[playerid][pVIP] = 0;
 	PlayerInfo[playerid][gPupgrade] = 0;
 	PlayerInfo[playerid][pSarmor] = 0;
 	PlayerInfo[playerid][pCash] = 100;
@@ -42115,7 +42297,7 @@ stock ResetPlayerVariables(playerid) {
 	PlayerInfo[playerid][pSweepLeft] = 0;
 	PlayerInfo[playerid][pVehicleKeys] = INVALID_PLAYER_VEHICLE_ID; // non-saved
 	PlayerInfo[playerid][pVehicleKeysFrom] = INVALID_PLAYER_ID; // non-saved
-	PlayerInfo[playerid][pCarLic] = 1;
+	PlayerInfo[playerid][pCarLic] = 0;
 	PlayerInfo[playerid][pFlyLic] = 0;
 	PlayerInfo[playerid][pBoatLic] = 1;
 	PlayerInfo[playerid][pFishLic] = 1;
@@ -42148,6 +42330,15 @@ stock ResetPlayerVariables(playerid) {
 	PlayerInfo[playerid][pCallsAccepted] = 0;
 	PlayerInfo[playerid][pPatientsDelivered] = 0;
 	PlayerInfo[playerid][pTriageTime] = 0;
+	
+	
+	
+	
+	PlayerInfo[playerid][pVip] = 0;
+	PlayerInfo[playerid][pVIPTokens] = 0;
+
+
+
 	for(new v = 0; v < MAX_PLAYERTOYS; v++)
 	{
 		PlayerToyInfo[playerid][v][ptModelID] = 0;
@@ -42481,7 +42672,7 @@ stock HospitalSpawn(playerid)
 		if(GetPVarInt(playerid, "Hospital") == 1 && PlayerInfo[playerid][pInsurance] == 0) {
 			SetPlayerArmourEx(playerid, PlayerInfo[playerid][pSarmor]);
 
-			if(PlayerInfo[playerid][pDonator] >= 2) SetPlayerHealth(playerid, 100.0);
+			if(PlayerInfo[playerid][pVIP] >= 2) SetPlayerHealth(playerid, 100.0);
 				else SetPlayerHealth(playerid, 50.0);
 
 			DeletePVar(playerid, "MedicBill");
@@ -42504,7 +42695,7 @@ stock HospitalSpawn(playerid)
 		} else if(GetPVarInt(playerid, "Hospital") == 2 && PlayerInfo[playerid][pInsurance] == 0) {
 			SetPlayerArmourEx(playerid, PlayerInfo[playerid][pSarmor]);
 
-			if(PlayerInfo[playerid][pDonator] >= 2) SetPlayerHealth(playerid, 100.0);
+			if(PlayerInfo[playerid][pVIP] >= 2) SetPlayerHealth(playerid, 100.0);
 			else SetPlayerHealth(playerid, 50.0);
 
 			DeletePVar(playerid, "MedicBill");
@@ -42529,7 +42720,7 @@ stock HospitalSpawn(playerid)
 		if(GetPVarInt(playerid, "Hospital") == 1 && PlayerInfo[playerid][pInsurance] == 1) {
 			SetPlayerArmourEx(playerid, PlayerInfo[playerid][pSarmor]);
 
-			if(PlayerInfo[playerid][pDonator] >= 2) SetPlayerHealth(playerid, 100.0);
+			if(PlayerInfo[playerid][pVIP] >= 2) SetPlayerHealth(playerid, 100.0);
 			else SetPlayerHealth(playerid, 50.0);
 
 			DeletePVar(playerid, "MedicBill");
@@ -42549,7 +42740,7 @@ stock HospitalSpawn(playerid)
 		} else if(GetPVarInt(playerid, "Hospital") == 2 && PlayerInfo[playerid][pInsurance] == 2) {
 			SetPlayerArmourEx(playerid, PlayerInfo[playerid][pSarmor]);
 
-			if(PlayerInfo[playerid][pDonator] >= 2) SetPlayerHealth(playerid, 100.0);
+			if(PlayerInfo[playerid][pVIP] >= 2) SetPlayerHealth(playerid, 100.0);
 			else SetPlayerHealth(playerid, 50.0);
 
 			DeletePVar(playerid, "MedicBill");
@@ -43101,7 +43292,7 @@ stock SaveAccount(playerid) {
 
 		format(szQuery, sizeof(szQuery), "UPDATE players SET Password = '%s', Level = %d, AdminLevel = %d, AdminName = '%s', BanAppealer = %d, Donator = %d, Banned = %d, Permabanned = %d, Disabled = %d, LastIP = '%s', Registered = %d, \
 		Tutorial = %i, Sex = %d, Age = %d, Skin = %d, PosX = '%f', PosY = '%f', PosZ = '%f', PosR = '%f', ConnectTime = %d, Respect = %d, PhoneNumber = %d, Warnings = %d, Gang = %d, Faction = %d, Leader = %d, Rankk = %d WHERE Username = '%s'",
-		PlayerInfo[playerid][pKey], PlayerInfo[playerid][pLevel], PlayerInfo[playerid][pAdmin], szAdminName, PlayerInfo[playerid][pBanAppealer], PlayerInfo[playerid][pDonator], PlayerInfo[playerid][pBanned],
+		PlayerInfo[playerid][pKey], PlayerInfo[playerid][pLevel], PlayerInfo[playerid][pAdmin], szAdminName, PlayerInfo[playerid][pBanAppealer], PlayerInfo[playerid][pVIP], PlayerInfo[playerid][pBanned],
 		PlayerInfo[playerid][pPermaBanned], PlayerInfo[playerid][pDisabled], PlayerInfo[playerid][pIP], PlayerInfo[playerid][pReg], PlayerInfo[playerid][pTut], PlayerInfo[playerid][pSex], PlayerInfo[playerid][pAge], PlayerInfo[playerid][pSkin], PlayerInfo[playerid][pPos_x],
 		PlayerInfo[playerid][pPos_y], PlayerInfo[playerid][pPos_z], PlayerInfo[playerid][pPos_r], PlayerInfo[playerid][pConnectTime], PlayerInfo[playerid][pRespect], PlayerInfo[playerid][pNumber], PlayerInfo[playerid][pWarns], PlayerInfo[playerid][pGang],
 		PlayerInfo[playerid][pFaction], PlayerInfo[playerid][pLeader], PlayerInfo[playerid][pRank], szPlayerName);
@@ -43314,7 +43505,7 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
      			UpdateDynamic3DTextLabelText(HouseInfo[PlayerInfo[extraid][pHouse2]][hTextID], COLOR_HOUSEGREEN, string);
 			}
 
-			if(PlayerInfo[extraid][pDonator] >= 1) {
+			if(PlayerInfo[extraid][pVIP] >= 1) {
 				format(string, sizeof(string), "[DONATOR NAMECHANGES] %s has changed their name to %s.", GetPlayerNameEx(extraid), szPlayerName);
 				Log("logs/donatornames.log", string);
 			}
@@ -44618,7 +44809,7 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 					PlayerInfo[extraid][pBanAppealer] = strval(szReturn);
 
 					mysql_fetch_field_row(szReturn, "Donator", g_MySQLConnections[0]);
-					PlayerInfo[extraid][pDonator] = strval(szReturn);
+					PlayerInfo[extraid][pVIP] = strval(szReturn);
 
 					mysql_fetch_field_row(szReturn, "Banned", g_MySQLConnections[0]);
 					PlayerInfo[extraid][pBanned] = strval(szReturn);
@@ -45187,7 +45378,7 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 				  		    PlayerInfo[extraid][pRefTokens] += PlayerInfo[extraid][pRefTokensOffline];
 				  		    PlayerInfo[extraid][pRefTokensOffline] = 0;
 				  		}
-			   			if(PlayerInfo[extraid][pJob2] >= 1 && PlayerInfo[extraid][pDonator] < 2 && PlayerInfo[extraid][pLevel] < 25) {
+			   			if(PlayerInfo[extraid][pJob2] >= 1 && PlayerInfo[extraid][pVIP] < 2 && PlayerInfo[extraid][pLevel] < 25) {
 							PlayerInfo[extraid][pJob2] = 0;
 							SendClientMessage(extraid, COLOR_YELLOW, "You have lost your secondary job due to the fact that you no longer have a VIP package or are below level 25.");
 						}
@@ -46948,6 +47139,7 @@ public OnPlayerStateChange(playerid, newstate, oldstate) {
 						SendClientMessage(i, COLOR_LIGHTBLUE, string);
 					}
 					GivePlayerCash(playerid, - TransportValue[i]);
+					GivePlayerCash(i,TransportValue[i]);
 					TransportMoney[i] += TransportValue[i];
 				}
       		}
@@ -48707,7 +48899,7 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys) {
 
         for(new i = 0; i < sizeof(DDoorsInfo); i++) {
             if(IsPlayerInRangeOfPoint(playerid,3.0,DDoorsInfo[i][ddExteriorX], DDoorsInfo[i][ddExteriorY], DDoorsInfo[i][ddExteriorZ]) && PlayerInfo[playerid][pVW] == DDoorsInfo[i][ddExteriorVW]) {
-                if(DDoorsInfo[i][ddVIP] > 0 && PlayerInfo[playerid][pDonator] < DDoorsInfo[i][ddVIP])
+                if(DDoorsInfo[i][ddVIP] > 0 && PlayerInfo[playerid][pVIP] < DDoorsInfo[i][ddVIP])
                     return SendClientMessage(playerid, COLOR_GRAD2, "You can't enter, you're not a high enough VIP level.");
 
 
@@ -48983,13 +49175,13 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys) {
         }
 
 		// Hitman HQ
-        if(IsPlayerInRangeOfPoint(playerid, 2.0, 1277.019165, -758.428771, 5080.750000) && (GetPlayerVirtualWorld(playerid) == 666420)) {
+        if(IsPlayerInRangeOfPoint(playerid, 2.0, 1277.019165, -758.428771, 5080.750000) && (GetPlayerVirtualWorld(playerid) == 42)) {
             if(PlayerInfo[playerid][pFaction] == 4 || PlayerInfo[playerid][pLeader] == 4) {
                 SetPlayerVirtualWorld(playerid, 0);
                 PlayerInfo[playerid][pVW] = 0;
                 SetPlayerInterior(playerid, 0);
                 PlayerInfo[playerid][pInt] = 0;
-                SetPlayerPos(playerid, -418.68, 1759.65, 6.22);
+                SetPlayerPos(playerid, -418.68, -1759.65, 6.22);
                 SetPlayerFacingAngle(playerid, 338.54);
                 SetCameraBehindPlayer(playerid);
                 return 1;
@@ -49824,11 +50016,11 @@ stock ShowEditMenu(playerid)
 }
 
 public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
-	new
-	    string[128],
-	    sendername[MAX_PLAYER_NAME];
 
-	if(GetPVarInt(playerid, "dialog") != dialogid) { // Confirm the dialogid matches what we have in the PVar
+	new string[128],
+	sendername[MAX_PLAYER_NAME];
+
+/*	if(GetPVarInt(playerid, "dialog") != dialogid) { // Confirm the dialogid matches what we have in the PVar
 		format(string, sizeof(string), "{AA3333}AdmWarning{FFFF00}: %s (ID %d) is possibly trying to spoof a dialog ID (%d).", GetPlayerNameEx(playerid), playerid, dialogid);
   		ABroadCast(COLOR_YELLOW, string, 2);
 
@@ -49858,6 +50050,219 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
   			Kick(playerid);
 	        return 1;
 		}
+	}
+	*/
+    if(dialogid == DIALOG_TOKENSHOP)
+	{
+	    if(response)
+	    {
+	        if(listitem == 0)
+			{
+				if(PlayerInfo[playerid][pVIPTokens] >= 2)
+				{
+				    SetPlayerHealth(playerid, 100);
+				    SendClientMessage(playerid, COLOR_WHITE, "You have received a first aid kit and have been fully healed!");
+				    PlayerInfo[playerid][pVIPTokens] -= 2;
+				}
+				else SendClientMessage(playerid, COLOR_WHITE, "You need atleast 2 tokens for this!");
+			}
+	        if(listitem == 1)
+			{
+				if(PlayerInfo[playerid][pVIPTokens] >= 3)
+				{
+				    SetPlayerArmour(playerid, 100);
+				    SendClientMessage(playerid, COLOR_WHITE, "You have received a kelvar vest!");
+				    PlayerInfo[playerid][pVIPTokens] -= 3;
+				}
+				else SendClientMessage(playerid, COLOR_WHITE, "You need atleast 3 tokens for this!");
+			}
+	        if(listitem == 2)
+			{
+				if(PlayerInfo[playerid][pVIPTokens] >= 30)
+				{
+				    SetPlayerArmour(playerid, 100);
+				    SendClientMessage(playerid, COLOR_WHITE, "You have received weapon set 1!");
+				    GivePlayerWeapon(playerid, 24, 99999);
+				    GivePlayerWeapon(playerid, 25, 99999);
+				    GivePlayerWeapon(playerid, 29, 99999);
+				    GivePlayerWeapon(playerid, 33, 99999);
+				    PlayerInfo[playerid][pVIPTokens] -= 30;
+				}
+				else SendClientMessage(playerid, COLOR_WHITE, "You need atleast 30 tokens for this!");
+			}
+	        if(listitem == 3)
+			{
+				if(PlayerInfo[playerid][pVIPTokens] >= 40)
+				{
+				    SetPlayerArmour(playerid, 100);
+				    SendClientMessage(playerid, COLOR_WHITE, "You have received weapon set 2!");
+				    GivePlayerWeapon(playerid, 24, 99999);
+				    GivePlayerWeapon(playerid, 27, 99999);
+				    GivePlayerWeapon(playerid, 30, 99999);
+				    GivePlayerWeapon(playerid, 34, 99999);
+				    PlayerInfo[playerid][pVIPTokens] -= 40;
+				}
+				else SendClientMessage(playerid, COLOR_WHITE, "You need atleast 40 tokens for this!");
+			}
+	        if(listitem == 4)
+			{
+				if(PlayerInfo[playerid][pVIPTokens] >= 30)
+				{
+				    SetPlayerArmour(playerid, 100);
+				    SendClientMessage(playerid, COLOR_WHITE, "You have received weapon set 3!");
+				    GivePlayerWeapon(playerid, 24, 99999);
+				    GivePlayerWeapon(playerid, 26, 99999);
+				    GivePlayerWeapon(playerid, 31, 99999);
+				    GivePlayerWeapon(playerid, 34, 99999);
+				    PlayerInfo[playerid][pVIPTokens] -= 30;
+				}
+				else SendClientMessage(playerid, COLOR_WHITE, "You need atleast 30 tokens for this!");
+			}
+			if(listitem == 5)
+			{
+			    if(PlayerInfo[playerid][pVIPTokens] >= 75)
+			    {
+			        SendClientMessage(playerid, COLOR_WHITE, "You are now flagged for a free car, rules apply.");
+			        SendClientMessage(playerid, COLOR_YELLOW, "The vehicle cannot be an LEO or some sort, it can be a truck. (military is allowed)");
+			        SendClientMessage(playerid, COLOR_YELLOW, "You are not allowed any weaponized vehicles, I.E. Mr. Splashy.");
+			        SendClientMessage(playerid, COLOR_WHITE, "Only a level 4+ administrator can issues these, so be patient and wait for one to come online!");
+			        format(string, sizeof(string), "FLAG: %s has got a free car from the Token Shop(VIP), they are ready to be issued it.", GetPlayerNameEx(playerid));
+			        Log("logs/flags.log", string);
+			        PlayerInfo[playerid][pVIPTokens] -= 75;
+			    }
+			    else SendClientMessage(playerid, COLOR_WHITE, "You need atleast 75 tokens for this!");
+			}
+		}
+	}
+
+	if(dialogid == DIALOG_VWEAPONS)
+	{
+	    if(PlayerInfo[playerid][pVip] == 4)
+	    {
+	    	if(response)
+	    	{
+		        if(listitem == 0)
+		        {
+		            SendClientMessage(playerid, COLOR_WHITE, "You have taken a 9MM from the VIP lockers.");
+					GivePlayerWeapon(playerid, 22, 99999);
+		        }
+	 	        if(listitem == 1)
+		        {
+		            SendClientMessage(playerid, COLOR_WHITE, "You have taken a Deagle from the VIP lockers.");
+					GivePlayerWeapon(playerid, 24, 99999);
+		        }
+	 	        if(listitem == 2)
+		        {
+		            SendClientMessage(playerid, COLOR_WHITE, "You have taken a MP5 from the VIP lockers.");
+					GivePlayerWeapon(playerid, 29, 99999);
+		        }
+	 	        if(listitem == 3)
+		        {
+		            SendClientMessage(playerid, COLOR_WHITE, "You have taken a AK-47 from the VIP lockers.");
+					GivePlayerWeapon(playerid, 30, 99999);
+		        }
+	 	        if(listitem == 4)
+		        {
+		            SendClientMessage(playerid, COLOR_WHITE, "You have taken a M4A1 from the VIP lockers.");
+					GivePlayerWeapon(playerid, 31, 99999);
+		        }
+	 	        if(listitem == 5)
+		        {
+		            SendClientMessage(playerid, COLOR_WHITE, "You have taken a SPAS-12 from the VIP lockers.");
+					GivePlayerWeapon(playerid, 27, 99999);
+		        }
+	 	        if(listitem == 6)
+		        {
+		            SendClientMessage(playerid, COLOR_WHITE, "You have taken a Shotgun from the VIP lockers.");
+					GivePlayerWeapon(playerid, 25, 99999);
+		        }
+		        if(listitem == 7)
+		        {
+		            SendClientMessage(playerid, COLOR_WHITE, "You have taken a Sniper from the VIP lockers.");
+					GivePlayerWeapon(playerid, 34, 99999);
+		        }
+	 	        if(listitem == 8)
+		        {
+		            SendClientMessage(playerid, COLOR_WHITE, "You have taken a Parachute from the VIP lockers.");
+					GivePlayerWeapon(playerid, 46, 99999);
+				}
+			}
+		}
+		else SendClientMessage(playerid, COLOR_WHITE, "You must be a platinum VIP to use this feature!");
+	}
+	
+	if(dialogid == DIALOG_VIPLOCKER)
+	{
+	    if(response)
+		{
+			if(listitem == 0)
+			{
+				SendClientMessage(playerid, COLOR_WHITE, "You have received a first aid kit and have been fully healed.");
+				SetPlayerHealth(playerid, 100);
+			}
+			if(listitem == 1)
+			{
+			    SendClientMessage(playerid, COLOR_WHITE, "You have received a kelvar vest.");
+			    SetPlayerArmour(playerid, 100);
+			}
+			if(listitem == 2)
+			{
+				if(PlayerInfo[playerid][pVip] == 4)
+				{
+				    ShowPlayerDialog(playerid, DIALOG_VWEAPONS, DIALOG_STYLE_LIST, "VIP Weapons", "9MM\nDeagle\nMP5\nAK-47\nM4A1\nSPAS-12\nShotgun\nSniper\nParachute", "Select", "Cancel");
+				}
+				else SendClientMessage(playerid, COLOR_WHITE, "You must be a platinum VIP to use this feature!");
+				return 1;
+			}
+			if(listitem == 3)
+			{
+			    if(PlayerInfo[playerid][pVip] >= 3)
+			    {
+			    	ShowPlayerDialog(playerid, DIALOG_VJOBS, DIALOG_STYLE_LIST, "VIP Auto-Job", "Arms Dealer\nMechanic\nTrucker", "Select", "Cancel");
+			    }
+			    else SendClientMessage(playerid, COLOR_WHITE, "You must be a Gold VIP to use this feature!");
+			}
+			if(listitem == 4)
+			{
+				if(VIPColor[playerid] == 0)
+				{
+					VIPColor[playerid] = 1;
+					SendClientMessage(playerid, COLOR_WHITE, "You have enabled your VIP player color! [press TAB to view it.]");
+				    SetPlayerColor(playerid, COLOR_PURPLE);
+			    }
+			    else
+				{
+				    SendClientMessage(playerid, COLOR_WHITE, "You have turned off your VIP player color!");
+				    SetPlayerColor(playerid, COLOR_WHITE);
+				    VIPColor[playerid] = 0;
+			    }
+			}
+		}
+	}
+	if(dialogid == DIALOG_VJOBS)
+	{
+	    if(PlayerInfo[playerid][pVip] >= 3)
+	    {
+		    if(response)
+		    {
+		        if(listitem == 0)
+		        {
+					PlayerInfo[playerid][pJob] = 9;
+					SendClientMessage(playerid, COLOR_WHITE, "You have taken the Arms Dealer Job.");
+		        }
+	 	        if(listitem == 1)
+		        {
+	                PlayerInfo[playerid][pJob] = 7;
+	                SendClientMessage(playerid, COLOR_WHITE, "You have taken the Mechanic Job.");
+		        }
+				if(listitem == 2)
+		        {
+	                PlayerInfo[playerid][pJob] = 20;
+	                SendClientMessage(playerid, COLOR_WHITE, "You have taken the Trucker Job.");
+		        }
+			}
+		}
+		else SendClientMessage(playerid, COLOR_WHITE, "You must be a Gold VIP to use this feature!");
 	}
 
 	if(dialogid == MAINMENU || dialogid == MAINMENU2) {
@@ -50859,7 +51264,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
             PayCheckCode[playerid] = 0;
 
 			// VIP Disabled
-			/*if(PlayerInfo[i][pDonator] > 0)
+			/*if(PlayerInfo[i][pVIP] > 0)
 			{
     			PlayerInfo[i][pPayCheck] += PlayerInfo[i][pPayCheck] / 2;
 			}*/
@@ -50900,7 +51305,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
             SendClientMessage(playerid, COLOR_GRAD1, string);
 
 			// VIP Disabled
-			/*switch(PlayerInfo[i][pDonator])
+			/*switch(PlayerInfo[i][pVIP])
 			{
     			case 0:
     			{
@@ -50935,17 +51340,17 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 			}*/
 
             new interest;
-            if(PlayerInfo[playerid][pDonator] == 0) interest = PlayerInfo[playerid][pBank] / 1000;
-            else if(PlayerInfo[playerid][pDonator] == 1) interest = PlayerInfo[playerid][pBank] / 500;
-            else if(PlayerInfo[playerid][pDonator] == 2) interest = PlayerInfo[playerid][pBank] / 333;
-            else if(PlayerInfo[playerid][pDonator] == 3) interest = PlayerInfo[playerid][pBank] / 200;
+            if(PlayerInfo[playerid][pVIP] == 0) interest = PlayerInfo[playerid][pBank] / 1000;
+            else if(PlayerInfo[playerid][pVIP] == 1) interest = PlayerInfo[playerid][pBank] / 500;
+            else if(PlayerInfo[playerid][pVIP] == 2) interest = PlayerInfo[playerid][pBank] / 333;
+            else if(PlayerInfo[playerid][pVIP] == 3) interest = PlayerInfo[playerid][pBank] / 200;
 
             if(interest > 5000) interest = 5000;
 
-            if(PlayerInfo[playerid][pDonator] == 0) format(string, sizeof(string), "  Old balance: $%d  |  Interest rate: 0.1 percent (5k max)", PlayerInfo[playerid][pBank]);
-            else if(PlayerInfo[playerid][pDonator] == 1) format(string, sizeof(string), "  Old balance: $%d  |  Interest rate: 0.2 percent (5k max)", PlayerInfo[playerid][pBank]);
-            else if(PlayerInfo[playerid][pDonator] == 2) format(string, sizeof(string), "  Old balance: $%d  |  Interest rate: 0.3 percent (5k max)", PlayerInfo[playerid][pBank]);
-            else if(PlayerInfo[playerid][pDonator] == 3) format(string, sizeof(string), "  Old balance: $%d  |  Interest rate: 0.5 percent (5k max)", PlayerInfo[playerid][pBank]);
+            if(PlayerInfo[playerid][pVIP] == 0) format(string, sizeof(string), "  Old balance: $%d  |  Interest rate: 0.1 percent (5k max)", PlayerInfo[playerid][pBank]);
+            else if(PlayerInfo[playerid][pVIP] == 1) format(string, sizeof(string), "  Old balance: $%d  |  Interest rate: 0.2 percent (5k max)", PlayerInfo[playerid][pBank]);
+            else if(PlayerInfo[playerid][pVIP] == 2) format(string, sizeof(string), "  Old balance: $%d  |  Interest rate: 0.3 percent (5k max)", PlayerInfo[playerid][pBank]);
+            else if(PlayerInfo[playerid][pVIP] == 3) format(string, sizeof(string), "  Old balance: $%d  |  Interest rate: 0.5 percent (5k max)", PlayerInfo[playerid][pBank]);
 
             SendClientMessage(playerid, COLOR_GRAD1, string);
 
@@ -51302,9 +51707,9 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 	}
 	if((dialogid == BUYTOYS2) && response)
 	{
-	    if(listitem == 5 && PlayerInfo[playerid][pDonator] < 1) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Bronze VIP to use that slot!");
-	    if(listitem == 6 && PlayerInfo[playerid][pDonator] < 2) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Silver VIP to use that slot!");
-        if(listitem == 7 && PlayerInfo[playerid][pDonator] < 3) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Gold VIP to use that slot!");
+	    if(listitem == 5 && PlayerInfo[playerid][pVIP] < 1) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Bronze VIP to use that slot!");
+	    if(listitem == 6 && PlayerInfo[playerid][pVIP] < 2) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Silver VIP to use that slot!");
+        if(listitem == 7 && PlayerInfo[playerid][pVIP] < 3) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Gold VIP to use that slot!");
 
 	    if(PlayerToyInfo[playerid][listitem][ptModelID] != 0) return SendClientMessage(playerid, COLOR_YELLOW, "* You already have something in that slot. Delete it with /toys");
 
@@ -51655,9 +52060,9 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 			}
 			else
 			{
-				if(listitem == 5 && PlayerInfo[playerid][pDonator] < 1) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Bronze VIP to use that slot!");
-			 	if(listitem == 6 && PlayerInfo[playerid][pDonator] < 2) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Silver VIP to use that slot!");
-        		if(listitem == 7 && PlayerInfo[playerid][pDonator] < 3) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Gold VIP to use that slot!");
+				if(listitem == 5 && PlayerInfo[playerid][pVIP] < 1) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Bronze VIP to use that slot!");
+			 	if(listitem == 6 && PlayerInfo[playerid][pVIP] < 2) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Silver VIP to use that slot!");
+        		if(listitem == 7 && PlayerInfo[playerid][pVIP] < 3) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Gold VIP to use that slot!");
 
 				if(PlayerToyInfo[playerid][listitem][ptScaleX] == 0) {
 					PlayerToyInfo[playerid][listitem][ptScaleX] = 1.0;
@@ -51717,9 +52122,9 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 	if((dialogid == BUYTOYSCOP2) && response)
 	{
 	    // (TEMPORARY - ZHAO NOTE) NO VIP added yet
-	    /*if(listitem >= 3 && PlayerInfo[playerid][pDonator] < 1 || listitem >= 3 && PlayerInfo[playerid][pBuddyInvited] == 1) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Bronze VIP to use that slot!");
-	    if(listitem >= 4 && PlayerInfo[playerid][pDonator] < 2) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Silver VIP to use that slot!");
-        if(listitem >= 5 && PlayerInfo[playerid][pDonator] < 3) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Gold VIP to use that slot!");
+	    /*if(listitem >= 3 && PlayerInfo[playerid][pVIP] < 1 || listitem >= 3 && PlayerInfo[playerid][pBuddyInvited] == 1) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Bronze VIP to use that slot!");
+	    if(listitem >= 4 && PlayerInfo[playerid][pVIP] < 2) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Silver VIP to use that slot!");
+        if(listitem >= 5 && PlayerInfo[playerid][pVIP] < 3) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Gold VIP to use that slot!");
 	    if(PlayerToyInfo[playerid][listitem][ptModelID] != 0) return SendClientMessage(playerid, COLOR_YELLOW, "* You already have something in that slot. Delete it with /toys");*/
 
 		slotselection[playerid] = listitem;
@@ -54018,19 +54423,19 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 		if(!response)
 		    return 1;
 
-        if(IsValidSkin(skinid) == 0 && PlayerInfo[playerid][pDonator] < 1) {
+        if(IsValidSkin(skinid) == 0 && PlayerInfo[playerid][pVIP] < 1) {
 			SendClientMessage(playerid, COLOR_GREY, "That skin ID is either invalid or restricted to faction or family!");
    			ShowPlayerDialogEx(playerid, 3495, DIALOG_STYLE_INPUT, "Skin Selection","Please enter a Skin ID!\n\nNote: Skin Changes cost $250.", "Buy", "Cancel");
 		} else {
 			if(GetPlayerCash(playerid) < 250 && PlayerInfo[playerid][pFaction] == 0 && PlayerInfo[playerid][pLeader] == 0)
 			   	return SendClientMessage(playerid, COLOR_GRAD2, "You can't afford these clothes!");
 
-			if(PlayerInfo[playerid][pDonator] > 0 && IsInvalidSkin(skinid)) {
+			if(PlayerInfo[playerid][pVIP] > 0 && IsInvalidSkin(skinid)) {
 			    ShowPlayerDialogEx(playerid, 3495, DIALOG_STYLE_INPUT, "Skin Selection","Please enter a Skin ID!\n\nNote: Skin Changes are free for VIP.", "Buy", "Cancel");
 			    return SendClientMessage(playerid, COLOR_GREY, "Invalid skin ID, try again.");
 			}
 
-			if(PlayerInfo[playerid][pFaction] == 0 && PlayerInfo[playerid][pLeader] == 0 && PlayerInfo[playerid][pDonator] == 0) {
+			if(PlayerInfo[playerid][pFaction] == 0 && PlayerInfo[playerid][pLeader] == 0 && PlayerInfo[playerid][pVIP] == 0) {
 				GivePlayerCash(playerid, -250);
 				GameTextForPlayer(playerid, "~g~Skin purchased! ~n~ ~r~- $250", 2000, 1);
 			} else {
@@ -56011,7 +56416,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 				TogglePlayerControllable(playerid, 1);
 				return 1;
             }
-            if(CarDealershipInfo[d][cdDonator] == 1 && PlayerInfo[playerid][pDonator] < 1)
+            if(CarDealershipInfo[d][cdDonator] == 1 && PlayerInfo[playerid][pVIP] < 1)
             {
  				SendClientMessage(playerid, COLOR_GREY, "The vehicles in this dealership are only available for Bronze VIP.");
 				RemovePlayerFromVehicle(playerid);
@@ -56021,7 +56426,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 				TogglePlayerControllable(playerid, 1);
 				return 1;
             }
-            if(CarDealershipInfo[d][cdDonator] == 2 && PlayerInfo[playerid][pDonator] < 2)
+            if(CarDealershipInfo[d][cdDonator] == 2 && PlayerInfo[playerid][pVIP] < 2)
             {
  				SendClientMessage(playerid, COLOR_GREY, "The vehicles in this dealership are only available for Silver VIP.");
 				RemovePlayerFromVehicle(playerid);
@@ -56031,7 +56436,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 				TogglePlayerControllable(playerid, 1);
 				return 1;
             }
-            if(CarDealershipInfo[d][cdDonator] == 3 && PlayerInfo[playerid][pDonator] < 3)
+            if(CarDealershipInfo[d][cdDonator] == 3 && PlayerInfo[playerid][pVIP] < 3)
             {
  				SendClientMessage(playerid, COLOR_GREY, "The vehicles in this dealership are only available for Gold VIP.");
 				RemovePlayerFromVehicle(playerid);
@@ -56044,8 +56449,8 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 
             new playervehicleid = GetPlayerFreeVehicleId(playerid),
 				totalvehicles = GetPlayerVehicleCountEx(playerid);
-            // (TEMPORARY - ZHAO NOTE) TempDonator not added yet
-			if(PlayerInfo[playerid][pDonator] == 0 && totalvehicles >= 5) //PlayerInfo[playerid][pTempDonator] > 0) && carsamount >= 5)
+            // (TEMPORARY - ZHAO NOTE) TempVIP not added yet
+			if(PlayerInfo[playerid][pVIP] == 0 && totalvehicles >= 5) //PlayerInfo[playerid][pTempVIP] > 0) && carsamount >= 5)
 			{
                 SendClientMessage(playerid, COLOR_GREY, "ERROR: You can't have more cars, non-VIP can only own 5 cars.");
                 RemovePlayerFromVehicle(playerid);
@@ -56055,7 +56460,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
                 TogglePlayerControllable(playerid, 1);
                 return 1;
 			}
-            if(PlayerInfo[playerid][pDonator] == 1 && totalvehicles >= 7)
+            if(PlayerInfo[playerid][pVIP] == 1 && totalvehicles >= 7)
             {
                 SendClientMessage(playerid, COLOR_GREY, "ERROR: You can't have more cars, Bronze VIP can only own 7 cars.");
                 RemovePlayerFromVehicle(playerid);
@@ -56065,7 +56470,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
                 TogglePlayerControllable(playerid, 1);
                 return 1;
             }
-            if(PlayerInfo[playerid][pDonator] == 2 && totalvehicles >= 8)
+            if(PlayerInfo[playerid][pVIP] == 2 && totalvehicles >= 8)
             {
                 SendClientMessage(playerid, COLOR_GREY, "ERROR: You can't have more cars, Silver VIP can only own 8 cars.");
                 RemovePlayerFromVehicle(playerid);
@@ -56075,7 +56480,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
                 TogglePlayerControllable(playerid, 1);
                 return 1;
             }
-            if(PlayerInfo[playerid][pDonator] == 3 && totalvehicles >= 10)
+            if(PlayerInfo[playerid][pVIP] == 3 && totalvehicles >= 10)
             {
                 SendClientMessage(playerid, COLOR_GREY, "ERROR: You can't have more cars, Gold VIP can only own 10 cars.");
                 RemovePlayerFromVehicle(playerid);
@@ -56095,7 +56500,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
                 TogglePlayerControllable(playerid, 1);
                 return 1;
 		    }
-           	if(PlayerInfo[playerid][pDonator] == 0 && VehicleSpawned[playerid] > 0)
+           	if(PlayerInfo[playerid][pVIP] == 0 && VehicleSpawned[playerid] > 0)
            	{
             	SendClientMessage(playerid, COLOR_GREY, "ERROR: You can only have 1 vehicle spawned at a time as non-VIP. Store that vehicle in order to purchase one.");
                 RemovePlayerFromVehicle(playerid);
@@ -56105,7 +56510,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
                 TogglePlayerControllable(playerid, 1);
 				return 1;
            	}
-         	if(PlayerInfo[playerid][pDonator] == 1 && VehicleSpawned[playerid] > 1)
+         	if(PlayerInfo[playerid][pVIP] == 1 && VehicleSpawned[playerid] > 1)
          	{
          		SendClientMessage(playerid, COLOR_GREY, "ERROR: You can only have 2 vehicles spawned at a time as Bronze VIP. Store that vehicle in order to purchase one.");
                 RemovePlayerFromVehicle(playerid);
@@ -56115,7 +56520,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
                 TogglePlayerControllable(playerid, 1);
 				return 1;
            	}
-         	if(PlayerInfo[playerid][pDonator] == 2 && VehicleSpawned[playerid] > 2)
+         	if(PlayerInfo[playerid][pVIP] == 2 && VehicleSpawned[playerid] > 2)
          	{
         		SendClientMessage(playerid, COLOR_GREY, "ERROR: You can only have 3 vehicles spawned at a time as Silver VIP. Store one vehicle in order to purchase one.");
                 RemovePlayerFromVehicle(playerid);
@@ -56125,7 +56530,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
                 TogglePlayerControllable(playerid, 1);
 				return 1;
            	}
-          	if(PlayerInfo[playerid][pDonator] == 3 && VehicleSpawned[playerid] > 3)
+          	if(PlayerInfo[playerid][pVIP] == 3 && VehicleSpawned[playerid] > 3)
           	{
   				SendClientMessage(playerid, COLOR_GREY, "ERROR: You can only have 4 vehicles spawned at a time as Gold VIP. Store one vehicle in order to purchase one.");
                 RemovePlayerFromVehicle(playerid);
@@ -56135,7 +56540,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
                 TogglePlayerControllable(playerid, 1);
 				return 1;
            	}
-           	/*if(PlayerInfo[playerid][pDonator] == 4 && VehicleSpawned[playerid] >= 5)
+           	/*if(PlayerInfo[playerid][pVIP] == 4 && VehicleSpawned[playerid] >= 5)
            	{
 				SendClientMessage(playerid, COLOR_GREY, "ERROR: You can only have 5 vehicles spawned at a time as Undefined VIP. Store one vehicle in order to purchase one.");
                 RemovePlayerFromVehicle(playerid);
@@ -56145,7 +56550,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
                 TogglePlayerControllable(playerid, 1);
 				return 1;
            	}
-           	if(PlayerInfo[playerid][pDonator] == 5 && VehicleSpawned[playerid] >= 5)
+           	if(PlayerInfo[playerid][pVIP] == 5 && VehicleSpawned[playerid] >= 5)
            	{
 				SendClientMessage(playerid, COLOR_GREY, "ERROR: You can only have 5 vehicles spawned at a time as VIP Moderator. Store one vehicle in order to purchase one.");
                 RemovePlayerFromVehicle(playerid);
@@ -56155,7 +56560,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
                 TogglePlayerControllable(playerid, 1);
 				return 1;
            	}*/
-           	if(PlayerInfo[playerid][pDonator] < 0 || PlayerInfo[playerid][pDonator] > 3)
+           	if(PlayerInfo[playerid][pVIP] < 0 || PlayerInfo[playerid][pVIP] > 3)
            	{
            	    SendClientMessage(playerid, COLOR_GREY, "ERROR: Invalid VIP level.");
             	RemovePlayerFromVehicle(playerid);
@@ -56170,7 +56575,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 		    SetPlayerPos(playerid, CarDealershipInfo[d][cdVehicleSpawn][0], CarDealershipInfo[d][cdVehicleSpawn][1], CarDealershipInfo[d][cdVehicleSpawn][2]+2);
 		    TogglePlayerControllable(playerid, 1);
 		    new cost;
-		    if(PlayerInfo[playerid][pDonator] < 1)
+		    if(PlayerInfo[playerid][pVIP] < 1)
             {
                 cost = CarDealershipInfo[d][cdVehicleCost][v];
 	            if(PlayerInfo[playerid][pCash] < CarDealershipInfo[d][cdVehicleCost][v])
@@ -56381,37 +56786,37 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 			}
 			else if(PlayerVehicleInfo[iTargetID][listitem][pvImpounded])
 			{
-				if(PlayerInfo[iTargetID][pDonator] == 0 && VehicleSpawned[iTargetID] >= 1)
+				if(PlayerInfo[iTargetID][pVIP] == 0 && VehicleSpawned[iTargetID] >= 1)
 				{
 					SendClientMessage(playerid, COLOR_GREY, "That player has too many vehicles out of storage for this vehicle to be released.");
 					return 1;
 				}
-				if(PlayerInfo[iTargetID][pDonator] == 1 && VehicleSpawned[iTargetID] >= 1)
+				if(PlayerInfo[iTargetID][pVIP] == 1 && VehicleSpawned[iTargetID] >= 1)
 				{
 					SendClientMessage(playerid, COLOR_GREY, "That player has too many vehicles out of storage for this vehicle to be released.");
 					return 1;
 				}
-				if(PlayerInfo[iTargetID][pDonator] == 2 && VehicleSpawned[iTargetID] >= 2)
+				if(PlayerInfo[iTargetID][pVIP] == 2 && VehicleSpawned[iTargetID] >= 2)
 				{
 					SendClientMessage(playerid, COLOR_GREY, "That player has too many vehicles out of storage for this vehicle to be released.");
 					return 1;
 				}
-				if(PlayerInfo[iTargetID][pDonator] == 3 && VehicleSpawned[iTargetID] >= 3)
+				if(PlayerInfo[iTargetID][pVIP] == 3 && VehicleSpawned[iTargetID] >= 3)
 	 			{
 					SendClientMessage(playerid, COLOR_GREY, "That player has too many vehicles out of storage for this vehicle to be released.");
 					return 1;
 			 	}
-				if(PlayerInfo[iTargetID][pDonator] == 4 && VehicleSpawned[iTargetID] >= 5)
+				if(PlayerInfo[iTargetID][pVIP] == 4 && VehicleSpawned[iTargetID] >= 5)
 				{
 					SendClientMessage(playerid, COLOR_GREY, "That player has too many vehicles out of storage for this vehicle to be released.");
 					return 1;
 				}
-				if(PlayerInfo[iTargetID][pDonator] == 5 && VehicleSpawned[iTargetID] >= 5)
+				if(PlayerInfo[iTargetID][pVIP] == 5 && VehicleSpawned[iTargetID] >= 5)
 				{
 					SendClientMessage(playerid, COLOR_GREY, "That player has too many vehicles out of storage for this vehicle to be released.");
 					return 1;
 				}
-				if(PlayerInfo[iTargetID][pDonator] < 0 || PlayerInfo[iTargetID][pDonator] > 5)
+				if(PlayerInfo[iTargetID][pVIP] < 0 || PlayerInfo[iTargetID][pVIP] > 5)
 				{
 					SendClientMessage(playerid, COLOR_GREY, "That player has too many vehicles out of storage for this vehicle to be released.");
 					return 1;
@@ -56482,37 +56887,37 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 					return SendClientMessage(playerid, COLOR_GRAD2, "You don't have enough money on you.");
 				}
 
-    			if(PlayerInfo[playerid][pDonator] == 0 && VehicleSpawned[playerid] > 0)
+    			if(PlayerInfo[playerid][pVIP] == 0 && VehicleSpawned[playerid] > 0)
 				{
 					SendClientMessage(playerid, COLOR_GREY, "As non-VIP you can only have 1 vehicle spawned. You must store a vehicle in order to spawn another one.");
 					return 1;
 				}
-				if(PlayerInfo[playerid][pDonator] == 1 && VehicleSpawned[playerid] > 1)
+				if(PlayerInfo[playerid][pVIP] == 1 && VehicleSpawned[playerid] > 1)
 				{
 					SendClientMessage(playerid, COLOR_GREY, "As Bronze VIP you can only have 2 vehicles spawned. You must store a vehicle in order to spawn another one.");
 					return 1;
 				}
-				if(PlayerInfo[playerid][pDonator] == 2 && VehicleSpawned[playerid] > 2)
+				if(PlayerInfo[playerid][pVIP] == 2 && VehicleSpawned[playerid] > 2)
 				{
 					SendClientMessage(playerid, COLOR_GREY, "As Silver VIP you can only have 3 vehicles spawned. You must store a vehicle in order to spawn another one.");
 					return 1;
 				}
-				if(PlayerInfo[playerid][pDonator] == 3 && VehicleSpawned[playerid] > 3)
+				if(PlayerInfo[playerid][pVIP] == 3 && VehicleSpawned[playerid] > 3)
 	 			{
 					SendClientMessage(playerid, COLOR_GREY, "As Gold VIP you can only have 4 vehicles spawned. You must store a vehicle in order to spawn another one.");
 					return 1;
 			 	}
-				/*if(PlayerInfo[playerid][pDonator] == 4 && VehicleSpawned[playerid] >= 5)
+				/*if(PlayerInfo[playerid][pVIP] == 4 && VehicleSpawned[playerid] >= 5)
 				{
 					SendClientMessage(playerid, COLOR_GREY, "As Undefined VIP you can only have 5 vehicles spawned. You must store a vehicle in order to spawn another one.");
 					return 1;
 				}
-				if(PlayerInfo[playerid][pDonator] == 5 && VehicleSpawned[playerid] >= 5)
+				if(PlayerInfo[playerid][pVIP] == 5 && VehicleSpawned[playerid] >= 5)
 				{
 					SendClientMessage(playerid, COLOR_GREY, "As VIP Moderator you can only have 5 vehicles spawned. You must store a vehicle in order to spawn another one.");
 					return 1;
 				}*/
-				if(PlayerInfo[playerid][pDonator] < 0 || PlayerInfo[playerid][pDonator] > 3)
+				if(PlayerInfo[playerid][pVIP] < 0 || PlayerInfo[playerid][pVIP] > 3)
 				{
 					SendClientMessage(playerid, COLOR_GREY, "You have an invalid VIP level.");
 					return 1;
@@ -56640,25 +57045,25 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 			SendClientMessage(playerid, COLOR_WHITE, "You can't spawn a disabled vehicle. It is disabled due to your VIP level (vehicle restrictions).");
 		}
 		else if(PlayerVehicleInfo[playerid][listitem][pvSpawned] == 0) {
-			if(PlayerInfo[playerid][pDonator] == 0 && VehicleSpawned[playerid] > 0) {
+			if(PlayerInfo[playerid][pVIP] == 0 && VehicleSpawned[playerid] > 0) {
 				SendClientMessage(playerid, COLOR_GREY, "As non-VIP you can only have 1 vehicle spawned. You must store a vehicle in order to spawn another one.");
 			}
-			else if(PlayerInfo[playerid][pDonator] == 1 && VehicleSpawned[playerid] > 1) {
+			else if(PlayerInfo[playerid][pVIP] == 1 && VehicleSpawned[playerid] > 1) {
 				SendClientMessage(playerid, COLOR_GREY, "As Bronze VIP you can only have 2 vehicles spawned. You must store a vehicle in order to spawn another one.");
 			}
-			else if(PlayerInfo[playerid][pDonator] == 2 && VehicleSpawned[playerid] > 2) {
+			else if(PlayerInfo[playerid][pVIP] == 2 && VehicleSpawned[playerid] > 2) {
 				SendClientMessage(playerid, COLOR_GREY, "As Silver VIP you can only have 3 vehicles spawned. You must store a vehicle in order to spawn another one.");
 			}
-			else if(PlayerInfo[playerid][pDonator] == 3 && VehicleSpawned[playerid] > 3) {
+			else if(PlayerInfo[playerid][pVIP] == 3 && VehicleSpawned[playerid] > 3) {
 				SendClientMessage(playerid, COLOR_GREY, "As Gold VIP you can only have 4 vehicles spawned. You must store a vehicle in order to spawn another one.");
 			}
-			/*else if(PlayerInfo[playerid][pDonator] == 4 && VehicleSpawned[playerid] >= 5) {
+			/*else if(PlayerInfo[playerid][pVIP] == 4 && VehicleSpawned[playerid] >= 5) {
 				SendClientMessage(playerid, COLOR_GREY, "As Undefined Donator you can only have 5 vehicles spawned. You must store a vehicle in order to spawn another one.");
 			}
-			else if(PlayerInfo[playerid][pDonator] == 5 && VehicleSpawned[playerid] >= 5){
+			else if(PlayerInfo[playerid][pVIP] == 5 && VehicleSpawned[playerid] >= 5){
 				SendClientMessage(playerid, COLOR_GREY, "As VIP Moderator you can only have 5 vehicles spawned. You must store a vehicle in order to spawn another one.");
 			}*/
-			else if(!(0 <= PlayerInfo[playerid][pDonator] <= 3)) {
+			else if(!(0 <= PlayerInfo[playerid][pVIP] <= 3)) {
 				SendClientMessage(playerid, COLOR_GREY, "You have an invalid Donator level.");
 			}
 			else {
@@ -57295,7 +57700,7 @@ stock DestroyPlayerVehicle(playerid, playervehicleid) {
 }
 
 stock LoadPlayerVehicles(playerid) {
-	switch(PlayerInfo[playerid][pDonator]) {
+	switch(PlayerInfo[playerid][pVIP]) {
 		case 0: {
 			PlayerVehicleInfo[playerid][0][pvDisabled] = 0;
 			PlayerVehicleInfo[playerid][1][pvDisabled] = 0;
@@ -57389,7 +57794,7 @@ stock LoadPlayerVehicles(playerid) {
 }
 
 vehicleCountCheck(playerid) {
-	switch(PlayerInfo[playerid][pDonator]) {
+	switch(PlayerInfo[playerid][pVIP]) {
 		case 0, 1: if(VehicleSpawned[playerid] >= 1) return 0;
 		case 2: if(VehicleSpawned[playerid] >= 2) return 0;
 		case 3: if(VehicleSpawned[playerid] >= 3) return 0;
@@ -60465,4 +60870,228 @@ Timer:ServerTime[1000]()
 		SetPlayerTime(i,PHours,PMinutes);
 	}
 	return true;
+}
+
+CMD:tokenshop(playerid, params[])
+{
+	if(PlayerInfo[playerid][pVip] >= 2)
+	{
+	    ShowPlayerDialog(playerid, DIALOG_TOKENSHOP, DIALOG_STYLE_LIST, "VIP Token Shop", "First Aid Kit(2 Tokens)\nKelvar Vest(3 Tokens)\nWeapon Set 1(30 Tokens)\nWeapon Set 2(40 Tokens)\nWeapon Set 3(50 Tokens)\n\nFree Car(75 Tokens)", "Select", "Cancel");
+	}
+	else SendClientMessage(playerid, COLOR_WHITE, "You must be atleast a Silver VIP to use this feature!");
+	return 1;
+}
+CMD:viplocker(playerid, params[])
+{
+	if(PlayerInfo[playerid][pVip] >= 2)
+	{
+	if(IsPlayerInRangeOfPoint(playerid, 2.0, 1804.9323,-1573.8809,13.4290))
+	{
+	    ShowPlayerDialog(playerid, DIALOG_VIPLOCKER, DIALOG_STYLE_LIST, "VIP Locker", "Medical Kit(free)\nKelvar Vest(free)\nWeapons\nJob Picker\nVIP Color", "Select", "Cancel");
+	}
+	else SendClientMessage(playerid, COLOR_WHITE, "You are not at the VIP Lockers, they are inside the VIP Lounge!");
+	}
+	else SendClientMessage(playerid, COLOR_WHITE, "You must be atleast a Silver VIP to use this feature!");
+	return 1;
+}
+//makevip commands
+CMD:makevip(playerid, params[])
+{
+	if (PlayerInfo[playerid][pAdmin] >= 4)
+	{
+		new giveplayerid, level, string[128];
+		if(sscanf(params, "ud", giveplayerid, level))
+		{
+			SendClientMessage(playerid, COLOR_WHITE, "USAGE: /setvip [playerid] [viplevel] ");
+			SendClientMessage(playerid, COLOR_WHITE, "Available Levels: |0| None |1| Bronze |2| Silver |3| Gold |4| Platinum");
+			return 1;
+		}
+
+		if(IsPlayerConnected(giveplayerid))
+		{
+		if(giveplayerid != INVALID_PLAYER_ID)
+			{
+				if(level < 0 || level > 4)
+				{
+					SendClientMessage(playerid, COLOR_WHITE, "VIP Level can not be below 0 or above 4!");
+					return 1;
+				}
+				new playerip[32];
+				GetPlayerIp(giveplayerid, playerip, sizeof(playerip));
+				if(level == 0)
+				{
+					SendClientMessage(playerid, COLOR_WHITE, "You have removed that player's VIP level.");
+					SendClientMessage(giveplayerid, COLOR_YELLOW, "Your VIP has been removed by an administrator.");
+					PlayerInfo[giveplayerid][pVip] = 0;
+		       		format(string, sizeof(string), "VIP: %s revoked %s VIP level", GetPlayerNameEx(playerid), GetPlayerNameEx(giveplayerid));
+			 		Log("logs/setvip.log", string);
+					VIPmembers--;
+					return 1;
+				}
+				if(level == 1)
+				{
+					SendClientMessage(playerid, COLOR_WHITE, "You have made that player a Bronze VIP member.");
+					SendClientMessage(giveplayerid, COLOR_YELLOW, "You have been made a Bronze VIP member by an administrator.");
+					PlayerInfo[giveplayerid][pVip] = 1;
+   					format(string, sizeof(string), "VIP: %s has set %s's VIP level to Bronze.", GetPlayerNameEx(playerid));
+			 		Log("logs/setvip.log", string);
+					VIPmembers++;
+					return 1;
+				}
+				if(level == 2)
+				{
+					SendClientMessage(playerid, COLOR_WHITE, "You have made that player a Silver VIP member.");
+					SendClientMessage(giveplayerid, COLOR_YELLOW, "You have been made a Silver VIP member by an administrator.");
+					PlayerInfo[giveplayerid][pVip] = 2;
+   					format(string, sizeof(string), "VIP: %s has set %s's VIP level to Silver.", GetPlayerNameEx(playerid));
+			 		Log("logs/setvip.log", string);
+					VIPmembers++;
+					return 1;
+				}
+				if(level == 3)
+				{
+					SendClientMessage(playerid, COLOR_WHITE, "You have made that player a Gold VIP member.");
+					SendClientMessage(giveplayerid, COLOR_YELLOW, "You have been made a Gold VIP member by an administrator.");
+					PlayerInfo[giveplayerid][pVip] = 3;
+   					format(string, sizeof(string), "VIP: %s has set %s's VIP level to Gold.", GetPlayerNameEx(playerid));
+			 		Log("logs/setvip.log", string);
+					VIPmembers++;
+					return 1;
+				}
+				if(level == 4)
+				{
+					SendClientMessage(playerid, COLOR_WHITE, "You have made that player a Platinum VIP member.");
+					SendClientMessage(giveplayerid, COLOR_YELLOW, "You have been made a Platinum VIP member by an administrator.");
+					PlayerInfo[giveplayerid][pVip] = 4;
+   					format(string, sizeof(string), "VIP: %s has set %s's VIP level to Platinum.", GetPlayerNameEx(playerid));
+			 		Log("logs/setvip.log", string);
+					VIPmembers++;
+					return 1;
+				}
+			}
+		}
+	}
+	else
+	{
+		SendClientMessage(playerid, COLOR_WHITE, "You are not authorized to use that command.");
+	}
+	return 1;
+}
+CMD:togvip(playerid, params[])
+{
+    if(PlayerInfo[playerid][pVip] >= 1 || PlayerInfo[playerid][pAdmin] >= 2 || BuddyInvite[playerid] == 1) {
+        if(GetPVarType(playerid, "togVIP")) {
+            DeletePVar(playerid, "togVIP");
+            SendClientMessageEx(playerid, COLOR_WHITE, "VIP chat disabled!");
+        }
+        else {
+            SetPVarInt(playerid, "togVIP", 1);
+            SendClientMessageEx(playerid, COLOR_WHITE, "VIP chat enabled!");
+        }
+    }
+    else SendClientMessageEx(playerid, COLOR_WHITE, "You're not a VIP.");
+    return 1;
+}
+//vip chat
+CMD:v(playerid, params[]) {
+	if(PlayerInfo[playerid][pVip] >= 1 || PlayerInfo[playerid][pAdmin] >= 2) {
+		if(isnull(params)) {
+			SendClientMessageEx(playerid, COLOR_WHITE, "USAGE: /v [message]");
+		}
+		else if(gettime() < GetPVarInt(playerid, "timeVIP")) {
+
+			new
+				szMessage[64];
+
+			format(szMessage, sizeof(szMessage), "You must wait %d seconds before speaking again in this channel.", GetPVarInt(playerid, "timeVIP") - gettime());
+			SendClientMessageEx(playerid, COLOR_YELLOW, szMessage);
+		}
+		else if(!GetPVarType(playerid, "togVIP")) {
+		    SendClientMessageEx(playerid, COLOR_WHITE, "You have VIP chat toggled | /togvip to enable it!");
+		}
+		else if(PlayerInfo[playerid][pVMuted] > 0) {
+			SendClientMessageEx(playerid, COLOR_LIGHTRED, "You are muted from the VIP chat channel!");
+		}
+		else {
+
+			new
+				szMessage[128];
+
+			switch(PlayerInfo[playerid][pAdmin])
+			{
+				case 2: format(szMessage, sizeof(szMessage), "** Junior Administrator %s: %s", GetPlayerNameEx(playerid), params);
+				case 3: format(szMessage, sizeof(szMessage), "** General Administrator %s: %s", GetPlayerNameEx(playerid), params);
+				case 4: format(szMessage, sizeof(szMessage), "** Senior Administrator %s: %s", GetPlayerNameEx(playerid), params);
+				case 5: format(szMessage, sizeof(szMessage), "** Head Administrator %s: %s", GetPlayerNameEx(playerid), params);
+				case 6: format(szMessage, sizeof(szMessage), "** Executive Administrator %s: %s", GetPlayerNameEx(playerid), params);
+
+				default:
+				{
+
+					SetPVarInt(playerid, "timeVIP", gettime() + 5);
+
+					switch(PlayerInfo[playerid][pVip])
+					{
+						case 1: format(szMessage, sizeof(szMessage), "** Bronze VIP %s: %s", GetPlayerNameEx(playerid), params);
+						case 2: format(szMessage, sizeof(szMessage), "** Silver VIP %s: %s", GetPlayerNameEx(playerid), params);
+						case 3: format(szMessage, sizeof(szMessage), "** Gold VIP %s: %s", GetPlayerNameEx(playerid), params);
+						case 4: format(szMessage, sizeof(szMessage), "** Platinum VIP %s: %s", GetPlayerNameEx(playerid), params);
+						default: return SendClientMessageEx(playerid, COLOR_GREEN, "You have an invalid VIP level!");
+					}
+				}
+			}
+			SendVIPMessage(COLOR_VIP, szMessage);
+		}
+	}
+	return 1;
+}
+//vip mute command
+CMD:vipmute(playerid,params[])
+{
+    new string[92], giveplayerid;
+   	if(PlayerInfo[playerid][pVip] == 4 || PlayerInfo[playerid][pAdmin] >= 4)
+	{
+    if(sscanf(params, "u", giveplayerid)) return SendClientMessage(playerid, -1, "USAGE: /vipmute [playerid]");
+ 	if(IsPlayerConnected(giveplayerid))
+	{
+        SendClientMessage(playerid, COLOR_WHITE, "You have muted that player from VIP chat.");
+		format(string, sizeof(string), "You have been muted from VIP chat by %s.", GetPlayerNameEx(playerid));
+		SendClientMessageEx(giveplayerid, COLOR_LIGHTRED, string);
+		PlayerInfo[giveplayerid][pVMuted] = 1;
+    }
+    }
+    return 1;
+}
+/*temp vip invite (buddyinvite)*/
+CMD:buddyinvite(playerid, params[])
+{
+	new giveplayerid, string[128];
+	if(PlayerInfo[playerid][pVip] >= 3)
+	{
+	    if(sscanf(params, "u", giveplayerid)) return SendClientMessage(playerid, COLOR_WHITE, "USAGE: /buddyinvite [playerid]");
+
+	    if(IsPlayerConnected(giveplayerid))
+	    {
+	        if(BuddyTimer[playerid] == 1)
+	        {
+	            SendClientMessage(playerid, COLOR_WHITE, "You cannot buddy invite yet!");
+	        }
+	        if(BuddyTimer[playerid] == 0)
+	        {
+	        BuddyInvite[giveplayerid] = 1;
+	        BuddyTimer[playerid] = 1;
+	        format(string, sizeof(string), "%s has buddy invited you!", GetPlayerNameEx(playerid));
+	        SendClientMessage(giveplayerid, COLOR_LIGHTBLUE, string);
+   	     	format(string, sizeof(string), "You have buddy invited %s!", GetPlayerNameEx(giveplayerid));
+	        SendClientMessage(playerid, COLOR_LIGHTBLUE, string);
+	        SendClientMessage(giveplayerid, COLOR_WHITE, "The buddy invite only lasts until you logout, so make the most of it!");
+	        SendClientMessage(giveplayerid, COLOR_WHITE, "As the buddy invite system is free, you are only able to speak in the VIP chat. (/vchat)");
+			format(string, sizeof(string), "VIP: %s has buddy-invited %s.", GetPlayerNameEx(playerid), GetPlayerNameEx(giveplayerid));
+			Log("logs/vip.log", string);
+	   }
+	   }
+	    else SendClientMessage(playerid, COLOR_WHITE, "That player is not connected!");
+	}
+	else SendClientMessage(playerid, COLOR_WHITE, "You must be atleast a Gold VIP to use this feature!");
+	return 1;
 }
