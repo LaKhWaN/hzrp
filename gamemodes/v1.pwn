@@ -1,9 +1,10 @@
 /*
 																			*/
 
-																			
+
 #pragma warning disable 239
 #pragma warning disable 214
+// #pragma option -d3
 //--------------------------[ SCRIPT VERSION INFO ]--------------------------
 #define 					SERVER_VERSION 						"v1.9"
 #define 					TEAMSPEAK 							"NA"
@@ -25,6 +26,19 @@
 #include 					<yom_buttons>
 #include 					<sscanf2>
 #include 					<a_mysql>
+
+
+// #define SQL_HOST	"localhost"
+// #define SQL_USER	"root"
+// #define SQL_PASS	""
+// #define SQL_DATA	"ngrp"
+
+#define SQL_HOST	"localhost"
+#define SQL_USER	"NextGenerati"
+#define SQL_PASS	"xPsMFjjB"
+#define SQL_DATA	"zNextGenerati0"
+
+
 //--------------------------------[ DEFINES ]--------------------------------
 			/*  ---------------- ENTITIES ----------------- */
 //#define 					DOUBLE_EXP_ENABLED
@@ -60,7 +74,7 @@
 #define 					NOOB_SKIN 							(299)
 #pragma 					dynamic 							(26384)
 			/*  ---------------- MySQL THREADS ----------------- */
-#define             		THREAD_NO_RESULT		         	(1)
+// #define             		THREAD_NO_RESULT		         	(1)
 #define             		THREAD_CONFIRM_USERNAME             (2)
 #define 					THREAD_LOGIN_ATTEMPT 				(3)
 #define             		THREAD_REGISTER_ACCOUNT         	(4)
@@ -471,8 +485,11 @@ new callcost = 1;
 new cchargetime = 60;
 new txtcost = 2;
 
-new
-	g_MySQLConnections[2]; // Array for future use.
+// new
+// 	g_MySQLConnections[2]; // Array for future use.
+new MySQL:sqldb;
+
+
 new
 	gaPaintballGameTimer[7],
 	gaPaintballGameTimeRemaining[7],
@@ -2023,7 +2040,7 @@ enum pInfo
 	pAdminName[32],
 	pBanAppealer,
 	pGangMod,
-	pVIP,
+	// pVip,
 	pBanned,
 	pPermaBanned,
 	pDisabled,
@@ -3001,7 +3018,7 @@ stock FindFreeAttachedObjectSlot(playerid)
 
 stock player_remove_vip_toys(iTargetID)
 {
-	if(PlayerInfo[iTargetID][pVIP] >= 3) return 1;
+	if(PlayerInfo[iTargetID][pVip] >= 3) return 1;
 	else for(new iToyIter; iToyIter < MAX_PLAYER_ATTOBJECTS; ++iToyIter) {
 		for(new LoopRapist; LoopRapist < sizeof(HoldingObjectsCop); ++LoopRapist) {
 			if(HoldingObjectsCop[LoopRapist][holdingmodelid] == PlayerToyInfo[iTargetID][iToyIter][ptModelID]) {
@@ -3009,8 +3026,8 @@ stock player_remove_vip_toys(iTargetID)
 					szQuery[128];
 
 				SetPVarInt(iTargetID, "deleteObject", iToyIter);
-				format(szQuery, sizeof(szQuery), "DELETE FROM toys WHERE Owner = %d AND ID = %d", PlayerInfo[iTargetID][pID], PlayerToyInfo[iTargetID][iToyIter][ptRealID]);
-				mysql_query(szQuery, THREAD_DELETE_PLAYER_OBJECT, iTargetID, g_MySQLConnections[0]);
+				mysql_format(sqldb,szQuery, sizeof(szQuery), "DELETE FROM toys WHERE Owner = %d AND ID = %d", PlayerInfo[iTargetID][pID], PlayerToyInfo[iTargetID][iToyIter][ptRealID]);
+				mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii", THREAD_DELETE_PLAYER_OBJECT, iTargetID);
 				if(IsPlayerAttachedObjectSlotUsed(iTargetID, iToyIter)) RemovePlayerAttachedObject(iTargetID, iToyIter);
 			}
 		}
@@ -6914,10 +6931,10 @@ stock SetPlayerSpawn(playerid)
 	    szName[64],
 	    szQuery[300];
 
-	mysql_real_escape_string(username, szName, g_MySQLConnections[0]);
+	mysql_escape_string(username, szName,sqldb);
 
 	format(szQuery, sizeof(szQuery), "INSERT INTO connections (PlayerID, AccountID, Username, TimeLoggedIn) VALUES(%d, %d, '%s', UNIX_TIMESTAMP(now()))", playerid, accountid, szName);
-	mysql_query(szQuery, THREAD_NO_RESULT, 0, g_MySQLConnections[0]);
+	mysql_tquery(szQuery, THREAD_NO_RESULT, 0,sqldb);
 	return 1;
 }*/
 
@@ -6928,11 +6945,11 @@ stock punishmentLog(playerid, issuerid, puntype, szPunishment[128], szReason[]) 
 			szRawReason[128],
 			szQuery[440];
 
-		mysql_real_escape_string(szPunishment, szPunText, g_MySQLConnections[0]);
-		mysql_real_escape_string(szReason, szRawReason, g_MySQLConnections[0]);
+		mysql_escape_string(szPunishment, szPunText,128,sqldb);
+		mysql_escape_string(szReason, szRawReason,128,sqldb);
 
-		format(szQuery, sizeof(szQuery), "INSERT INTO punishments (punIssuer, punIssuedTo, punText, punType, punReason, punTS) VALUES(%d, %d, '%s', %d, '%s', UNIX_TIMESTAMP(now()))", PlayerInfo[issuerid][pID], PlayerInfo[playerid][pID], szPunText, puntype, szRawReason);
-		mysql_query(szQuery, THREAD_NO_RESULT, 0, g_MySQLConnections[0]);
+		mysql_format(sqldb,szQuery, sizeof(szQuery), "INSERT INTO punishments (punIssuer, punIssuedTo, punText, punType, punReason, punTS) VALUES(%d, %d, '%s', %d, '%s', UNIX_TIMESTAMP(now()))", PlayerInfo[issuerid][pID], PlayerInfo[playerid][pID], szPunText, puntype, szRawReason);
+		mysql_tquery(sqldb,szQuery);
 	}
 	return 1;
 }
@@ -6944,11 +6961,11 @@ stock punishmentLogEx(playerid, issuerid, puntype, szPunishment[128], szReason[]
 	    szRawReason[128],
 	    szQuery[440];
 
-		mysql_real_escape_string(szPunishment, szPunText, g_MySQLConnections[0]);
-		mysql_real_escape_string(szReason, szRawReason, g_MySQLConnections[0]);
+		mysql_escape_string(szPunishment, szPunText,sqldb);
+		mysql_escape_string(szReason, szRawReason,sqldb);
 
-		format(szQuery, sizeof(szQuery), "INSERT INTO punishments (punIssuer, punIssuedTo, punText, punType, punReason, punTS) VALUES(%d, %d, '%s', %d, '%s', UNIX_TIMESTAMP(now()))", issuerid, playerid, szPunText, puntype, szRawReason);
-		mysql_query(szQuery, THREAD_NO_RESULT, 0, g_MySQLConnections[0]);
+		mysql_format(sqldb,szQuery, sizeof(szQuery), "INSERT INTO punishments (punIssuer, punIssuedTo, punText, punType, punReason, punTS) VALUES(%d, %d, '%s', %d, '%s', UNIX_TIMESTAMP(now()))", issuerid, playerid, szPunText, puntype, szRawReason);
+		mysql_tquery(sqldb,szQuery);
 	}
 	return 1;
 }
@@ -7969,12 +7986,12 @@ CMD:join(playerid, params[])
   			SendClientMessage(playerid, COLOR_GREY, "You're not even near a place to get a Job!");
      	}
 	}
-	else if(PlayerInfo[playerid][pJob] != 0 && PlayerInfo[playerid][pVIP] < 2 && PlayerInfo[playerid][pLevel] < 25)
+	else if(PlayerInfo[playerid][pJob] != 0 && PlayerInfo[playerid][pVip] < 2 && PlayerInfo[playerid][pLevel] < 25)
  	{
   		SendClientMessage(playerid, COLOR_GREY, "You already have a Job, use /quitjob first!");
 		SendClientMessage(playerid, COLOR_GREY, "Only VIP and level 25+ can get two jobs!");
   	}
-	else if(PlayerInfo[playerid][pJob2] == 0 && (PlayerInfo[playerid][pVIP] >= 2 || PlayerInfo[playerid][pLevel] >= 25))
+	else if(PlayerInfo[playerid][pJob2] == 0 && (PlayerInfo[playerid][pVip] >= 2 || PlayerInfo[playerid][pLevel] >= 25))
 	{
     	if(PlayerInfo[playerid][pJob2] == 0 && GetPlayerState(playerid) == 1 && IsPlayerInRangeOfPoint(playerid,3.0, 256.971954, 69.655586, 1003.640625))
 		{
@@ -8086,7 +8103,7 @@ CMD:join(playerid, params[])
 
 CMD:quitjob(playerid, params[])
 {
-	if(PlayerInfo[playerid][pVIP] >= 2)
+	if(PlayerInfo[playerid][pVip] >= 2)
 	{
 		new jobid;
 		if(sscanf(params, "d", jobid))
@@ -8440,22 +8457,22 @@ CMD:accept(playerid, params[])
 								totalvehicles = GetPlayerVehicleCountEx(playerid);
 
 							// (TEMPORARY - ZHAO NOTE) TempVIP not added yet
-			 				if(PlayerInfo[playerid][pVIP] == 0 && totalvehicles >= 5) //PlayerInfo[playerid][pTempVIP] > 0) && carsamount >= 5)
+			 				if(PlayerInfo[playerid][pVip] == 0 && totalvehicles >= 5) //PlayerInfo[playerid][pTempVIP] > 0) && carsamount >= 5)
 							{
                 				SendClientMessage(playerid, COLOR_GREY, "ERROR: You can't have more cars, non-VIP can only own 5 cars.");
                 				return 1;
 							}
-            				if(PlayerInfo[playerid][pVIP] == 1 && totalvehicles >= 7)
+            				if(PlayerInfo[playerid][pVip] == 1 && totalvehicles >= 7)
  					 		{
    					 			SendClientMessage(playerid, COLOR_GREY, "ERROR: You can't have more cars, Bronze VIP can only own 7 cars.");
                 				return 1;
             				}
-            				if(PlayerInfo[playerid][pVIP] == 2 && totalvehicles >= 8)
+            				if(PlayerInfo[playerid][pVip] == 2 && totalvehicles >= 8)
             				{
           					 	SendClientMessage(playerid, COLOR_GREY, "ERROR: You can't have more cars, Silver VIP can only own 8 cars.");
            					 	return 1;
            					}
-            				if(PlayerInfo[playerid][pVIP] == 3 && totalvehicles >= 10)
+            				if(PlayerInfo[playerid][pVip] == 3 && totalvehicles >= 10)
             				{
                 				SendClientMessage(playerid, COLOR_GREY, "ERROR: You can't have more cars, Diamond Donator can only own 10 cars.");
                 				return 1;
@@ -8465,27 +8482,27 @@ CMD:accept(playerid, params[])
 		        				SendClientMessage(playerid, COLOR_GREY, "ERROR: You can't have more cars.");
                 				return 1;
 		    				}
-   							if(PlayerInfo[playerid][pVIP] == 0 && VehicleSpawned[playerid] > 0)
+   							if(PlayerInfo[playerid][pVip] == 0 && VehicleSpawned[playerid] > 0)
 							{
 								SendClientMessage(playerid, COLOR_GREY, "As non-donator you can only have 1 vehicle spawned. You must store a vehicle in order to spawn another one.");
 								return 1;
 							}
-							if(PlayerInfo[playerid][pVIP] == 1 && VehicleSpawned[playerid] > 1)
+							if(PlayerInfo[playerid][pVip] == 1 && VehicleSpawned[playerid] > 1)
 				            {
 								SendClientMessage(playerid, COLOR_GREY, "As Bronze VIP you can only have 2 vehicles spawned. You must store a vehicle in order to spawn another one.");
 								return 1;
 							}
-							if(PlayerInfo[playerid][pVIP] == 2 && VehicleSpawned[playerid] > 2)
+							if(PlayerInfo[playerid][pVip] == 2 && VehicleSpawned[playerid] > 2)
 							{
 								SendClientMessage(playerid, COLOR_GREY, "As Silver-VIP you can only have 3 vehicles spawned. You must store a vehicle in order to spawn another one.");
 								return 1;
 							}
-							if(PlayerInfo[playerid][pVIP] == 3 && VehicleSpawned[playerid] > 3)
+							if(PlayerInfo[playerid][pVip] == 3 && VehicleSpawned[playerid] > 3)
 	 						{
 								SendClientMessage(playerid, COLOR_GREY, "As Gold VIP you can only have 4 vehicles spawned. You must store a vehicle in order to spawn another one.");
 								return 1;
 			 				}
-							if(PlayerInfo[playerid][pVIP] < 0 || PlayerInfo[playerid][pVIP] > 3)
+							if(PlayerInfo[playerid][pVip] < 0 || PlayerInfo[playerid][pVip] > 3)
 							{
 								SendClientMessage(playerid, COLOR_GREY, "You have an invalid Donator level.");
 								return 1;
@@ -8527,8 +8544,8 @@ CMD:accept(playerid, params[])
                             new
                                 szQuery[64];
 
-							format(szQuery, sizeof(szQuery), "UPDATE playervehicles SET Owner = %d WHERE ID = %d", PlayerInfo[playerid][pID], GetPVarInt(playerid, "carsaleid"));
-							mysql_query(szQuery, THREAD_NO_RESULT, 0, g_MySQLConnections[0]);
+							mysql_format(sqldb,szQuery, sizeof(szQuery), "UPDATE playervehicles SET Owner = %d WHERE ID = %d", PlayerInfo[playerid][pID], GetPVarInt(playerid, "carsaleid"));
+							mysql_tquery(sqldb,szQuery);
 
                             VehicleSpawned[playerid]++;
 
@@ -10918,10 +10935,10 @@ CMD:help(playerid, params[])
 	if(PlayerInfo[playerid][pHelper] >= 2)
 		SendClientMessage(playerid, COLOR_WHITE, "*** HELPER *** /togc /c /accepthelp /helprequests /quithelp /acceptpm /quitpm /pm /nrn");
 
-	if(PlayerInfo[playerid][pVIP] >= 1)
+	if(PlayerInfo[playerid][pVip] >= 1)
 	    SendClientMessage(playerid, COLOR_YELLOW, "*** VIP *** /changegender /changeage /changeplates /changeph");
 
-	if(PlayerInfo[playerid][pVIP] >= 3)
+	if(PlayerInfo[playerid][pVip] >= 3)
 	    SendClientMessage(playerid, COLOR_YELLOW, "*** VIP (GOLD) *** /placebb /pickupbb");
 
 	SendClientMessage(playerid, COLOR_WHITE,"*** OTHER *** /cellphonehelp /carhelp /househelp /toyhelp /renthelp /jobhelp /leaderhelp /animhelp /fishhelp /insurehelp");
@@ -12839,10 +12856,10 @@ CMD:oipcheck(playerid, params[]) {
 		string[128],
 		szPlayerName[MAX_PLAYER_NAME];
 
-	mysql_real_escape_string(params, szPlayerName, g_MySQLConnections[0]);
+	mysql_escape_string(params, szPlayerName,MAX_PLAYER_NAME,sqldb);
 
-	format(string, sizeof(string), "SELECT Username, LastIP FROM players WHERE Username = '%s'", szPlayerName);
-	mysql_query(string, THREAD_OFFLINE_IP_CHECK, playerid, g_MySQLConnections[0]);
+	mysql_format(sqldb,string, sizeof(string), "SELECT Username, LastIP FROM players WHERE Username = '%s'", szPlayerName);
+	mysql_tquery(sqldb,string, "OnQueryFinished","ii",THREAD_OFFLINE_IP_CHECK,playerid);
 	return 1;
 }
 
@@ -12908,10 +12925,10 @@ CMD:unban(playerid, params[]) {
 		if(isnull(params))
 			return SendClientMessage(playerid, COLOR_WHITE, "USAGE: /unban [playername]");
 
-		mysql_real_escape_string(params, szPlayerName, g_MySQLConnections[0]);
+		mysql_escape_string(params, szPlayerName,MAX_PLAYER_NAME ,sqldb);
 
-		format(string, sizeof(string), "SELECT Banned, Permabanned, Warnings, LastIP, Username FROM players WHERE Username = '%s'", szPlayerName);
-		mysql_query(string, THREAD_CHECK_BANNED, playerid, g_MySQLConnections[0]);
+		mysql_format(sqldb,string, sizeof(string), "SELECT Banned, Permabanned, Warnings, LastIP, Username FROM players WHERE Username = '%s'", szPlayerName);
+		mysql_tquery(sqldb,string, "OnQueryFinished","ii",THREAD_CHECK_BANNED,playerid);
 	}
 	else
 	{
@@ -12946,10 +12963,10 @@ CMD:oban(playerid, params[]) {
 	new
 	    szPlayerName[MAX_PLAYER_NAME];
 
-	mysql_real_escape_string(playername, szPlayerName, g_MySQLConnections[0]);
+	mysql_escape_string(playername, szPlayerName,MAX_PLAYER_NAME,sqldb);
 
-	format(string, sizeof(string), "SELECT Permabanned, Banned, AdminLevel, Username, LastIP, ID FROM players WHERE Username = '%s'", szPlayerName);
-	mysql_query(string, THREAD_OFFLINE_BAN, playerid, g_MySQLConnections[0]);
+	mysql_format(sqldb,string, sizeof(string), "SELECT Permabanned, Banned, AdminLevel, Username, LastIP, ID FROM players WHERE Username = '%s'", szPlayerName);
+	mysql_tquery(sqldb,string,"OnQueryFinished","ii",THREAD_OFFLINE_BAN,playerid);
 	return 1;
 }
 
@@ -13046,10 +13063,10 @@ CMD:owarn(playerid, params[])
 	new
 	    szPlayerName[MAX_PLAYER_NAME];
 
-	mysql_real_escape_string(name, szPlayerName, g_MySQLConnections[0]);
+	mysql_escape_string(name,szPlayerName,MAX_PLAYER_NAME,sqldb);
 
-	format(string, sizeof(string), "SELECT Permabanned, Banned, AdminLevel, Username, LastIP, Warnings, ID FROM players WHERE Username = '%s'", szPlayerName);
-	mysql_query(string, THREAD_OFFLINE_WARN, playerid, g_MySQLConnections[0]);
+	mysql_format(sqldb,string, sizeof(string), "SELECT Permabanned, Banned, AdminLevel, Username, LastIP, Warnings, ID FROM players WHERE Username = '%s'", szPlayerName);
+	mysql_tquery(sqldb,string,"OnQueryFinished","ii",THREAD_OFFLINE_WARN,playerid);
 	return 1;
 }
 
@@ -13085,10 +13102,10 @@ CMD:ofine(playerid, params[])
 	new
 	    szPlayerName[MAX_PLAYER_NAME];
 
-	mysql_real_escape_string(name, szPlayerName, g_MySQLConnections[0]);
+	mysql_escape_string(name,szPlayerName,MAX_PLAYER_NAME,sqldb);
 
-	format(string, sizeof(string), "SELECT Permabanned, Banned, AdminLevel, Username, LastIP, Bank, Cash FROM players WHERE Username = '%s'", szPlayerName);
-	mysql_query(string, THREAD_OFFLINE_FINE, playerid, g_MySQLConnections[0]);
+	mysql_format(sqldb,string, sizeof(string), "SELECT Permabanned, Banned, AdminLevel, Username, LastIP, Bank, Cash FROM players WHERE Username = '%s'", szPlayerName);
+	mysql_tquery(sqldb,string, "OnQueryFinished","ii",THREAD_OFFLINE_FINE,playerid);
 
 	return 1;
 }
@@ -13149,14 +13166,14 @@ CMD:oflag(playerid, params[]) {
 		        szFlag[128],
 		        szQuery[128];
 
-			mysql_real_escape_string(name, szPlayerName, g_MySQLConnections[0]);
+			mysql_escape_string(name,szPlayerName,MAX_PLAYER_NAME,sqldb);
 
-			mysql_real_escape_string(reason, szFlag, g_MySQLConnections[0]);
+			mysql_escape_string(reason, szFlag,128,sqldb);
 			SetPVarString(playerid, "offline_flag", szFlag);
 			SetPVarString(playerid, "offline_flag_target", szPlayerName);
 
-			format(szQuery, sizeof(szQuery), "SELECT Username FROM players WHERE Username = '%s'", szPlayerName);
-			mysql_query(szQuery, THREAD_OFFLINE_FLAG, playerid, g_MySQLConnections[0]);
+			mysql_format(sqldb,szQuery, sizeof(szQuery), "SELECT Username FROM players WHERE Username = '%s'", szPlayerName);
+			mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii",THREAD_OFFLINE_FLAG,playerid);
 		}
 		return 1;
 	}
@@ -15517,12 +15534,12 @@ CMD:approvename(playerid, params[]) {
     GetPVarString(iTarget, "NewNameRequest", szPlayerName, MAX_PLAYER_NAME);
     SetPVarInt(iTarget, "requestby", playerid);
 
-    mysql_real_escape_string(szPlayerName, szPlayerName, g_MySQLConnections[0]);
+    mysql_escape_string(szPlayerName, szPlayerName,MAX_PLAYER_NAME,sqldb);
 
     SetPVarString(iTarget, "requestedname", szPlayerName);
 
-    format(szQuery, sizeof(szQuery), "SELECT Username FROM players WHERE Username = '%s'", szPlayerName);
-	mysql_query(szQuery, THREAD_CHECK_NEW_NAME, iTarget, g_MySQLConnections[0]);
+    mysql_format(sqldb,szQuery, sizeof(szQuery), "SELECT Username FROM players WHERE Username = '%s'", szPlayerName);
+	mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii",THREAD_CHECK_NEW_NAME,iTarget);
 	return 1;
 }
 
@@ -16035,7 +16052,7 @@ CMD:wat(playerid, params[]) {
 
 	SendClientMessage(playerid, COLOR_WHITE, "* Attached all toys.");
 
-	if(PlayerInfo[playerid][pVIP] <= 0)
+	if(PlayerInfo[playerid][pVip] <= 0)
 	{
 		for(new x;x<5;x++)
 		{
@@ -16047,7 +16064,7 @@ CMD:wat(playerid, params[]) {
 			if(PlayerToyInfo[playerid][x][ptModelID] != 0) SetPlayerAttachedObject(playerid, x, PlayerToyInfo[playerid][x][ptModelID], PlayerToyInfo[playerid][x][ptBone], PlayerToyInfo[playerid][x][ptPosX], PlayerToyInfo[playerid][x][ptPosY], PlayerToyInfo[playerid][x][ptPosZ], PlayerToyInfo[playerid][x][ptRotX], PlayerToyInfo[playerid][x][ptRotY], PlayerToyInfo[playerid][x][ptRotZ], PlayerToyInfo[playerid][x][ptScaleX], PlayerToyInfo[playerid][x][ptScaleY], PlayerToyInfo[playerid][x][ptScaleZ]);
 		}
 	}
-	else if(PlayerInfo[playerid][pVIP] == 1)
+	else if(PlayerInfo[playerid][pVip] == 1)
 	{
 		for(new x;x<6;x++)
 		{
@@ -16059,7 +16076,7 @@ CMD:wat(playerid, params[]) {
 			if(PlayerToyInfo[playerid][x][ptModelID] != 0) SetPlayerAttachedObject(playerid, x, PlayerToyInfo[playerid][x][ptModelID], PlayerToyInfo[playerid][x][ptBone], PlayerToyInfo[playerid][x][ptPosX], PlayerToyInfo[playerid][x][ptPosY], PlayerToyInfo[playerid][x][ptPosZ], PlayerToyInfo[playerid][x][ptRotX], PlayerToyInfo[playerid][x][ptRotY], PlayerToyInfo[playerid][x][ptRotZ], PlayerToyInfo[playerid][x][ptScaleX], PlayerToyInfo[playerid][x][ptScaleY], PlayerToyInfo[playerid][x][ptScaleZ]);
 		}
 	}
-	else if(PlayerInfo[playerid][pVIP] == 2)
+	else if(PlayerInfo[playerid][pVip] == 2)
 	{
 		for(new x;x<7;x++)
 		{
@@ -16071,7 +16088,7 @@ CMD:wat(playerid, params[]) {
 			if(PlayerToyInfo[playerid][x][ptModelID] != 0) SetPlayerAttachedObject(playerid, x, PlayerToyInfo[playerid][x][ptModelID], PlayerToyInfo[playerid][x][ptBone], PlayerToyInfo[playerid][x][ptPosX], PlayerToyInfo[playerid][x][ptPosY], PlayerToyInfo[playerid][x][ptPosZ], PlayerToyInfo[playerid][x][ptRotX], PlayerToyInfo[playerid][x][ptRotY], PlayerToyInfo[playerid][x][ptRotZ], PlayerToyInfo[playerid][x][ptScaleX], PlayerToyInfo[playerid][x][ptScaleY], PlayerToyInfo[playerid][x][ptScaleZ]);
 		}
 	}
-	else if(PlayerInfo[playerid][pVIP] >= 3)
+	else if(PlayerInfo[playerid][pVip] >= 3)
 	{
 		for(new x;x<8;x++)
 		{
@@ -16856,17 +16873,17 @@ CMD:g(playerid, params[])
 	if(strlen(params) > 80)
 	    return SendClientMessage(playerid, COLOR_GREY, "Your message is too long - the limit is 80 characters.");
 
-	if(PlayerInfo[playerid][pAdmin] < 1 && PlayerInfo[playerid][pVIP] == 1)
+	if(PlayerInfo[playerid][pAdmin] < 1 && PlayerInfo[playerid][pVip] == 1)
 	{
 		format(string, sizeof(string), "(( Bronze VIP %s: %s ))", GetPlayerNameEx(playerid), params);
 		GlobalChatTimer[playerid] = 5;
 	}
-	else if(PlayerInfo[playerid][pAdmin] < 1 && PlayerInfo[playerid][pVIP] == 2)
+	else if(PlayerInfo[playerid][pAdmin] < 1 && PlayerInfo[playerid][pVip] == 2)
 	{
 		format(string, sizeof(string), "(( Silver VIP %s: %s ))", GetPlayerNameEx(playerid), params);
 		GlobalChatTimer[playerid] = 5;
 	}
-	else if(PlayerInfo[playerid][pAdmin] < 1 && PlayerInfo[playerid][pVIP] == 3)
+	else if(PlayerInfo[playerid][pAdmin] < 1 && PlayerInfo[playerid][pVip] == 3)
 	{
 		format(string, sizeof(string), "(( Gold VIP %s: %s ))", GetPlayerNameEx(playerid), params);
 		GlobalChatTimer[playerid] = 5;
@@ -16881,12 +16898,12 @@ CMD:g(playerid, params[])
 		format(string, sizeof(string), "(( Senior Helper %s: %s ))", GetPlayerNameEx(playerid), params);
 		GlobalChatTimer[playerid] = 2;
 	}
-	else if(PlayerInfo[playerid][pAdmin] < 1 && PlayerInfo[playerid][pVIP] == 1)
+	else if(PlayerInfo[playerid][pAdmin] < 1 && PlayerInfo[playerid][pVip] == 1)
 	{
 		format(string, sizeof(string), "(( Level %d Player %s: %s ))", PlayerInfo[playerid][pLevel], GetPlayerNameEx(playerid), params);
 		GlobalChatTimer[playerid] = 5;
 	}
-	else if(PlayerInfo[playerid][pAdmin] < 1 && PlayerInfo[playerid][pVIP] == 0)
+	else if(PlayerInfo[playerid][pAdmin] < 1 && PlayerInfo[playerid][pVip] == 0)
 	{
 		format(string, sizeof(string), "(( Level %d Player %s: %s ))", PlayerInfo[playerid][pLevel], GetPlayerNameEx(playerid), params);
 		GlobalChatTimer[playerid] = 5;
@@ -17198,7 +17215,7 @@ CMD:setdonator(playerid, params[]) {
 					SendClientMessage(playerid, COLOR_GRAD1, "VIP Level can't be below 0 or above 3!");
 					return 1;
 				}
-				PlayerInfo[giveplayerid][pVIP] = level;
+				PlayerInfo[giveplayerid][pVip] = level;
 
 				new playerip[32];
 				GetPlayerIp(giveplayerid, playerip, sizeof(playerip));
@@ -17925,7 +17942,7 @@ public LoadTruck(playerid)
 
 CMD:mp3(playerid, params[])
 {
-    if(PlayerInfo[playerid][pVIP] < 2 && AdminDuty[playerid] == 0)
+    if(PlayerInfo[playerid][pVip] < 2 && AdminDuty[playerid] == 0)
         return SendClientMessage(playerid, COLOR_WHITE, "You must be at least Silver-VIP to use this feature.");
 
    	if(PlayerCuffed[playerid] >= 1 || GetPVarInt(playerid, "Injured") == 1)
@@ -17941,7 +17958,7 @@ CMD:placeboombox(playerid, params[]) {
 
 CMD:placebb(playerid, params[])
 {
-    if(PlayerInfo[playerid][pVIP] < 3)
+    if(PlayerInfo[playerid][pVip] < 3)
         return SendClientMessage(playerid, COLOR_WHITE, "You must be at least Gold VIP to use this feature.");
 
 	if(PlayerCuffed[playerid] >= 1 || GetPVarInt(playerid, "Injured") == 1)
@@ -18130,7 +18147,7 @@ CMD:awithdraw(playerid, params[])
 		SendClientMessage(playerid, COLOR_GRAD2, "   You don't have that much!");
 		return 1;
 	}
-	if(PlayerInfo[playerid][pVIP] == 0)
+	if(PlayerInfo[playerid][pVip] == 0)
 	{
 		new fee;
 		fee = 3*amount/100;
@@ -18175,7 +18192,7 @@ CMD:adeposit(playerid, params[]) {
 		SendClientMessage(playerid, COLOR_GRAD2, "   You don't have that much.");
 		return 1;
 	}
-	if(PlayerInfo[playerid][pVIP] == 0)
+	if(PlayerInfo[playerid][pVip] == 0)
 	{
 		new fee;
 		fee = 3*amount/100;
@@ -18237,7 +18254,7 @@ CMD:awiretransfer(playerid, params[])
 			new playermoney = PlayerInfo[playerid][pBank];
 			if(amount > 0 && playermoney >= amount)
 			{
-				if(PlayerInfo[playerid][pVIP] == 0)
+				if(PlayerInfo[playerid][pVip] == 0)
 				{
 					new fee;
 					fee = 3*amount/100;
@@ -20457,14 +20474,14 @@ CMD:setname(playerid, params[]) {
 	if(strfind(szNewName, "_", false) == -1)
 		return SendClientMessage(playerid, COLOR_GREY, "The name must include an underscore ('_').");
 
-	mysql_real_escape_string(szNewName, szNewName, g_MySQLConnections[0]);
+	mysql_escape_string(szNewName, szNewName,MAX_PLAYER_NAME,sqldb);
 
 	SetPVarInt(iTarget, "requestby", playerid);
 	SetPVarInt(iTarget, "requestpath", 3);
 	SetPVarString(iTarget, "requestedname", szNewName);
 
-	format(szQuery, sizeof(szQuery), "SELECT Username FROM players WHERE Username = '%s'", szNewName);
-	mysql_query(szQuery, THREAD_CHECK_NEW_NAME, iTarget, g_MySQLConnections[0]);
+	mysql_format(sqldb,szQuery, sizeof(szQuery), "SELECT Username FROM players WHERE Username = '%s'", szNewName);
+	mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii",THREAD_CHECK_NEW_NAME,iTarget);
 
 	return 1;
 }
@@ -21090,8 +21107,8 @@ CMD:listpnamechanges(playerid, params[]) {
 
 	SetPVarInt(playerid, "namechanges_target", iTarget);
 
-	format(szQuery, sizeof(szQuery), "SELECT oldname, unixts, newname, approvedbyname FROM namechanges WHERE dbid = %d ORDER BY unixts DESC LIMIT 10", PlayerInfo[iTarget][pID]);
-	mysql_query(szQuery, THREAD_LIST_NAMECHANGES, playerid, g_MySQLConnections[0]);
+	mysql_format(sqldb,szQuery, sizeof(szQuery), "SELECT oldname, unixts, newname, approvedbyname FROM namechanges WHERE dbid = %d ORDER BY unixts DESC LIMIT 10", PlayerInfo[iTarget][pID]);
+	mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii", THREAD_LIST_NAMECHANGES,playerid);
 	return 1;
 }
 
@@ -22011,10 +22028,10 @@ CMD:oprison(playerid, params[]) {
 		new
 		    szPlayerName[MAX_PLAYER_NAME];
 
-		mysql_real_escape_string(name, szPlayerName, g_MySQLConnections[0]);
+		mysql_escape_string(name,szPlayerName,MAX_PLAYER_NAME,sqldb);
 
-		format(string, sizeof(string), "SELECT Permabanned, Banned, AdminLevel, Username, LastIP, JailTime, ID FROM players WHERE Username = '%s'", szPlayerName);
-		mysql_query(string, THREAD_OFFLINE_PRISON, playerid, g_MySQLConnections[0]);
+		mysql_format(sqldb,string, sizeof(string), "SELECT Permabanned, Banned, AdminLevel, Username, LastIP, JailTime, ID FROM players WHERE Username = '%s'", szPlayerName);
+		mysql_tquery(sqldb,string,"OnQueryFinished","ii",THREAD_OFFLINE_PRISON,playerid);
 	}
 	return 1;
 }
@@ -23821,10 +23838,10 @@ CMD:su(playerid, params[]) {
 					szCleanDescription[64],
 					szQuery[270];
 
-				mysql_real_escape_string(szCrime, szCleanDescription, g_MySQLConnections[0]);
+				mysql_escape_string(szCrime, szCleanDescription,64,sqldb);
 
-				format(szQuery, sizeof(szQuery), "INSERT INTO crimes (crimeIssuer, crimeIssuedTo, crimeDescription, crimeIssuerName, crimeIssuedToName) VALUES(%d, %d, '%s', '%s', '%s')", PlayerInfo[playerid][pID], PlayerInfo[iTargetID][pID], szCleanDescription, GetPlayerNameEx(playerid), GetPlayerNameEx(iTargetID));
-				mysql_query(szQuery, THREAD_NO_RESULT, 0, g_MySQLConnections[0]);
+				mysql_format(sqldb,szQuery, sizeof(szQuery), "INSERT INTO crimes (crimeIssuer, crimeIssuedTo, crimeDescription, crimeIssuerName, crimeIssuedToName) VALUES(%d, %d, '%s', '%s', '%s')", PlayerInfo[playerid][pID], PlayerInfo[iTargetID][pID], szCleanDescription, GetPlayerNameEx(playerid), GetPlayerNameEx(iTargetID));
+				mysql_tquery(sqldb,szQuery);
 			}
 			foreach(Player, i) if(IsACop(i) || PlayerInfo[i][pFaction] == 5 && PlayerInfo[i][pDivision] == 5 || PlayerInfo[playerid][pFaction] == 5 && PlayerInfo[playerid][pDivision] == 2) {
 				format(szMessage, sizeof(szMessage), "HQ: All units APB (reporter: %s)",GetPlayerNameEx(playerid));
@@ -25164,12 +25181,12 @@ CMD:ouninvite(playerid, params[]) {
 		    szPlayerName[MAX_PLAYER_NAME],
 		    szQuery[128];
 
-		mysql_real_escape_string(params, szPlayerName, g_MySQLConnections[0]);
+		mysql_escape_string(params, szPlayerName,MAX_PLAYER_NAME,sqldb);
 
 		SetPVarString(playerid, "uninvite_target", szPlayerName);
 
-		format(szQuery, sizeof(szQuery), "SELECT Faction, AdminLevel FROM players WHERE Username = '%s'", szPlayerName);
-		mysql_query(szQuery, THREAD_OFFLINE_UNINVITE, playerid, g_MySQLConnections[0]);
+		mysql_format(sqldb,szQuery, sizeof(szQuery), "SELECT Faction, AdminLevel FROM players WHERE Username = '%s'", szPlayerName);
+		mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii",THREAD_OFFLINE_UNINVITE,playerid);
 	}
 	else SendClientMessage(playerid, COLOR_GRAD1, "You're not authorized to use that command - only leaders can do this.");
 	return 1;
@@ -25835,7 +25852,7 @@ CMD:testsaving(playerid, params[]) {
 	PlayerInfo[playerid][pRank] = iValue;
 	PlayerInfo[playerid][pJob] = iValue;
 	PlayerInfo[playerid][pJob2] = iValue;
-	PlayerInfo[playerid][pVIP] = iValue;
+	PlayerInfo[playerid][pVip] = iValue;
 	PlayerInfo[playerid][gPupgrade] = iValue;
 	PlayerInfo[playerid][pSarmor] = iValue;
 	PlayerInfo[playerid][pCash] = iValue;
@@ -26654,49 +26671,49 @@ CMD:createpvehicle(playerid, params[])
     new playervehicleid = GetPlayerFreeVehicleId(giveplayerid),
 		totalvehicles = GetPlayerVehicleCountEx(playerid);
 	// (TEMPORARY - ZHAO NOTE) TempVIP not added yet
-	if(PlayerInfo[giveplayerid][pVIP] == 0 && totalvehicles >= 5) //PlayerInfo[giveplayerid][pTempVIP] > 0) && carsamount >= 5)
+	if(PlayerInfo[giveplayerid][pVip] == 0 && totalvehicles >= 5) //PlayerInfo[giveplayerid][pTempVIP] > 0) && carsamount >= 5)
 	{
         SendClientMessage(playerid, COLOR_GREY, "That player can't have more cars, non-VIP can only own 5 cars.");
         return 1;
 	}
-    if(PlayerInfo[giveplayerid][pVIP] == 1 && totalvehicles >= 7)
+    if(PlayerInfo[giveplayerid][pVip] == 1 && totalvehicles >= 7)
     {
         SendClientMessage(playerid, COLOR_GREY, "That player can't have more cars, Bronze VIP can only own 7 cars.");
         return 1;
     }
-    if(PlayerInfo[giveplayerid][pVIP] == 2 && totalvehicles >= 8)
+    if(PlayerInfo[giveplayerid][pVip] == 2 && totalvehicles >= 8)
     {
         SendClientMessage(playerid, COLOR_GREY, "That player can't have more cars, Silver VIP can only own 8 cars.");
         return 1;
     }
-    if(PlayerInfo[giveplayerid][pVIP] == 3 && totalvehicles >= 10)
+    if(PlayerInfo[giveplayerid][pVip] == 3 && totalvehicles >= 10)
     {
         SendClientMessage(playerid, COLOR_GREY, "That player can't have more cars, Gold VIP can only own 10 cars.");
         return 1;
     }
 
     if(playervehicleid == -1) return SendClientMessage(playerid, COLOR_GREY, "ERROR: That player can't have more cars.");
-    if(PlayerInfo[giveplayerid][pVIP] == 0 && VehicleSpawned[giveplayerid] > 0)
+    if(PlayerInfo[giveplayerid][pVip] == 0 && VehicleSpawned[giveplayerid] > 0)
     {
 		SendClientMessage(playerid, COLOR_GREY, "That player is non-VIP and can only have 1 vehicle spawned. The player must store that vehicle in order to create a new one.");
 		return 1;
     }
-   	if(PlayerInfo[giveplayerid][pVIP] == 1 && VehicleSpawned[giveplayerid] > 1)
+   	if(PlayerInfo[giveplayerid][pVip] == 1 && VehicleSpawned[giveplayerid] > 1)
    	{
 		SendClientMessage(playerid, COLOR_GREY, "That player is Bronze VIP and can only have 2 vehicles spawned. The player must store that vehicle in order to create a new one.");
 		return 1;
     }
-   	if(PlayerInfo[giveplayerid][pVIP] == 2 && VehicleSpawned[giveplayerid] > 2)
+   	if(PlayerInfo[giveplayerid][pVip] == 2 && VehicleSpawned[giveplayerid] > 2)
    	{
 		SendClientMessage(playerid, COLOR_GREY, "That player is Silver VIP and can only have 3 vehicles spawned. The player must store a vehicle in order to create a new one.");
 		return 1;
     }
-   	if(PlayerInfo[giveplayerid][pVIP] == 3 && VehicleSpawned[giveplayerid] > 3)
+   	if(PlayerInfo[giveplayerid][pVip] == 3 && VehicleSpawned[giveplayerid] > 3)
    	{
 		SendClientMessage(playerid, COLOR_GREY, "That player is Gold VIP and can only have 4 vehicles spawned. The player must store a vehicle in order to create a new one.");
 		return 1;
     }
-    if(PlayerInfo[giveplayerid][pVIP] < 0 || PlayerInfo[giveplayerid][pVIP] > 3)
+    if(PlayerInfo[giveplayerid][pVip] < 0 || PlayerInfo[giveplayerid][pVip] > 3)
     {
     	SendClientMessage(playerid, COLOR_GREY, "ERROR: That player has an invalid VIP level.");
 		return 1;
@@ -27075,12 +27092,12 @@ CMD:sellmycar(playerid, params[]) {
             if(!IsPlayerConnected(giveplayerid)) return SendClientMessage(playerid, COLOR_GREY, "Player is currently not connected to the server.");
             if(ProxDetectorS(8.0, playerid, giveplayerid))
 		 	{
-		 	    if((PlayerInfo[giveplayerid][pVIP] < 2) && (GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 610  || GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 611 || GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 608 || GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 607))
+		 	    if((PlayerInfo[giveplayerid][pVip] < 2) && (GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 610  || GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 611 || GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 608 || GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 607))
 				{
 				    SendClientMessage(playerid, COLOR_GREY, "You can't sell silver VIP vehicles to non-silver VIP.");
 				    return 1;
 				}
-    			if((PlayerInfo[giveplayerid][pVIP] < 3) && (GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 606 || GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 594 || GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 441))
+    			if((PlayerInfo[giveplayerid][pVip] < 3) && (GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 606 || GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 594 || GetVehicleModel(PlayerVehicleInfo[playerid][d][pvId]) == 441))
 				{
 				    SendClientMessage(playerid, COLOR_GREY, "You can't sell Gold VIP vehicles to non-Gold VIP.");
 				    return 1;
@@ -29112,7 +29129,7 @@ public StopaniTimer(playerid)
 
 CMD:buyclothes(playerid, params[]) {
 	if(IsAtClothShop(playerid)) {
-		if(PlayerInfo[playerid][pFaction] == 0 && PlayerInfo[playerid][pLeader] == 0 && PlayerInfo[playerid][pVIP] == 0)
+		if(PlayerInfo[playerid][pFaction] == 0 && PlayerInfo[playerid][pLeader] == 0 && PlayerInfo[playerid][pVip] == 0)
 			ShowPlayerDialogEx(playerid, 3495, DIALOG_STYLE_INPUT, "Skin Selection","Please enter a Skin ID!\n\nNote: Skin Changes cost $250.", "Buy", "Cancel");
 		else
 		    ShowPlayerDialogEx(playerid, 3495, DIALOG_STYLE_INPUT, "Skin Selection","Please enter a Skin ID!\n\nNote: Your skin changes are free.", "Buy", "Cancel");
@@ -30347,7 +30364,7 @@ CMD:getcrack(playerid, params[])
 			GivePlayerCash(playerid, -price);
 			PlayerInfo[playerid][pCrack] += amount;
 
-			//if(PlayerInfo[playerid][pVIP] < 1) Points[mypoint][Stock] = Points[mypoint][Stock]-amount;
+			//if(PlayerInfo[playerid][pVip] < 1) Points[mypoint][Stock] = Points[mypoint][Stock]-amount;
 			Points[mypoint][Stock] = Points[mypoint][Stock]-amount;
 
 			format(string, sizeof(string), " CRACK AVAILABLE: %d grams.", Points[mypoint][Stock]);
@@ -31823,7 +31840,7 @@ CMD:fstoregun(playerid, params[]) {
 		SendClientMessage(playerid, COLOR_GREY, "You can't use this while you're in an event.");
 		return 1;
 	}
-	/*if(PlayerInfo[playerid][pVIP] > 2)
+	/*if(PlayerInfo[playerid][pVip] > 2)
 	{
 		SendClientMessage(playerid, COLOR_GRAD1, "You can't give away weapons if you're Gold+ VIP!");
 		return 1;
@@ -32292,7 +32309,7 @@ CMD:safedeposit(playerid, params[]) {
 }
 
 CMD:changeage(playerid, params[]) {
-	if(PlayerInfo[playerid][pVIP] < 1)
+	if(PlayerInfo[playerid][pVip] < 1)
 	    return SendClientMessage(playerid, COLOR_GREY, "This command is only available to VIP right now.");
 
 	if(isnull(params))
@@ -32312,7 +32329,7 @@ CMD:changeage(playerid, params[]) {
 }
 
 CMD:changeph(playerid, params[]) {
-	if(PlayerInfo[playerid][pVIP] < 1)
+	if(PlayerInfo[playerid][pVip] < 1)
 	    return SendClientMessage(playerid, COLOR_GREY, "This command is only available to VIP right now.");
 
 	if(isnull(params))
@@ -32350,7 +32367,7 @@ CMD:changeph(playerid, params[]) {
 }
 
 CMD:changegender(playerid, params[]) {
-	if(PlayerInfo[playerid][pVIP] < 1)
+	if(PlayerInfo[playerid][pVip] < 1)
 	    return SendClientMessage(playerid, COLOR_GREY, "This command is only available to VIP right now.");
 
 	if(isnull(params))
@@ -32715,7 +32732,7 @@ CMD:adjustrank(playerid, params[])
 
 CMD:phoneprivacy(playerid, params[])
 {
-    if(PlayerInfo[playerid][pNumber] != 0 && PlayerInfo[playerid][pVIP] >= 1)
+    if(PlayerInfo[playerid][pNumber] != 0 && PlayerInfo[playerid][pVip] >= 1)
 	{
         if(PhonePrivacy[playerid] == 1)
 		{
@@ -32732,7 +32749,7 @@ CMD:phoneprivacy(playerid, params[])
 }
 
 CMD:changeplates(playerid, params[]) {
-	if(PlayerInfo[playerid][pVIP] < 1)
+	if(PlayerInfo[playerid][pVip] < 1)
 	    return SendClientMessage(playerid, COLOR_GREY, "This command is only available to VIP right now.");
 
 	new
@@ -32762,7 +32779,7 @@ CMD:changeplates(playerid, params[]) {
 			if(strlen(plate) > 8)
 			    return SendClientMessage(playerid, COLOR_GREY, "The license plate can not be longer than 8 characters!");
 
-			mysql_real_escape_string(plate, plate, g_MySQLConnections[0]);
+			mysql_escape_string(plate, plate,32,sqldb);
 
 			if(strcmp(color, "black", true)==0) format(PlayerVehicleInfo[playerid][d][pvNumberPlate], 32, "{000000}%s", plate);
 			else if(strcmp(color, "white", true)==0) format(PlayerVehicleInfo[playerid][d][pvNumberPlate], 32, "{FFFFFF}%s", plate);
@@ -33263,14 +33280,14 @@ CMD:changeuserpassword(playerid, params[]) {
     if(sscanf(params, "s[MAX_PLAYER_NAME]s[64]", accountName, password))
 		return SendClientMessage(playerid, COLOR_WHITE, "USAGE: /changeuserpassword [playername] [new password]");
 
-	mysql_real_escape_string(accountName, accountName, g_MySQLConnections[0]);
-	mysql_real_escape_string(password, szPassword, g_MySQLConnections[0]);
+	mysql_escape_string(accountName, accountName,MAX_PLAYER_NAME,sqldb);
+	mysql_escape_string(password, szPassword,64,sqldb);
 
 	SetPVarString(playerid, "opasschange", szPassword);
 	SetPVarString(playerid, "opasschangetarget", accountName);
 
-	format(string, sizeof(string), "SELECT Username FROM players WHERE Username = '%s' AND AdminLevel = 0", accountName);
-	mysql_query(string, THREAD_CHECK_NAME_PASSWORD, playerid, g_MySQLConnections[0]);
+	mysql_format(sqldb,string, sizeof(string), "SELECT Username FROM players WHERE Username = '%s' AND AdminLevel = 0", accountName);
+	mysql_tquery(sqldb,string,"OnQueryFinished","ii",THREAD_CHECK_NAME_PASSWORD,playerid);
     return 1;
 }
 
@@ -35441,9 +35458,9 @@ CMD:ocheck(playerid, params[]) {
 		szPlayerName[MAX_PLAYER_NAME],
 	    szQuery[68];
 
-	mysql_real_escape_string(params, szPlayerName, g_MySQLConnections[0]);
-	format(szQuery, sizeof(szQuery), "SELECT * FROM players WHERE Username = '%s'", szPlayerName);
-	mysql_query(szQuery, THREAD_GET_STATS, playerid, g_MySQLConnections[0]);
+	mysql_escape_string(params, szPlayerName,MAX_PLAYER_NAME,sqldb);
+	mysql_format(sqldb,szQuery, sizeof(szQuery), "SELECT * FROM players WHERE Username = '%s'", szPlayerName);
+	mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii", THREAD_GET_STATS, playerid);
 	return 1;
 }
 
@@ -35467,9 +35484,9 @@ CMD:okills(playerid, params[]) {
 		szPlayerName[MAX_PLAYER_NAME],
 	    szQuery[68];
 
-	mysql_real_escape_string(params, szPlayerName, g_MySQLConnections[0]);
-	format(szQuery, sizeof(szQuery), "SELECT * FROM players WHERE Username = '%s'", szPlayerName);
-	mysql_query(szQuery, THREAD_OFFLINE_KILLS, playerid, g_MySQLConnections[0]);
+	mysql_escape_string(params, szPlayerName,MAX_PLAYER_NAME,sqldb);
+	mysql_format(sqldb,szQuery, sizeof(szQuery), "SELECT * FROM players WHERE Username = '%s'", szPlayerName);
+	mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii", THREAD_OFFLINE_KILLS,playerid);
 	return 1;
 }
 
@@ -36275,7 +36292,7 @@ CMD:buyhouse(playerid, params[])
 				}
 				/*else if(PlayerInfo[playerid][pHouse2] == INVALID_HOUSE_ID)
 				{
-				    if(PlayerInfo[playerid][pVIP] == 0)
+				    if(PlayerInfo[playerid][pVip] == 0)
 				        return SendClientMessage(playerid, COLOR_GREY, "You already own a house!");
 
 					if(GetPlayerCash(playerid) > HouseInfo[h][hValue])
@@ -38999,7 +39016,7 @@ CMD:enter(playerid, params[])
 	{
         if(IsPlayerInRangeOfPoint(playerid,3.0,DDoorsInfo[i][ddExteriorX], DDoorsInfo[i][ddExteriorY], DDoorsInfo[i][ddExteriorZ]) && PlayerInfo[playerid][pVW] == DDoorsInfo[i][ddExteriorVW])
 		{
-            if(DDoorsInfo[i][ddVIP] > 0 && PlayerInfo[playerid][pVIP] < DDoorsInfo[i][ddVIP]) {
+            if(DDoorsInfo[i][ddVIP] > 0 && PlayerInfo[playerid][pVip] < DDoorsInfo[i][ddVIP]) {
                 SendClientMessage(playerid, COLOR_GRAD2, "You can't enter, you're not a high enough VIP level.");
                 return 1;
             }
@@ -39462,15 +39479,15 @@ public OnPlayerRegister(playerid, password[]) {
 
 		GetPlayerName(playerid, szPlayerName, MAX_PLAYER_NAME);
 
-		mysql_real_escape_string(szPlayerName, szPlayerName2, g_MySQLConnections[0]);
+		mysql_escape_string(szPlayerName, szPlayerName2,MAX_PLAYER_NAME,sqldb);
 
 		SetPVarString(playerid, "password", password);
 
 		// Set the variable to logged in so we aren't cockblocked by SaveAccount()
 		gPlayerLogged[playerid] = 1;
 
-		format(szQuery, sizeof(szQuery), "INSERT INTO players (Username, Password) VALUES('%s', '%s')", szPlayerName2, password);
-		mysql_query(szQuery, THREAD_REGISTER_ACCOUNT, playerid, g_MySQLConnections[0]);
+		mysql_format(sqldb,szQuery, sizeof(szQuery), "INSERT INTO players (Username, Password) VALUES('%s', '%s')", szPlayerName2, password);
+		mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii", THREAD_REGISTER_ACCOUNT,playerid);
 	}
 	return 1;
 }
@@ -39516,7 +39533,7 @@ stock AskHuntQuestion(playerid) {
 	    case 5: ShowPlayerDialogEx(playerid, DIALOG_HUNT_QUESTION, DIALOG_STYLE_LIST, "What is the callsign of the Campo's team in Battlefield 3?", "Kimball 4-6\nMisfit 1-3\nFitmissie 69\nActual 1-3", "OK", "Cancel");
 	    case 6: ShowPlayerDialogEx(playerid, DIALOG_HUNT_QUESTION, DIALOG_STYLE_LIST, "In the popular US TV show 'Psych', what is the name of the sidekick?", "Burton Guster\nCarlton Lassiter\nJames Roday\nHenry Spencer", "OK", "Cancel");
 	    case 7: ShowPlayerDialogEx(playerid, DIALOG_HUNT_QUESTION, DIALOG_STYLE_LIST, "Which company developed the iPhone?", "Grapefruit\nOrange\nApple\nBlackBerry", "OK", "Cancel");
-	    case 8: ShowPlayerDialogEx(playerid, DIALOG_HUNT_QUESTION, DIALOG_STYLE_LIST, "What symbol is used for hashtags on Twitter?", "#\n$\n�\n&", "OK", "Cancel");
+	    case 8: ShowPlayerDialogEx(playerid, DIALOG_HUNT_QUESTION, DIALOG_STYLE_LIST, "What symbol is used for hashtags on Twitter?", "#\n$\n?\n&", "OK", "Cancel");
 	    case 9: ShowPlayerDialogEx(playerid, DIALOG_HUNT_QUESTION, DIALOG_STYLE_LIST, "3 robbers robbed a store. Once they came out, they were totally changed, but they still continued robbing. Why?", "Developers, developers, developers, developers (cont.)\nThey changed their clothes, not their ways\nThey used Harry Potter's cloak of invisibility\nThe sun is shining everyday", "OK", "Cancel");
 	}
 
@@ -39550,14 +39567,23 @@ public OnGameModeInit()
 
 	// MySQL connect
 	/*if(!IsBETAServer()) {
-		g_MySQLConnections[0] = mysql_connect("localhost", "root", "horizonrp", "");
+		sqldb = mysql_connect("localhost", "root", "horizonrp", "");
 	} else*/
-	g_MySQLConnections[0] = mysql_connect("localhost", "root", "ngrp", "");
-	// g_MySQLConnections[0] = mysql_connect("localhost", "NextGenerati", "zNextGenerati0", "xPsMFjjB");
+	// sqldb = mysql_connect("localhost", "root", "ngrp", "");
+	//sqldb = mysql_connect("localhost", "NextGenerati", "zNextGenerati0", "xPsMFjjB");
+	sqldb = mysql_connect(SQL_HOST, SQL_USER, SQL_PASS, SQL_DATA);
+	if(mysql_errno(sqldb) != 0)
+	{
+		printf("[MySQL] (sqldb) Fatal Error! Could not connect to MySQL: Host %s - DB: %s - User: %s", SQL_HOST, SQL_DATA, SQL_USER);
+		print("[MySQL] Note: Make sure that you have provided the correct connection credentials.");
+		printf("[MySQL] Error number: %i", mysql_errno(sqldb));
+		SendRconCommand("exit");
+	}
+	printf("Connected to the database: %s successfully",SQL_DATA);
+	mysql_log(ERROR);
+	// mysql_debug(1);
 
-	mysql_debug(1);
-
-	mysql_query("set session query_cache_type=0;", THREAD_NO_RESULT, 0, g_MySQLConnections[0]);
+	// mysql_tquery("set session query_cache_type=0;",  0,sqldb);
 
 	// Dynamic systems
 	LoadPoints();
@@ -41257,17 +41283,17 @@ public OnGameModeInit()
 	// Streamer_Update()
 
 	//VIP
-	Create3DTextLabel("{FFFFFF}VIP Locker\n{EEE72A}(/viplocker to access the locker)", 0x008080FF, 2561.32519531,1403.24609375,7699.56640625,5.0, 0, 0);
-	CreateDynamicObject(14614,2533.68457031,1416.85351562,7705.11816406,0.00000000,0.00000000,0.00000000, .interiorid = 89); //object(triad_main3) (1)
-	CreateDynamicObject(14607,2533.54492188,1417.93652344,7705.11572266,0.00000000,0.00000000,359.74731445, .interiorid = 89); //object(triad_main2) (2)
-	CreateDynamicObject(14563,2533.70019531,1419.26757812,7705.11376953,0.00000000,0.00000000,0.00000000, .interiorid = 89); //object(triad_main) (1)
-	CreateDynamicObject(3533,2544.49926758,1432.28100586,7702.83007812,0.00000000,0.00000000,0.00000000, .interiorid = 89); //object(trdpillar01) (1)
-	CreateDynamicObject(3533,2544.46289062,1403.82421875,7702.83007812,0.00000000,0.00000000,0.00000000, .interiorid = 89); //object(trdpillar01) (2)
-	CreateDynamicObject(14561,2584.83007812,1417.66503906,7704.10937500,0.00000000,0.00000000,179.74731445, .interiorid = 89); //object(triad_neon) (2)
-	CreateDynamicObject(3533,2569.09399414,1406.85668945,7705.23632812,0.00000000,0.00000000,0.00000000, .interiorid = 89); //object(trdpillar01) (2)
-	CreateDynamicObject(3533,2569.12109375,1428.65820312,7705.23632812,0.00000000,0.00000000,0.00000000, .interiorid = 89); //object(trdpillar01) (2)
-	CreateDynamicObject(1846,2502.62304688,1391.47949219,7699.94970703,90.00000000,90.00000000,269.98901367, .interiorid = 89); //object(shop_shelf04) (1)
-	CreateDynamicObject(8664,2470.62500000,1449.24902344,7707.08886719,0.00000000,179.99450684,269.98901367, .interiorid = 89); //object(casrylegrnd_lvs) (2)
+	Create3DTextLabel("{FFFFFF}VIP Locker\n{EEE72A}(/viplocker to access the locker)", 0x008080FF, 2561.32519531,1403.24609375,7699.56640625,5.0, 363636, 0);
+	CreateDynamicObject(14614,2533.68457031,1416.85351562,7705.11816406,0.00000000,0.00000000,0.00000000); //object(triad_main3) (1)
+	CreateDynamicObject(14607,2533.54492188,1417.93652344,7705.11572266,0.00000000,0.00000000,359.74731445); //object(triad_main2) (2)
+	CreateDynamicObject(14563,2533.70019531,1419.26757812,7705.11376953,0.00000000,0.00000000,0.00000000); //object(triad_main) (1)
+	CreateDynamicObject(3533,2544.49926758,1432.28100586,7702.83007812,0.00000000,0.00000000,0.00000000); //object(trdpillar01) (1)
+	CreateDynamicObject(3533,2544.46289062,1403.82421875,7702.83007812,0.00000000,0.00000000,0.00000000); //object(trdpillar01) (2)
+	CreateDynamicObject(14561,2584.83007812,1417.66503906,7704.10937500,0.00000000,0.00000000,179.74731445); //object(triad_neon) (2)
+	CreateDynamicObject(3533,2569.09399414,1406.85668945,7705.23632812,0.00000000,0.00000000,0.00000000); //object(trdpillar01) (2)
+	CreateDynamicObject(3533,2569.12109375,1428.65820312,7705.23632812,0.00000000,0.00000000,0.00000000); //object(trdpillar01) (2)
+	CreateDynamicObject(1846,2502.62304688,1391.47949219,7699.94970703,90.00000000,90.00000000,269.98901367); //object(shop_shelf04) (1)
+	CreateDynamicObject(8664,2470.62500000,1449.24902344,7707.08886719,0.00000000,179.99450684,269.98901367); //object(casrylegrnd_lvs) (2)
 	CreateDynamicObject(3534,2522.69213867,1427.96093750,7705.81347656,179.99450684,0.00000000,0.00000000); //object(trdlamp01) (1)
 	CreateDynamicObject(3534,2520.36645508,1407.96240234,7705.81347656,179.99450684,0.00000000,0.00000000); //object(trdlamp01) (2)
 	CreateDynamicObject(3534,2505.93945312,1408.00488281,7705.81347656,179.99450684,0.00000000,0.00000000); //object(trdlamp01) (3)
@@ -41396,7 +41422,7 @@ public OnGameModeInit()
 	RemoveBuildingForPlayer(-1, 968, -2436.8125, 495.4688, 29.6797, 0.25);
 	RemoveBuildingForPlayer(-1, 10611, -2453.6563, 514.5000, 24.4375, 0.25);
 
-	
+
 	//Anim stopper message
 	txtAnimHelper = TextDrawCreate(630.0, 420.0, "~r~~k~~PED_SPRINT~ ~w~to stop the animation");
 	TextDrawUseBox(txtAnimHelper, 0);
@@ -41972,7 +41998,7 @@ public OnGameModeInit()
 	SetVehicleHealth(LSPDVehicles[21], 2500.0);
 	SetVehicleHealth(LSPDVehicles[22], 2500.0);
 
-	//mysql_query("TRUNCATE TABLE connections", THREAD_NO_RESULT, 0, g_MySQLConnections[0]);
+	//mysql_tquery("TRUNCATE TABLE connections", THREAD_NO_RESULT, 0,sqldb);
 	return 1;
 }
 
@@ -42225,7 +42251,7 @@ stock ResetPlayerVariables(playerid) {
 	PlayerInfo[playerid][pRank] = 0;
 	PlayerInfo[playerid][pJob] = 0;
 	PlayerInfo[playerid][pJob2] = 0;
-	PlayerInfo[playerid][pVIP] = 0;
+	PlayerInfo[playerid][pVip] = 0;
 	PlayerInfo[playerid][gPupgrade] = 0;
 	PlayerInfo[playerid][pSarmor] = 0;
 	PlayerInfo[playerid][pCash] = 100;
@@ -42330,10 +42356,10 @@ stock ResetPlayerVariables(playerid) {
 	PlayerInfo[playerid][pCallsAccepted] = 0;
 	PlayerInfo[playerid][pPatientsDelivered] = 0;
 	PlayerInfo[playerid][pTriageTime] = 0;
-	
-	
-	
-	
+
+
+
+
 	PlayerInfo[playerid][pVip] = 0;
 	PlayerInfo[playerid][pVIPTokens] = 0;
 
@@ -42672,7 +42698,7 @@ stock HospitalSpawn(playerid)
 		if(GetPVarInt(playerid, "Hospital") == 1 && PlayerInfo[playerid][pInsurance] == 0) {
 			SetPlayerArmourEx(playerid, PlayerInfo[playerid][pSarmor]);
 
-			if(PlayerInfo[playerid][pVIP] >= 2) SetPlayerHealth(playerid, 100.0);
+			if(PlayerInfo[playerid][pVip] >= 2) SetPlayerHealth(playerid, 100.0);
 				else SetPlayerHealth(playerid, 50.0);
 
 			DeletePVar(playerid, "MedicBill");
@@ -42695,7 +42721,7 @@ stock HospitalSpawn(playerid)
 		} else if(GetPVarInt(playerid, "Hospital") == 2 && PlayerInfo[playerid][pInsurance] == 0) {
 			SetPlayerArmourEx(playerid, PlayerInfo[playerid][pSarmor]);
 
-			if(PlayerInfo[playerid][pVIP] >= 2) SetPlayerHealth(playerid, 100.0);
+			if(PlayerInfo[playerid][pVip] >= 2) SetPlayerHealth(playerid, 100.0);
 			else SetPlayerHealth(playerid, 50.0);
 
 			DeletePVar(playerid, "MedicBill");
@@ -42720,7 +42746,7 @@ stock HospitalSpawn(playerid)
 		if(GetPVarInt(playerid, "Hospital") == 1 && PlayerInfo[playerid][pInsurance] == 1) {
 			SetPlayerArmourEx(playerid, PlayerInfo[playerid][pSarmor]);
 
-			if(PlayerInfo[playerid][pVIP] >= 2) SetPlayerHealth(playerid, 100.0);
+			if(PlayerInfo[playerid][pVip] >= 2) SetPlayerHealth(playerid, 100.0);
 			else SetPlayerHealth(playerid, 50.0);
 
 			DeletePVar(playerid, "MedicBill");
@@ -42740,7 +42766,7 @@ stock HospitalSpawn(playerid)
 		} else if(GetPVarInt(playerid, "Hospital") == 2 && PlayerInfo[playerid][pInsurance] == 2) {
 			SetPlayerArmourEx(playerid, PlayerInfo[playerid][pSarmor]);
 
-			if(PlayerInfo[playerid][pVIP] >= 2) SetPlayerHealth(playerid, 100.0);
+			if(PlayerInfo[playerid][pVip] >= 2) SetPlayerHealth(playerid, 100.0);
 			else SetPlayerHealth(playerid, 50.0);
 
 			DeletePVar(playerid, "MedicBill");
@@ -42807,10 +42833,10 @@ public OnPlayerDisconnect(playerid, reason)
     }
 
 	// print("[debug] step #0");
-	new
-		szQuery[128];
-	format(szQuery, sizeof(szQuery), "DELETE FROM connections WHERE PlayerID = %d", playerid);
-	mysql_query(szQuery, THREAD_NO_RESULT, playerid, g_MySQLConnections[0]);
+	// new
+	// 	szQuery[128];
+	// format(szQuery, sizeof(szQuery), "DELETE FROM connections WHERE PlayerID = %d", playerid);
+	// mysql_tquery(szQuery, THREAD_NO_RESULT, playerid,sqldb);
 
 	// print("[debug] step #1");
 
@@ -43259,10 +43285,10 @@ stock AttemptPlayerLogin(playerid, passbuffer[]) {
 
 	GetPlayerName(playerid, szPlayerName, sizeof(szPlayerName));
 
-	mysql_real_escape_string(szPlayerName, szPlayerName2, g_MySQLConnections[0]);
+	mysql_escape_string(szPlayerName, szPlayerName2,MAX_PLAYER_NAME,sqldb);
 
-	format(szQuery, sizeof(szQuery), "SELECT * FROM players WHERE Username = '%s' AND Password = '%s'", szPlayerName2, passbuffer);
-	mysql_query(szQuery, THREAD_LOGIN_ATTEMPT, playerid, g_MySQLConnections[0]);
+	mysql_format(sqldb,szQuery, sizeof(szQuery), "SELECT * FROM players WHERE Username = '%s' AND Password = '%s'", szPlayerName2, passbuffer);
+	mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii", THREAD_LOGIN_ATTEMPT,playerid);
 	return 1;
 }
 
@@ -43270,8 +43296,8 @@ stock LoadPlayerDynamicItems(playerid) {
 	new
 	    szString[128];
 
-	format(szString, sizeof(szString), "SELECT toys.* FROM toys INNER JOIN players ON toys.Owner = players.ID WHERE players.ID = '%d' ORDER BY toys.ID ASC LIMIT %d", PlayerInfo[playerid][pID], MAX_PLAYERTOYS);
-	mysql_query(szString, THREAD_LOAD_P_ITEMS_CHAIN_1, playerid, g_MySQLConnections[0]);
+	mysql_format(sqldb,szString, sizeof(szString), "SELECT toys.* FROM toys INNER JOIN players ON toys.Owner = players.ID WHERE players.ID = '%d' ORDER BY toys.ID ASC LIMIT %d", PlayerInfo[playerid][pID], MAX_PLAYERTOYS);
+	mysql_tquery(sqldb,szString, "OnQueryFinished","ii",THREAD_LOAD_P_ITEMS_CHAIN_1, playerid);
 	return 1;
 }
 
@@ -43287,17 +43313,17 @@ stock SaveAccount(playerid) {
 
 		GetPlayerName(playerid, szPlayerName, MAX_PLAYER_NAME);
 
-		mysql_real_escape_string(szPlayerName, szPlayerName2, g_MySQLConnections[0]);
-		mysql_real_escape_string(PlayerInfo[playerid][pAdminName], szAdminName, g_MySQLConnections[0]);
+		mysql_escape_string(szPlayerName, szPlayerName2,MAX_PLAYER_NAME,sqldb);
+		mysql_escape_string(PlayerInfo[playerid][pAdminName], szAdminName,MAX_PLAYER_NAME,sqldb);
 
-		format(szQuery, sizeof(szQuery), "UPDATE players SET Password = '%s', Level = %d, AdminLevel = %d, AdminName = '%s', BanAppealer = %d, Donator = %d, Banned = %d, Permabanned = %d, Disabled = %d, LastIP = '%s', Registered = %d, \
+		mysql_format(sqldb,szQuery, sizeof(szQuery), "UPDATE players SET Password = '%s', Level = %d, AdminLevel = %d, AdminName = '%s', BanAppealer = %d, Donator = %d, Banned = %d, Permabanned = %d, Disabled = %d, LastIP = '%s', Registered = %d, \
 		Tutorial = %i, Sex = %d, Age = %d, Skin = %d, PosX = '%f', PosY = '%f', PosZ = '%f', PosR = '%f', ConnectTime = %d, Respect = %d, PhoneNumber = %d, Warnings = %d, Gang = %d, Faction = %d, Leader = %d, Rankk = %d WHERE Username = '%s'",
-		PlayerInfo[playerid][pKey], PlayerInfo[playerid][pLevel], PlayerInfo[playerid][pAdmin], szAdminName, PlayerInfo[playerid][pBanAppealer], PlayerInfo[playerid][pVIP], PlayerInfo[playerid][pBanned],
+		PlayerInfo[playerid][pKey], PlayerInfo[playerid][pLevel], PlayerInfo[playerid][pAdmin], szAdminName, PlayerInfo[playerid][pBanAppealer], PlayerInfo[playerid][pVip], PlayerInfo[playerid][pBanned],
 		PlayerInfo[playerid][pPermaBanned], PlayerInfo[playerid][pDisabled], PlayerInfo[playerid][pIP], PlayerInfo[playerid][pReg], PlayerInfo[playerid][pTut], PlayerInfo[playerid][pSex], PlayerInfo[playerid][pAge], PlayerInfo[playerid][pSkin], PlayerInfo[playerid][pPos_x],
 		PlayerInfo[playerid][pPos_y], PlayerInfo[playerid][pPos_z], PlayerInfo[playerid][pPos_r], PlayerInfo[playerid][pConnectTime], PlayerInfo[playerid][pRespect], PlayerInfo[playerid][pNumber], PlayerInfo[playerid][pWarns], PlayerInfo[playerid][pGang],
 		PlayerInfo[playerid][pFaction], PlayerInfo[playerid][pLeader], PlayerInfo[playerid][pRank], szPlayerName);
 
-		mysql_query(szQuery, THREAD_SAVE_ACCOUNT_CHAIN_1, playerid, g_MySQLConnections[0]);
+		mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii", THREAD_SAVE_ACCOUNT_CHAIN_1,playerid);
 	}
 	return 1;
 }
@@ -43339,35 +43365,48 @@ stock timec(timestamp, compare = -1) {
     }
     return returnstr;
 }
+// forward OnQueryError(errorid, const error[], const callback[], const query[], MySQL:handle);
 
-public OnQueryError(errorid, error[], resultid, extraid, callback[], query[], connectionHandle) {
-	printf("errorid: %d | error: %s | callback: %s | query: %s | connection handle: %d | resultid: %d | extraid: %d", errorid, error, callback, query, connectionHandle, resultid, extraid);
+public OnQueryError(errorid, const error[], const callback[], const query[], MySQL:handle) {
+	printf("errorid: %d | error: %s | callback: %s | query: %s", errorid, error, callback, query);
 	return 1;
 }
-
-public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
-	new
-	    szQuery[2048];
+forward OnQueryFinished(resultid,extraid);
+public OnQueryFinished(resultid, extraid)
+{
+	new szQuery[2048];
 
 	switch(resultid) {
-	    case THREAD_CONFIRM_USERNAME: {
-	        mysql_store_result(g_MySQLConnections[0]);
+	    case THREAD_CONFIRM_USERNAME:
+		{
+	        // // mysql_free_result(sqldb);
 
-	        if(mysql_fetch_int(g_MySQLConnections[0]) == 0) { // MySQL confirmed the COUNT(*) result is 0; no account with that username exists yet.
-	            mysql_free_result(g_MySQLConnections[0]);
-	            ShowMainMenuDialog(extraid, 2);
+	        // if(mysql_fetch_int(sqldb) == 0) { // MySQL confirmed the COUNT(*) result is 0; no account with that username exists yet.
+			if(cache_num_rows())
+			{
+				new count;
+				cache_get_value_name_int(0,"COUNT(*)",count);
 
-	            gPlayerAccount[extraid] = 0;
-	        } else {
-	            mysql_free_result(g_MySQLConnections[0]);
-	            ShowMainMenuDialog(extraid, 1);
-	            gPlayerAccount[extraid] = 1;
+				if(count == 0)
+				{
+					// mysql_free_result(sqldb);
+					ShowMainMenuDialog(extraid, 2);
+		            gPlayerAccount[extraid] = 0;
+				}
+	         	else
+				{
+					// mysql_free_result(sqldb);
+					ShowMainMenuDialog(extraid, 1);
+					gPlayerAccount[extraid] = 1;
+				}
 		  	}
 	    }
-	    case THREAD_CHECK_NAME_PASSWORD: {
-	        mysql_store_result(g_MySQLConnections[0]);
+		
+	    case THREAD_CHECK_NAME_PASSWORD:
+		{
+// // mysql_free_result(sqldb);
 
-	        if(mysql_num_rows(g_MySQLConnections[0]) > 0) {
+	        if(cache_num_rows()) {
 	            new
 	                szPassword[64],
 	                szTarget[MAX_PLAYER_NAME],
@@ -43378,22 +43417,22 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 
 				WP_Hash(szBuffer, sizeof(szBuffer), szPassword);
 
-		        format(szQuery, sizeof(szQuery), "UPDATE players SET Password = '%s' WHERE Username = '%s'", szBuffer, szTarget);
-		        mysql_query(szQuery, THREAD_FULLY_CHANGE_PASSWORD, extraid, g_MySQLConnections[0]);
+		        mysql_format(sqldb,szQuery, sizeof(szQuery), "UPDATE players SET Password = '%s' WHERE Username = '%s'", szBuffer, szTarget);
+		        mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii", THREAD_FULLY_CHANGE_PASSWORD,extraid);
 	        } else {
 				DeletePVar(extraid, "opasschange");
 				DeletePVar(extraid, "opasschangetarget");
 				SendClientMessage(extraid, COLOR_GREY, "The player account name specified doesn't exist or currently has admin.");
 			}
 
-	        mysql_free_result(g_MySQLConnections[0]);
+	        // // mysql_free_result(sqldb);
 	    }
 		case THREAD_LIST_NAMECHANGES: {
-		    mysql_store_result(g_MySQLConnections[0]);
-
-		    if(mysql_num_rows(g_MySQLConnections[0]) > 0) {
+		    // mysql_free_result(sqldb);
+/*
+		    if(cache_num_rows()) {
 		        // Use 'szQuery' because of the large size of the string at our disposal
-		        format(szQuery, sizeof(szQuery), "");
+		        mysql_format(sqldb,szQuery, sizeof(szQuery), "");
 
 		        new
 		            szPlayerName[MAX_PLAYER_NAME],
@@ -43404,7 +43443,7 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 
 		        format(szMessage, sizeof(szMessage), "Listing the last 10 namechanges for %s:\n", GetPlayerNameEx(GetPVarInt(extraid, "namechanges_target")));
 
-	        	while(mysql_fetch_row_format(szQuery, "|", g_MySQLConnections[0])) {
+	        	while(mysql_fetch_row_format(szQuery, "|",sqldb)) {
 					sscanf(szQuery, "p<|>s[MAX_PLAYER_NAME]ds[MAX_PLAYER_NAME]s[MAX_PLAYER_NAME]", szPlayerOldName, iUnixTS, szPlayerName, szPlayerAdminName);
 
 					format(szMessage, sizeof(szMessage), "%s\n%s is now known as %s (as of %s) and his namechange was approved of by %s", szMessage, szPlayerOldName, szPlayerName, timec(iUnixTS), szPlayerAdminName);
@@ -43418,7 +43457,7 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 				DeletePVar(extraid, "namechanges_target");
 		    }
 
-		    mysql_free_result(g_MySQLConnections[0]);
+		    // // mysql_free_result(sqldb);*/
 		}
 	    case THREAD_FULLY_CHANGE_PASSWORD: {
 	        new
@@ -43438,9 +43477,9 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 	        DeletePVar(extraid, "opasschangetarget");
 		}
 	    case THREAD_CHECK_NEW_NAME: {
-			mysql_store_result(g_MySQLConnections[0]);
+			// mysql_free_result(sqldb);
 
-			if(mysql_num_rows(g_MySQLConnections[0]) > 0) {
+			if(cache_num_rows()) {
 			    SendClientMessage(GetPVarInt(extraid, "requestby"), COLOR_GREY, "The requested name is already taken.");
 			    if(GetPVarInt(extraid, "requestpath") == 1) {
 					SendClientMessage(extraid, COLOR_GREY, "The name you requested has already been taken, please select another.");
@@ -43466,11 +43505,11 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 
 				GetPVarString(extraid, "requestedname", szPlayerName, MAX_PLAYER_NAME);
 
-				format(szQuery, sizeof(szQuery), "UPDATE players SET Username = '%s' WHERE ID = %d", szPlayerName, PlayerInfo[extraid][pID]);
-				mysql_query(szQuery, THREAD_CONFIRMED_NAMECHANGE, extraid, g_MySQLConnections[0]);
+				mysql_format(sqldb,szQuery, sizeof(szQuery), "UPDATE players SET Username = '%s' WHERE ID = %d", szPlayerName, PlayerInfo[extraid][pID]);
+				mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii",THREAD_CONFIRMED_NAMECHANGE,extraid);
 			}
 
-			mysql_free_result(g_MySQLConnections[0]);
+			// // mysql_free_result(sqldb);
 		}
 		case THREAD_CONFIRMED_NAMECHANGE: {
   			new
@@ -43505,7 +43544,7 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
      			UpdateDynamic3DTextLabelText(HouseInfo[PlayerInfo[extraid][pHouse2]][hTextID], COLOR_HOUSEGREEN, string);
 			}
 
-			if(PlayerInfo[extraid][pVIP] >= 1) {
+			if(PlayerInfo[extraid][pVip] >= 1) {
 				format(string, sizeof(string), "[DONATOR NAMECHANGES] %s has changed their name to %s.", GetPlayerNameEx(extraid), szPlayerName);
 				Log("logs/donatornames.log", string);
 			}
@@ -43517,8 +43556,8 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 			Log("logs/stats.log", string);
 
 			if(AdminDuty[extraid] == 0) {
-				format(szQuery, sizeof(szQuery), "INSERT INTO namechanges (dbid, oldname, newname, approvedbyid, approvedbyname, unixts) VALUES(%d, '%s', '%s', %d, '%s', %d)", PlayerInfo[extraid][pID], GetPlayerNameEx(extraid), szPlayerName, PlayerInfo[GetPVarInt(extraid, "requestby")][pID], GetPlayerNameEx(GetPVarInt(extraid, "requestby")), gettime());
-				mysql_query(szQuery, THREAD_NO_RESULT, 0, g_MySQLConnections[0]);
+				mysql_format(sqldb,szQuery, sizeof(szQuery), "INSERT INTO namechanges (dbid, oldname, newname, approvedbyid, approvedbyname, unixts) VALUES(%d, '%s', '%s', %d, '%s', %d)", PlayerInfo[extraid][pID], GetPlayerNameEx(extraid), szPlayerName, PlayerInfo[GetPVarInt(extraid, "requestby")][pID], GetPlayerNameEx(GetPVarInt(extraid, "requestby")), gettime());
+				mysql_tquery(sqldb,szQuery);
 			}
 
 			SetPlayerName(extraid, szPlayerName);
@@ -43545,23 +43584,23 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 			DeletePVar(extraid, "RequestingNameChange");
 		}
 	    case THREAD_GIVE_REF_TOKENS: {
-	        mysql_store_result(g_MySQLConnections[0]);
+// // mysql_free_result(sqldb);
 
-	        if(mysql_num_rows(g_MySQLConnections[0]) == 0)
+	        if(cache_num_rows() == 0)
 	            return SendClientMessage(extraid, COLOR_YELLOW, "The player who referred you here no longer has an account and has not been given their referral token.");
 
-			new
-			    iTokens = mysql_fetch_int(g_MySQLConnections[0]) + 1;
+			new iTokens;
+			cache_get_value_name_int(0,"RefTokensOffline",iTokens);
 
-			format(szQuery, sizeof(szQuery), "UPDATE players SET RefTokensOffline = %d WHERE Username = '%s'", iTokens, PlayerInfo[extraid][pReferredBy]);
-			mysql_query(szQuery, THREAD_LITERALLY_GIVE_REFTOKEN, extraid, g_MySQLConnections[0]);
+			mysql_format(sqldb,szQuery, sizeof(szQuery), "UPDATE players SET RefTokensOffline = %d WHERE Username = '%s'", iTokens, PlayerInfo[extraid][pReferredBy]);
+			mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii",THREAD_LITERALLY_GIVE_REFTOKEN,extraid);
 
-            mysql_free_result(g_MySQLConnections[0]);
+            // // mysql_free_result(sqldb);
 		}
 		case THREAD_OFFLINE_FLAG: {
-	        mysql_store_result(g_MySQLConnections[0]);
+// // mysql_free_result(sqldb);
 
-	        if(mysql_num_rows(g_MySQLConnections[0]) == 0)
+	        if(cache_num_rows() == 0)
 	            return SendClientMessage(extraid, COLOR_GREY, "That account doesn't exist!");
 
 			new
@@ -43576,8 +43615,8 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 			getdate(year,month,day);
 			format(szFormattedFlag, sizeof(szFormattedFlag), "%s - %s (%d/%d/%d)", szFlag, GetPlayerNameEx(extraid), day, month, year);
 
-			format(szQuery, sizeof(szQuery), "UPDATE players SET Flag = '%s' WHERE Username = '%s'", szFormattedFlag, szPlayerName);
-			mysql_query(szQuery, THREAD_NO_RESULT, 0, g_MySQLConnections[0]);
+			mysql_format(sqldb,szQuery, sizeof(szQuery), "UPDATE players SET Flag = '%s' WHERE Username = '%s'", szFormattedFlag, szPlayerName);
+			mysql_tquery(sqldb,szQuery);
 
 			// Avoid defining a new string, use one that's already clear to go.
 			format(szFormattedFlag, sizeof(szFormattedFlag), "AdmCmd: %s has flagged %s, reason: %s.", GetPlayerNameEx(extraid), szPlayerName, szFlag);
@@ -43586,25 +43625,25 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 			DeletePVar(extraid, "offline_flag");
 			DeletePVar(extraid, "offline_flag_target");
 
-    		mysql_free_result(g_MySQLConnections[0]);
+    		// // mysql_free_result(sqldb);
 		}
 		case THREAD_OFFLINE_UNINVITE: {
-		    mysql_store_result(g_MySQLConnections[0]);
+		    // mysql_free_result(sqldb);
 
-	        if(mysql_num_rows(g_MySQLConnections[0]) == 0)
+	        if(cache_num_rows() == 0)
 	            return SendClientMessage(extraid, COLOR_YELLOW, "That account doesn't exist!");
 
-			if(mysql_retrieve_row()) {
+			if(cache_num_rows()) {
 			    new
 			        szReturn[6];
 
-            	mysql_fetch_field_row(szReturn, "AdminLevel", g_MySQLConnections[0]);
+            	cache_get_value_name(0,"AdminLevel",szReturn);
 
             	if(strval(szReturn) >= 5)
             	    return SendClientMessage(extraid, COLOR_YELLOW, "This player can't be uninvited by you. ");
 
-                mysql_fetch_field_row(szReturn, "Faction", g_MySQLConnections[0]);
-
+                // mysql_fetch_field_row(szReturn, "Faction",sqldb);
+				cache_get_value_name(0,"Faction",szReturn);
                 if(strval(szReturn) != PlayerInfo[extraid][pFaction])
                 	return SendClientMessage(extraid, COLOR_YELLOW, "This player isn't in the same faction as you.");
 
@@ -43612,10 +43651,10 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 				    szPlayerName[MAX_PLAYER_NAME];
 
 				GetPVarString(extraid, "uninvite_target", szPlayerName, MAX_PLAYER_NAME);
-				format(szQuery, sizeof(szQuery), "UPDATE players SET Faction = 0, Rankk = 0, OnDuty = 0, Leader = 0, Skin = 299 WHERE Username = '%s'", szPlayerName);
-				mysql_query(szQuery, THREAD_FULLY_UNINVITE, extraid, g_MySQLConnections[0]);
+				mysql_format(sqldb,szQuery, sizeof(szQuery), "UPDATE players SET Faction = 0, Rankk = 0, OnDuty = 0, Leader = 0, Skin = 299 WHERE Username = '%s'", szPlayerName);
+				mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii",THREAD_FULLY_UNINVITE,extraid);
 
-				mysql_free_result(g_MySQLConnections[0]);
+				// mysql_free_result(sqldb);
             }
 
 		}
@@ -43642,13 +43681,13 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
    			SendClientMessage(extraid, COLOR_YELLOW, string);
 		}
 	    case THREAD_REFERRAL_MENU: {
-	        mysql_store_result(g_MySQLConnections[0]);
+// // mysql_free_result(sqldb);
 
-	        if(mysql_num_rows(g_MySQLConnections[0]) == 0) {
+	        if(cache_num_rows() == 0) {
 	            format(PlayerInfo[extraid][pReferredBy], MAX_PLAYER_NAME, "");
                 ShowPlayerDialogEx(extraid, REGISTRATION_MENU_FOUR, DIALOG_STYLE_INPUT, "{FFA500}Next Generation Roleplay - Registration", "{FFFFFF}ENTRY DECLINED: There is no player registered by that name.\n\nWhat is the name of the player that referred you?\n\nNote: It must be the full player name with underscore ('_'). For example: John_Smith", "Done", "Cancel");
 	        } else {
-	            mysql_free_result(g_MySQLConnections[0]);
+	            // mysql_free_result(sqldb);
 
 				new
 				    string[128];
@@ -43658,38 +43697,37 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 	        }
 		}
 		case THREAD_MDC_CHECK: {
-			if(mysql_num_rows(g_MySQLConnections[0]) == 0) { // No rows exist with the specified criteria, so, wrong password!
-				mysql_free_result(g_MySQLConnections[0]);
+			if(cache_num_rows() == 0) { // No rows exist with the specified criteria, so, wrong password!
+				// mysql_free_result(sqldb);
 				ShowPlayerDialogEx(extraid, MDC_END_ID, DIALOG_STYLE_MSGBOX, "SA-MDC - Logged in | ERROR ", "There is no record of that person.", "OK", "Cancel");
 			} else {
-				mysql_store_result(g_MySQLConnections[0]);
+				// mysql_free_result(sqldb);
 				new
 					crimeDescription[128],
 					crimeIssuerName[MAX_PLAYER_NAME],
 					crimeIssuedToName[MAX_PLAYER_NAME],
-					szFullMessage[1028],
-					iSlot = 0;
+					szFullMessage[1028];
+					// iSlot = 0;
 
-				while(mysql_retrieve_row()) {
-					iSlot++;
-					switch(iSlot) {
-						case 1: {
-							mysql_fetch_field_row(crimeDescription, "crimeDescription", g_MySQLConnections[0]);
-							mysql_fetch_field_row(crimeIssuerName, "crimeIssuerName", g_MySQLConnections[0]);
-							mysql_fetch_field_row(crimeIssuedToName, "crimeIssuedToName", g_MySQLConnections[0]);
-							if(!isnull(crimeDescription)) {
-								format(szFullMessage, sizeof(szFullMessage), "Name: %s", crimeIssuedToName);
-								format(szFullMessage, sizeof(szFullMessage), "%s\n %s - %s", szFullMessage, crimeDescription, crimeIssuerName);
-							}
-						}
-						case 2, 3, 4, 5, 6: {
-							mysql_fetch_field_row(crimeDescription, "crimeDescription", g_MySQLConnections[0]);
-							mysql_fetch_field_row(crimeIssuerName, "crimeIssuerName", g_MySQLConnections[0]);
-							if(!isnull(szFullMessage) && !isnull(crimeDescription)) {
-								format(szFullMessage, sizeof(szFullMessage), "%s\n %s - %s", szFullMessage, crimeDescription, crimeIssuerName);
-							}
-						}
+				// while(mysql_retrieve_row()) {
+				for(new c; c < cache_num_rows(); c++){
+					// iSlot++;
+					cache_get_value_name(c,"crimeDescription",crimeDescription);
+					cache_get_value_name(c,"crimeIssuerName",crimeIssuerName);
+					cache_get_value_name(c,"crimeIssuedToName",crimeIssuedToName);
+					if(!isnull(crimeDescription)) {
+						format(szFullMessage, sizeof(szFullMessage), "Name: %s", crimeIssuedToName);
+						format(szFullMessage, sizeof(szFullMessage), "%s\n %s - %s", szFullMessage, crimeDescription, crimeIssuerName);
 					}
+				
+					// 	case 2, 3, 4, 5, 6: {
+					// 		cache_get_value_name(crimeDescription, "crimeDescription",sqldb);
+					// 		cache_get_value_name(crimeIssuerName, "crimeIssuerName",sqldb);
+					// 		if(!isnull(szFullMessage) && !isnull(crimeDescription)) {
+					// 			format(szFullMessage, sizeof(szFullMessage), "%s\n %s - %s", szFullMessage, crimeDescription, crimeIssuerName);
+					// 		}
+					// 	}
+					// }
 				}
 				for(new i=0; i < MAX_PLAYERVEHICLES; i++) {
 					if(PlayerVehicleInfo[GetPVarInt(extraid, "MDCCHECK")][i][pvTicket] != 0)
@@ -43699,137 +43737,97 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 				}
 				ShowPlayerDialogEx(extraid, MDC_END_ID, DIALOG_STYLE_LIST, "SA-MDC - Logged in | Criminal History", szFullMessage, "OK", "Cancel");
 				DeletePVar(extraid, "MDCCHECK");
-				mysql_free_result(g_MySQLConnections[0]);
+				// mysql_free_result(sqldb);
 			}
 		}
 	    case THREAD_OFFLINE_KILLS: {
-			mysql_store_result(g_MySQLConnections[0]);
+			// mysql_free_result(sqldb);
 			if(IsPlayerConnected(extraid)) {
-				if(mysql_num_rows(g_MySQLConnections[0]) == 0) { // No rows exist with the specified criteria, so, wrong password!
-		            mysql_free_result(g_MySQLConnections[0]);
+				if(cache_num_rows() == 0) { // No rows exist with the specified criteria, so, wrong password!
+		            // mysql_free_result(sqldb);
 					SendClientMessage(extraid, COLOR_GREY, "The specified player account doesn't exist.");
 		        } else {
-					mysql_retrieve_row();
+					// mysql_retrieve_row();
 
 					new
 					    szPlayerName[MAX_PLAYER_NAME],
 						szReturn[128],
 						iPlayerID;
 
-                    mysql_fetch_field_row(szPlayerName, "Username", g_MySQLConnections[0]);
-					mysql_fetch_field_row(szReturn, "ID", g_MySQLConnections[0]);
+                    cache_get_value_name(0, "Username",szPlayerName);
+					cache_get_value_name(0, "ID",szReturn);
 				    iPlayerID = strval(szReturn);
-					mysql_free_result(g_MySQLConnections[0]);
+					// mysql_free_result(sqldb);
 
 					SendClientMessage(extraid, COLOR_GREEN, "________________________________________________");
 					format(szReturn, sizeof(szReturn), "<< Last 10 Kills of %s >>", szPlayerName);
 					SendClientMessage(extraid, COLOR_YELLOW, szReturn);
 
-					format(szQuery, sizeof(szQuery), "SELECT kills.* FROM kills INNER JOIN players ON kills.killerID = players.ID OR kills.killedID = players.ID WHERE players.ID = '%d' ORDER BY kills.killTS ASC LIMIT 10", iPlayerID);
-					mysql_query(szQuery, THREAD_OFFLINE_KILLS_2, extraid, g_MySQLConnections[0]);
+					mysql_format(sqldb,szQuery, sizeof(szQuery), "SELECT kills.* FROM kills INNER JOIN players ON kills.killerID = players.ID OR kills.killedID = players.ID WHERE players.ID = '%d' ORDER BY kills.killTS ASC LIMIT 10", iPlayerID);
+					mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii",THREAD_OFFLINE_KILLS_2, extraid);
 				}
 			}
 	    }
 	    case THREAD_OFFLINE_KILLS_2: {
-			mysql_store_result(g_MySQLConnections[0]);
+			// mysql_free_result(sqldb);
 			new
-				KillLog[128],
-				iSlot = 0;
+				KillLog[128];
+				// iSlot = 0;
 
-			while(mysql_retrieve_row()) {
-				iSlot++;
-				switch(iSlot) {
-					case 9: {
-						mysql_fetch_field_row(KillLog, "killText", g_MySQLConnections[0]);
-						if(!isnull(KillLog)) SendClientMessage(extraid, COLOR_YELLOW, KillLog);
-					}
-					case 8: {
-						mysql_fetch_field_row(KillLog, "killText", g_MySQLConnections[0]);
-						if(!isnull(KillLog)) SendClientMessage(extraid, COLOR_YELLOW, KillLog);
-					}
-					case 7: {
-						mysql_fetch_field_row(KillLog, "killText", g_MySQLConnections[0]);
-						if(!isnull(KillLog)) SendClientMessage(extraid, COLOR_YELLOW, KillLog);
-					}
-					case 6: {
-						mysql_fetch_field_row(KillLog, "killText", g_MySQLConnections[0]);
-						if(!isnull(KillLog)) SendClientMessage(extraid, COLOR_YELLOW, KillLog);
-					}
-					case 5: {
-						mysql_fetch_field_row(KillLog, "killText", g_MySQLConnections[0]);
-						if(!isnull(KillLog)) SendClientMessage(extraid, COLOR_YELLOW, KillLog);
-					}
-					case 4: {
-						mysql_fetch_field_row(KillLog, "killText", g_MySQLConnections[0]);
-						if(!isnull(KillLog)) SendClientMessage(extraid, COLOR_YELLOW, KillLog);
-					}
-					case 3: {
-						mysql_fetch_field_row(KillLog, "killText", g_MySQLConnections[0]);
-						if(!isnull(KillLog)) SendClientMessage(extraid, COLOR_YELLOW, KillLog);
-					}
-					case 2: {
-						mysql_fetch_field_row(KillLog, "killText", g_MySQLConnections[0]);
-						if(!isnull(KillLog)) SendClientMessage(extraid, COLOR_YELLOW, KillLog);
-					}
-					case 1: {
-						mysql_fetch_field_row(KillLog, "killText", g_MySQLConnections[0]);
-						if(!isnull(KillLog)) SendClientMessage(extraid, COLOR_YELLOW, KillLog);
-					}
-					case 0: {
-						mysql_fetch_field_row(KillLog, "killText", g_MySQLConnections[0]);
-						if(!isnull(KillLog)) SendClientMessage(extraid, COLOR_YELLOW, KillLog);
-					}
-				}
+			for(new c=0; c < cache_num_rows(); c++)
+			{
+				cache_get_value_name(c, "killText",KillLog);
+				if(!isnull(KillLog)) SendClientMessage(extraid, COLOR_YELLOW, KillLog);	
 			}
-			mysql_free_result(g_MySQLConnections[0]);
+			// mysql_free_result(sqldb);
 		}
 	    case THREAD_GET_STATS: {
-	        mysql_store_result(g_MySQLConnections[0]);
+// // mysql_free_result(sqldb);
 			if(IsPlayerConnected(extraid)) {
 			    new
 			        szReturn[128];
 
-		        if(mysql_num_rows(g_MySQLConnections[0]) == 0) { // No rows exist with the specified criteria, so, wrong password!
-		            mysql_free_result(g_MySQLConnections[0]);
+		        if(cache_num_rows() == 0) { // No rows exist with the specified criteria, so, wrong password!
+		            // mysql_free_result(sqldb);
 					SendClientMessage(extraid, COLOR_GREY, "The specified player account doesn't exist.");
 		        } else {
-		            mysql_retrieve_row();
+		            // mysql_retrieve_row();
 
 					new facgang[20], employer[64], rank[64], division[64], jtext[20], jtext2[20];
 
-					mysql_fetch_field_row(szReturn, "Level", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Level",szReturn);
 				    new level = strval(szReturn);
 
-				    mysql_fetch_field_row(szReturn, "ConnectTime", g_MySQLConnections[0]);
+				    cache_get_value_name(0, "ConnectTime",szReturn);
 				    new phours = strval(szReturn);
 
-				    mysql_fetch_field_row(szReturn, "Respect", g_MySQLConnections[0]);
+				    cache_get_value_name(0, "Respect",szReturn);
 					new respect = strval(szReturn);
 
 					new nxtlevel = level + 1;
 					new expamount = nxtlevel*levelexp;
 					new costlevel = nxtlevel*2500;
 
-					mysql_fetch_field_row(szReturn, "PhoneNumber", g_MySQLConnections[0]);
+					cache_get_value_name(0, "PhoneNumber",szReturn);
 					new pnumber = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Warnings", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Warnings",szReturn);
 					new warns = strval(szReturn);
 
 					facgang = "Faction";
 					employer = "None";
 					rank = "None";
 
-					mysql_fetch_field_row(szReturn, "Gang", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Gang",szReturn);
 					new iGang = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Rankk", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Rankk",szReturn);
 					new iRank = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Division", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Division",szReturn);
 					new iDivision = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Faction", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Faction",szReturn);
 					new iFaction = strval(szReturn);
 
 					if(iGang < 255) {
@@ -43855,10 +43853,10 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 			            GetPlayerFactionInfo(MAX_PLAYERS, rank, division, employer);
 					}
 
-					mysql_fetch_field_row(szReturn, "Job", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Job",szReturn);
 					new iJob = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Job2", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Job2",szReturn);
 					new iJob2 = strval(szReturn);
 
 					switch(iJob)
@@ -43913,7 +43911,7 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 					{
 						case 1:
 						{
-								mysql_fetch_field_row(szReturn, "DetSkill", g_MySQLConnections[0]);
+								cache_get_value_name(0, "DetSkill",szReturn);
 								new skilllevel = strval(szReturn);
 								if(skilllevel >= 0 && skilllevel <= 50) { jlevel = 1; }
 								else if(skilllevel >= 51 && skilllevel <= 100) { jlevel = 2; }
@@ -43923,7 +43921,7 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 						}
 						case 2:
 						{
-								mysql_fetch_field_row(szReturn, "LawSkill", g_MySQLConnections[0]);
+								cache_get_value_name(0, "LawSkill",szReturn);
 								new skilllevel = strval(szReturn);
 								if(skilllevel >= 0 && skilllevel <= 50) { jlevel = 1; }
 								else if(skilllevel >= 51 && skilllevel <= 100) { jlevel = 2; }
@@ -43933,7 +43931,7 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 						}
 						case 3:
 						{
-								mysql_fetch_field_row(szReturn, "SexSkill", g_MySQLConnections[0]);
+								cache_get_value_name(0, "SexSkill",szReturn);
 								new skilllevel = strval(szReturn);
 								if(skilllevel >= 0 && skilllevel <= 50) { jlevel = 1; }
 								else if(skilllevel >= 51 && skilllevel <= 100) { jlevel = 2; }
@@ -43943,7 +43941,7 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 						}
 						case 4:
 						{
-								mysql_fetch_field_row(szReturn, "DrugsSkill", g_MySQLConnections[0]);
+								cache_get_value_name(0, "DrugsSkill",szReturn);
 								new skilllevel = strval(szReturn);
 								if(skilllevel >= 0 && skilllevel <= 50) { jlevel = 1; }
 								else if(skilllevel >= 51 && skilllevel <= 100) { jlevel = 2; }
@@ -43953,7 +43951,7 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 						}
 						case 5:
 						{
-								mysql_fetch_field_row(szReturn, "CarSkill", g_MySQLConnections[0]);
+								cache_get_value_name(0, "CarSkill",szReturn);
 								new skilllevel = strval(szReturn);
 								if(skilllevel >= 0 && skilllevel <= 50) { jlevel = 1; }
 								else if(skilllevel >= 51 && skilllevel <= 100) { jlevel = 2; }
@@ -43963,7 +43961,7 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 						}
 				  		case 7:
 						{
-								mysql_fetch_field_row(szReturn, "MechSkill", g_MySQLConnections[0]);
+								cache_get_value_name(0, "MechSkill",szReturn);
 								new skilllevel = strval(szReturn);
 								if(skilllevel >= 0 && skilllevel <= 50) { jlevel = 1; }
 								else if(skilllevel >= 51 && skilllevel <= 100) { jlevel = 2; }
@@ -43973,7 +43971,7 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 						}
 						case 9:
 						{
-								mysql_fetch_field_row(szReturn, "ArmsSkill", g_MySQLConnections[0]);
+								cache_get_value_name(0, "ArmsSkill",szReturn);
 								new skilllevel = strval(szReturn);
 								if(skilllevel >= 0 && skilllevel < 50) { jlevel = 1; }
 								else if(skilllevel >= 50 && skilllevel < 100) { jlevel = 2; }
@@ -43983,7 +43981,7 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 						}
 						case 12:
 						{
-								mysql_fetch_field_row(szReturn, "BoxSkill", g_MySQLConnections[0]);
+								cache_get_value_name(0, "BoxSkill",szReturn);
 								new skilllevel = strval(szReturn);
 								if(skilllevel >= 0 && skilllevel <= 50) { jlevel = 1; }
 								else if(skilllevel >= 51 && skilllevel <= 100) { jlevel = 2; }
@@ -43993,7 +43991,7 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 						}
 						case 14:
 						{
-								mysql_fetch_field_row(szReturn, "SmugSkill", g_MySQLConnections[0]);
+								cache_get_value_name(0, "SmugSkill",szReturn);
 								new skilllevel = strval(szReturn);
 								if(skilllevel >= 0 && skilllevel <= 50) { jlevel = 1; }
 								else if(skilllevel >= 51 && skilllevel <= 100) { jlevel = 2; }
@@ -44003,7 +44001,7 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 						}
 						case 20:
 						{
-								mysql_fetch_field_row(szReturn, "TruckSkill", g_MySQLConnections[0]);
+								cache_get_value_name(0, "TruckSkill",szReturn);
 								new skilllevel = strval(szReturn);
 								if(skilllevel >= 0 && skilllevel <= 50) { jlevel = 1; }
 								else if(skilllevel >= 51 && skilllevel <= 100) { jlevel = 2; }
@@ -44014,21 +44012,21 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 						default: jlevel = 0;
 					}
 
-                    mysql_fetch_field_row(szReturn, "UpgradePoints", g_MySQLConnections[0]);
+                    cache_get_value_name(0, "UpgradePoints",szReturn);
 					new upgrade = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "SpawnArmor", g_MySQLConnections[0]);
+					cache_get_value_name(0, "SpawnArmor",szReturn);
 					new Float:sarmor = floatstr(szReturn);
 
-                    mysql_fetch_field_row(szReturn, "Cash", g_MySQLConnections[0]);
+                    cache_get_value_name(0, "Cash",szReturn);
 					new cash = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Bank", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Bank",szReturn);
 					new bank = strval(szReturn);
 
 					new totalwealth = cash + bank;
 
-					mysql_fetch_field_row(szReturn, "Insurance", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Insurance",szReturn);
 					new iInsurance = strval(szReturn);
 
 					new insur[20];
@@ -44039,88 +44037,88 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 						default: insur = "None";
 					}
 
-                    mysql_fetch_field_row(szReturn, "Crimes", g_MySQLConnections[0]);
+                    cache_get_value_name(0, "Crimes",szReturn);
 					new crimes = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Arrested", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Arrested",szReturn);
 					new arrests = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "WantedLevel", g_MySQLConnections[0]);
+					cache_get_value_name(0, "WantedLevel",szReturn);
 					new wanted = strval(szReturn);
 
 					new Float:health, Float:armor;
 
-					mysql_fetch_field_row(szReturn, "Health", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Health",szReturn);
 					health = floatstr(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Armor", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Armor",szReturn);
 					armor = floatstr(szReturn);
 
-                    mysql_fetch_field_row(szReturn, "Pot", g_MySQLConnections[0]);
+                    cache_get_value_name(0, "Pot",szReturn);
 					new pot = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Crack", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Crack",szReturn);
 					new crack = strval(szReturn);
 
-                    mysql_fetch_field_row(szReturn, "RadioFreq", g_MySQLConnections[0]);
+                    cache_get_value_name(0, "RadioFreq",szReturn);
 					new radiofreq = strval(szReturn);
 
-                    mysql_fetch_field_row(szReturn, "Materials", g_MySQLConnections[0]);
+                    cache_get_value_name(0, "Materials",szReturn);
 					new mats = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Rope", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Rope",szReturn);
 					new rope = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Cigars", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Cigars",szReturn);
 					new cigars = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Sprunk", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Sprunk",szReturn);
 					new sprunk = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Spraycan", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Spraycan",szReturn);
 					new spray = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "BiggestFish", g_MySQLConnections[0]);
+					cache_get_value_name(0, "BiggestFish",szReturn);
 					new bigfish = strval(szReturn);
 
 					// Eight line (admin only)
-					mysql_fetch_field_row(szReturn, "House", g_MySQLConnections[0]);
+					cache_get_value_name(0, "House",szReturn);
 					new house = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Renting", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Renting",szReturn);
 					new rent = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Interior", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Interior",szReturn);
 					new interior = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "VirtualWorld", g_MySQLConnections[0]);
+					cache_get_value_name(0, "VirtualWorld",szReturn);
 					new vw = strval(szReturn);
 					new realvw = vw;
 
-					mysql_fetch_field_row(szReturn, "JailTime", g_MySQLConnections[0]);
+					cache_get_value_name(0, "JailTime",szReturn);
 					new jtime = strval(szReturn);
 
 					new
 					    szPlayerName[MAX_PLAYER_NAME];
 
-                    mysql_fetch_field_row(szPlayerName, "Username", g_MySQLConnections[0]);
+                    cache_get_value_name(0,"Username",szPlayerName);
 
 					// Added
 					new married[20];
-					mysql_fetch_field_row(married, "MarriedTo", g_MySQLConnections[0]);
+					cache_get_value_name(0,"MarriedTo",married);
 
-                    mysql_fetch_field_row(szReturn, "RefTokens", g_MySQLConnections[0]);
+                    cache_get_value_name(0, "RefTokens",szReturn);
 					new reftokens = strval(szReturn);
 
 					new sext[16];
-					mysql_fetch_field_row(szReturn, "Sex", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Sex",szReturn);
 
 					if(strval(szReturn) == 1) { sext = "Male"; } else { sext = "Female"; }
 
-					mysql_fetch_field_row(szReturn, "Age", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Age",szReturn);
 					new age = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Donator", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Donator",szReturn);
 					new donator = strval(szReturn);
 
 					new donatortxt[16];
@@ -44130,25 +44128,25 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 					else if(donator == 3) { donatortxt = "Gold"; }
 					else { donatortxt = "No"; }
 
-                    mysql_fetch_field_row(szReturn, "NewMutedTotal", g_MySQLConnections[0]);
+                    cache_get_value_name(0, "NewMutedTotal",szReturn);
 					new nmutes = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "AdMutedTotal", g_MySQLConnections[0]);
+					cache_get_value_name(0, "AdMutedTotal",szReturn);
 			        new admutes = strval(szReturn);
 
-			        mysql_fetch_field_row(szReturn, "ReportMutedTotal", g_MySQLConnections[0]);
+			        cache_get_value_name(0, "ReportMutedTotal",szReturn);
 			        new rmutes = strval(szReturn);
 
-                    mysql_fetch_field_row(szReturn, "AdminLevel", g_MySQLConnections[0]);
+                    cache_get_value_name(0, "AdminLevel",szReturn);
 					new adminlevel = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Banned", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Banned",szReturn);
 					new banned = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Permabanned", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Permabanned",szReturn);
 					new permabanned = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Disabled", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Disabled",szReturn);
 					new disabled = strval(szReturn);
 
 				    SendClientMessage(extraid, COLOR_NEWS,"___________________________________________________________________________________________________");
@@ -44173,10 +44171,10 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 				}
 			}
 
-	        mysql_free_result(g_MySQLConnections[0]);
+	        // mysql_free_result(sqldb);
 	    }
-		case THREAD_OFFLINE_FINE: {
-	        mysql_store_result(g_MySQLConnections[0]);
+/*		case THREAD_OFFLINE_FINE: {
+// // mysql_free_result(sqldb);
 
 	        new
 	            szMessage[128],
@@ -44192,7 +44190,7 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 	            szResult[256],
 				iTotalCashAfterFine;
 
-	        if(mysql_fetch_row_format(szResult, "|", g_MySQLConnections[0])) {
+	        if(mysql_fetch_row_format(szResult, "|",sqldb)) {
 				sscanf(szResult, "p<|>dddssdd", iPlayerPermabanned, iPlayerBanned, iPlayerAdminLevel, szPlayerName, szPlayerIP, iBankAccount, iCash);
 
 				if(iPlayerPermabanned > 0)
@@ -44202,13 +44200,13 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 				    return SendClientMessage(extraid, COLOR_GREY, "You can't fine other administrators.");
 
 				GetPVarString(extraid, "ofinereason", szReason, sizeof(szReason));
-				mysql_real_escape_string(szReason, szReason, g_MySQLConnections[0]);
+				mysql_escape_string(szReason, szReason,sqldb);
 
 				iFinedAmount = GetPVarInt(extraid, "ofineamount");
 
 				iTotalCashAfterFine = iCash - iFinedAmount;
-				format(szQuery, sizeof(szQuery), "UPDATE players SET Cash = %d WHERE Username = '%s'", iTotalCashAfterFine, szPlayerName);
-				mysql_query(szQuery, THREAD_NO_RESULT, extraid, g_MySQLConnections[0]);
+				mysql_format(sqldb,szQuery, sizeof(szQuery), "UPDATE players SET Cash = %d WHERE Username = '%s'", iTotalCashAfterFine, szPlayerName);
+				mysql_tquery(sqldb,szQuery);
 
 				format(szMessage, sizeof(szMessage), "AdmCmd: %s was offline fined $%d by %s, reason: %s", szPlayerName, iFinedAmount, GetPlayerNameEx(extraid), szReason);
 				Log("logs/admin.log", szMessage);
@@ -44216,10 +44214,10 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 				ABroadCast(COLOR_LIGHTRED,szMessage,1);
 	        } else SendClientMessage(extraid, COLOR_GREY, "The player specified does not exist.");
 
-	        mysql_free_result(g_MySQLConnections[0]);
+	        // mysql_free_result(sqldb);
 	    }
 	    case THREAD_OFFLINE_BAN: {
-	        mysql_store_result(g_MySQLConnections[0]);
+// // mysql_free_result(sqldb);
 
 	        new
 	            szMessage[128],
@@ -44232,7 +44230,7 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 	            iAccountID,
 	            szResult[256];
 
-	        if(mysql_fetch_row_format(szResult, "|", g_MySQLConnections[0])) {
+	        if(mysql_fetch_row_format(szResult, "|",sqldb)) {
 				sscanf(szResult, "p<|>ddds[MAX_PLAYER_NAME]s[20]d", iPlayerPermabanned, iPlayerBanned, iPlayerAdminLevel, szPlayerName, szPlayerIP, iAccountID);
 
 				if(iPlayerPermabanned > 0)
@@ -44242,7 +44240,7 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 				    return SendClientMessage(extraid, COLOR_GREY, "You can't ban other administrators.");
 
 				GetPVarString(extraid, "obanreason", szReason, sizeof(szReason));
-				mysql_real_escape_string(szReason, szReason, g_MySQLConnections[0]);
+				mysql_escape_string(szReason, szReason,sqldb);
 
 				AddBan(szPlayerIP);
 
@@ -44250,17 +44248,17 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 				Log("logs/ban.log", szMessage);
 				ABroadCast(COLOR_LIGHTRED, szMessage, 1);
 
-				format(szQuery, sizeof(szQuery), "UPDATE players SET Banned = 1 WHERE Username = '%s'", szPlayerName);
-				mysql_query(szQuery, THREAD_NO_RESULT, extraid, g_MySQLConnections[0]);
+				mysql_format(sqldb,szQuery, sizeof(szQuery), "UPDATE players SET Banned = 1 WHERE Username = '%s'", szPlayerName);
+				mysql_tquery(sqldb,szQuery);
 				punishmentLogEx(iAccountID, PlayerInfo[extraid][pID], 4, szMessage, szReason);
 
 				DeletePVar(extraid, "obanreason");
 	        } else SendClientMessage(extraid, COLOR_GREY, "The player specified does not exist.");
 
-	        mysql_free_result(g_MySQLConnections[0]);
+	        // mysql_free_result(sqldb);
 	    }
 	    case THREAD_OFFLINE_PRISON: {
-			mysql_store_result(g_MySQLConnections[0]);
+			// mysql_free_result(sqldb);
 
 			new
 				szMessage[128],
@@ -44274,7 +44272,7 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 				iAccountID,
 				szResult[285];
 
-			if(mysql_fetch_row_format(szResult, "|", g_MySQLConnections[0])) {
+			if(mysql_fetch_row_format(szResult, "|",sqldb)) {
 				sscanf(szResult, "p<|>ddds[20]s[19]d", iPlayerPermabanned, iPlayerBanned, iPlayerAdminLevel, szPlayerName, szPlayerIP, iPlayerPrisonTime, iAccountID);
 				print(szResult);
 
@@ -44288,7 +44286,7 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 					return SendClientMessage(extraid, COLOR_GREY, "You can't warn other administrators.");
 
 				GetPVarString(extraid, "oprisonreason", szReason, sizeof(szReason));
-				mysql_real_escape_string(szReason, szReason, g_MySQLConnections[0]);
+				mysql_escape_string(szReason, szReason,sqldb);
 
                 iPlayerPrisonTime = GetPVarInt(extraid, "oprisontime");
 
@@ -44298,17 +44296,17 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 				Log("logs/admin.log", szMessage);
                 punishmentLogEx(iAccountID, PlayerInfo[extraid][pID], 2, szMessage, szReason);
 
-    			format(szQuery, sizeof(szQuery), "UPDATE players SET Jailed = 3, JailTime = %d, PrisonReason = '%s', PrisonedBy = '%s' WHERE Username = '%s'", iPlayerPrisonTime, szReason, GetPlayerNameExEx(extraid), szPlayerName);
-				mysql_query(szQuery, THREAD_NO_RESULT, extraid, g_MySQLConnections[0]);
+    			mysql_format(sqldb,szQuery, sizeof(szQuery), "UPDATE players SET Jailed = 3, JailTime = %d, PrisonReason = '%s', PrisonedBy = '%s' WHERE Username = '%s'", iPlayerPrisonTime, szReason, GetPlayerNameExEx(extraid), szPlayerName);
+				mysql_tquery(sqldb,szQuery);
 
 				DeletePVar(extraid, "oprisonreason");
 				DeletePVar(extraid, "oprisontime");
 			} else SendClientMessage(extraid, COLOR_GREY, "The player specified does not exist.");
 
-			mysql_free_result(g_MySQLConnections[0]);
+			// mysql_free_result(sqldb);
 	    }
 		case THREAD_OFFLINE_WARN: {
-			mysql_store_result(g_MySQLConnections[0]);
+			// mysql_free_result(sqldb);
 
 			new
 				szMessage[128],
@@ -44322,7 +44320,7 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 				iAccountID,
 				szResult[256];
 
-			if(mysql_fetch_row_format(szResult, "|", g_MySQLConnections[0])) {
+			if(mysql_fetch_row_format(szResult, "|",sqldb)) {
 				sscanf(szResult, "p<|>ddds[24]s[20]dd", iPlayerPermabanned, iPlayerBanned, iPlayerAdminLevel, szPlayerName, szPlayerIP, iPlayerWarnings, iAccountID);
 				print(szResult);
 
@@ -44343,14 +44341,14 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 					format(szReason, sizeof(szReason), "%s (had 3 warnings)", szReason);
 					SetPVarString(extraid, "obanreason", szReason);
 
-	    			format(szQuery, sizeof(szQuery), "UPDATE players SET Warnings = %d WHERE Username = '%s'", iPlayerWarnings, szPlayerName);
-					mysql_query(szQuery, THREAD_NO_RESULT, extraid, g_MySQLConnections[0]);
+	    			mysql_format(sqldb,szQuery, sizeof(szQuery), "UPDATE players SET Warnings = %d WHERE Username = '%s'", iPlayerWarnings, szPlayerName);
+					mysql_tquery(sqldb,szQuery);
 
 					punishmentLogEx(iAccountID, PlayerInfo[extraid][pID], 4, szMessage, szReason);
-					mysql_real_escape_string(szPlayerName, szPlayerName, g_MySQLConnections[0]);
+					mysql_escape_string(szPlayerName, szPlayerName,sqldb);
 
-					format(szMessage, sizeof(szMessage), "SELECT Permabanned, Banned, AdminLevel, Username, LastIP FROM players WHERE Username = '%s'", szPlayerName);
-					mysql_query(szMessage, THREAD_OFFLINE_BAN, extraid, g_MySQLConnections[0]);
+					mysql_format(sqldb,szMessage, sizeof(szMessage), "SELECT Permabanned, Banned, AdminLevel, Username, LastIP FROM players WHERE Username = '%s'", szPlayerName);
+					mysql_tquery(sqldb,szMessage, THREAD_OFFLINE_BAN,"i",extraid,sqldb);
 					return 1;
 				}
 
@@ -44360,16 +44358,16 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 				Log("logs/admin.log", szMessage);
                 punishmentLogEx(iAccountID, PlayerInfo[extraid][pID], 1, szMessage, szReason);
 
-    			format(szQuery, sizeof(szQuery), "UPDATE players SET Warnings = %d WHERE Username = '%s'", iPlayerWarnings, szPlayerName);
-				mysql_query(szQuery, THREAD_NO_RESULT, extraid, g_MySQLConnections[0]);
+    			mysql_format(sqldb,szQuery, sizeof(szQuery), "UPDATE players SET Warnings = %d WHERE Username = '%s'", iPlayerWarnings, szPlayerName);
+				mysql_tquery(sqldb,szQuery);
 
 				DeletePVar(extraid, "owarnreason");
 			} else SendClientMessage(extraid, COLOR_GREY, "The player specified does not exist.");
 
-			mysql_free_result(g_MySQLConnections[0]);
+			// mysql_free_result(sqldb);
 		}
 	    case THREAD_OFFLINE_IP_CHECK: {
-	        mysql_store_result(g_MySQLConnections[0]);
+// // mysql_free_result(sqldb);
 
 	        new
 	            szMessage[128],
@@ -44377,17 +44375,17 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 	            szPlayerName[MAX_PLAYER_NAME],
 	            szResult[256];
 
-	        if(mysql_fetch_row_format(szResult, "|", g_MySQLConnections[0])) {
+	        if(mysql_fetch_row_format(szResult, "|",sqldb)) {
 				sscanf(szResult, "p<|>s[20]s[16]", szPlayerName, szPlayerIP);
 
 				format(szMessage, sizeof(szMessage), "Name: %s | IP: %s", szPlayerName, szPlayerIP);
 				SendClientMessage(extraid, COLOR_WHITE, szMessage);
 	        } else SendClientMessage(extraid, COLOR_GREY, "The player specified does not exist.");
 
-	        mysql_free_result(g_MySQLConnections[0]);
+	        // mysql_free_result(sqldb);
 	    }
 	    case THREAD_CHECK_BANNED: {
-	        mysql_store_result(g_MySQLConnections[0]);
+// // mysql_free_result(sqldb);
 
 	        new
 	            szResult[128],
@@ -44398,13 +44396,13 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 	            iPlayerWarnings,
 	            iPlayerPermaban;
 
-			if(mysql_fetch_row_format(szResult, "|", g_MySQLConnections[0])) {
+			if(mysql_fetch_row_format(szResult, "|",sqldb)) {
 			    sscanf(szResult, "p<|>ddds[16]s[20]", iPlayerBan, iPlayerPermaban, iPlayerWarnings, szPlayerIP, szPlayerName);
 				print(szResult);
 
 			    if(iPlayerPermaban > 0) {
 			        SendClientMessage(extraid, COLOR_GREY, "You can't unban this person in-game, they have been permanently banned.");
-			        mysql_free_result(g_MySQLConnections[0]);
+			        // mysql_free_result(sqldb);
 			    } else {
 			        if(iPlayerBan > 0) {
 			            RemoveBan(szPlayerIP);
@@ -44416,15 +44414,15 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 						Log("logs/ban.log", szMessage);
 
 						if(iPlayerWarnings >= 3) {
-							format(szQuery, sizeof(szQuery), "UPDATE players SET Banned = 0, Warnings = 0 WHERE Username = '%s'", szPlayerName);
-						} else format(szQuery, sizeof(szQuery), "UPDATE players SET Banned = 0 WHERE Username = '%s'", szPlayerName);
-						mysql_query(szQuery, THREAD_NO_RESULT, 0, g_MySQLConnections[0]);
+							mysql_format(sqldb,szQuery, sizeof(szQuery), "UPDATE players SET Banned = 0, Warnings = 0 WHERE Username = '%s'", szPlayerName);
+						} else mysql_format(sqldb,szQuery, sizeof(szQuery), "UPDATE players SET Banned = 0 WHERE Username = '%s'", szPlayerName);
+						mysql_tquery(sqldb,szQuery);
 			        } else SendClientMessage(extraid, COLOR_GREY, "The player specified isn't banned.");
 			    }
 			} else SendClientMessage(extraid, COLOR_GREY, "No rows exist with the criteria specified.");
 
-	        mysql_free_result(g_MySQLConnections[0]);
-	    }
+	        // mysql_free_result(sqldb);
+	    }*/
 	    case THREAD_DELETE_PLAYER_OBJECT: {
 	        new
 	            string[64],
@@ -44446,243 +44444,243 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 		    DeletePVar(extraid, "deleteObject");
 		}
 	    case THREAD_LOAD_P_ITEMS_CHAIN_1: {
-	        mysql_store_result(g_MySQLConnections[0]);
+// // mysql_free_result(sqldb);
 
 	        new
 	            szReturn[16],
 	            iSlot = 0;
 
-	        while(mysql_retrieve_row()) {
-	            mysql_fetch_field_row(szReturn, "ID", g_MySQLConnections[0]);
+	        for(new c; c < cache_num_rows(); c++){
+	            cache_get_value_name(c, "ID",szReturn);
 	            PlayerToyInfo[extraid][iSlot][ptRealID] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "ModelID", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "ModelID",szReturn);
 	            PlayerToyInfo[extraid][iSlot][ptModelID] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Bone", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Bone",szReturn);
 	            PlayerToyInfo[extraid][iSlot][ptBone] = strval(szReturn);
 
 				if(PlayerToyInfo[extraid][iSlot][ptBone] > 18 || PlayerToyInfo[extraid][iSlot][ptBone] < 1) PlayerToyInfo[extraid][iSlot][ptBone] = 1;
 
-				mysql_fetch_field_row(szReturn, "PosX", g_MySQLConnections[0]);
+				cache_get_value_name(c, "PosX",szReturn);
 				PlayerToyInfo[extraid][iSlot][ptPosX] = floatstr(szReturn);
 
-				mysql_fetch_field_row(szReturn, "PosY", g_MySQLConnections[0]);
+				cache_get_value_name(c, "PosY",szReturn);
 				PlayerToyInfo[extraid][iSlot][ptPosY] = floatstr(szReturn);
 
-				mysql_fetch_field_row(szReturn, "PosZ", g_MySQLConnections[0]);
+				cache_get_value_name(c, "PosZ",szReturn);
 				PlayerToyInfo[extraid][iSlot][ptPosZ] = floatstr(szReturn);
 
-				mysql_fetch_field_row(szReturn, "RotX", g_MySQLConnections[0]);
+				cache_get_value_name(c, "RotX",szReturn);
 				PlayerToyInfo[extraid][iSlot][ptRotX] = floatstr(szReturn);
 
-				mysql_fetch_field_row(szReturn, "RotY", g_MySQLConnections[0]);
+				cache_get_value_name(c, "RotY",szReturn);
 				PlayerToyInfo[extraid][iSlot][ptRotY] = floatstr(szReturn);
 
-				mysql_fetch_field_row(szReturn, "RotZ", g_MySQLConnections[0]);
+				cache_get_value_name(c, "RotZ",szReturn);
 				PlayerToyInfo[extraid][iSlot][ptRotZ] = floatstr(szReturn);
 
-				mysql_fetch_field_row(szReturn, "ScaX", g_MySQLConnections[0]);
+				cache_get_value_name(c, "ScaX",szReturn);
 				PlayerToyInfo[extraid][iSlot][ptScaleX] = floatstr(szReturn);
 
-				mysql_fetch_field_row(szReturn, "ScaY", g_MySQLConnections[0]);
+				cache_get_value_name(c, "ScaY",szReturn);
 				PlayerToyInfo[extraid][iSlot][ptScaleY] = floatstr(szReturn);
 
-				mysql_fetch_field_row(szReturn, "ScaZ", g_MySQLConnections[0]);
+				cache_get_value_name(c, "ScaZ",szReturn);
 				PlayerToyInfo[extraid][iSlot][ptScaleZ] = floatstr(szReturn);
 
-				iSlot++;
+				// iSlot++;
 	        }
 
-	        mysql_free_result(g_MySQLConnections[0]);
+	        // mysql_free_result(sqldb);
 
-	        format(szQuery, sizeof(szQuery), "SELECT playervehicles.* FROM playervehicles INNER JOIN players ON playervehicles.Owner = players.ID WHERE players.ID = '%d' ORDER BY playervehicles.Owner ASC LIMIT %d", PlayerInfo[extraid][pID], MAX_PLAYERVEHICLES);
-	        mysql_query(szQuery, THREAD_LOAD_P_ITEMS_CHAIN_2, extraid, g_MySQLConnections[0]);
+	        mysql_format(sqldb,szQuery, sizeof(szQuery), "SELECT playervehicles.* FROM playervehicles INNER JOIN players ON playervehicles.Owner = players.ID WHERE players.ID = '%d' ORDER BY playervehicles.Owner ASC LIMIT %d", PlayerInfo[extraid][pID], MAX_PLAYERVEHICLES);
+	        mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii",THREAD_LOAD_P_ITEMS_CHAIN_2,extraid);
 	    }
 	    case THREAD_LOAD_P_ITEMS_CHAIN_2: {
-	        mysql_store_result(g_MySQLConnections[0]);
+// // mysql_free_result(sqldb);
 
 	        new
 	            szReturn[16],
 	            iSlot = 0;
 
-	        while(mysql_retrieve_row()) {
-	            mysql_fetch_field_row(szReturn, "ID", g_MySQLConnections[0]);
+	        for(new c; c < cache_num_rows(); c++){
+	            cache_get_value_name(c, "ID",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvRealID] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "PosX", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "PosX",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvPosX] = floatstr(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "PosY", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "PosY",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvPosY] = floatstr(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "PosZ", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "PosZ",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvPosZ] = floatstr(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "PosAngle", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "PosAngle",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvPosAngle] = floatstr(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "ModelID", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "ModelID",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvModelId] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "LockType", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "LockType",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvLock] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Locked", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Locked",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvLocked] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "PaintJob", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "PaintJob",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvPaintJob] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Color1", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Color1",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvColor1] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Color2", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Color2",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvColor2] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Price", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Price",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvPrice] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Ticket", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Ticket",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvTicket] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Weapon0", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Weapon0",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvWeapons][0] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Weapon1", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Weapon1",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvWeapons][1] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Weapon2", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Weapon2",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvWeapons][2] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "WepUpgrade", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "WepUpgrade",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvWepUpgrade] = strval(szReturn);
 
-	            /*mysql_fetch_field_row(szReturn, "Fuel", g_MySQLConnections[0]);*/
+	            /*cache_get_value_name(c, "Fuel",szReturn);*/
 	            PlayerVehicleInfo[extraid][iSlot][pvFuel] = 100.0; //floatstr(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Impound", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Impound",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvImpounded] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Spawned", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Spawned",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvSpawned] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Disabled", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Disabled",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvDisabled] = strval(szReturn);
 
-	            mysql_fetch_field_row(PlayerVehicleInfo[extraid][iSlot][pvNumberPlate], "NumPlate", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "NumPlate",PlayerVehicleInfo[extraid][iSlot][pvNumberPlate]);
 
-	            mysql_fetch_field_row(szReturn, "Disabled", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Disabled",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvDisabled] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Mod0", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Mod0",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvMods][0] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Mod1", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Mod1",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvMods][1] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Mod2", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Mod2",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvMods][2] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Mod3", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Mod3",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvMods][3] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Mod4", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Mod4",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvMods][4] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Mod5", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Mod5",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvMods][5] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Mod6", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Mod6",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvMods][6] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Mod7", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Mod7",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvMods][7] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Mod8", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Mod8",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvMods][8] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Mod9", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Mod9",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvMods][9] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Mod10", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Mod10",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvMods][10] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Mod11", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Mod11",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvMods][11] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Mod12", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Mod12",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvMods][12] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Mod13", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Mod13",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvMods][13] = strval(szReturn);
 
-	            mysql_fetch_field_row(szReturn, "Mod14", g_MySQLConnections[0]);
+	            cache_get_value_name(c, "Mod14",szReturn);
 	            PlayerVehicleInfo[extraid][iSlot][pvMods][14] = strval(szReturn);
 	            if(AdminLoggedInBefore[extraid] == 0) LoadPlayerVehicles(extraid);
 	            CheckPlayerVehicleForDesync(extraid, PlayerVehicleInfo[extraid][iSlot][pvId]);
 
-				iSlot++;
+				// iSlot++;
 	        }
 
-	        mysql_free_result(g_MySQLConnections[0]);
+	        // mysql_free_result(sqldb);
 
-	        format(szQuery, sizeof(szQuery), "SELECT kills.* FROM kills INNER JOIN players ON kills.killerID = players.ID OR kills.killedID = players.ID WHERE players.ID = '%d' ORDER BY kills.killTS ASC LIMIT 10", PlayerInfo[extraid][pID]);
-	        mysql_query(szQuery, THREAD_LOAD_P_ITEMS_CHAIN_3, extraid, g_MySQLConnections[0]);
+	        mysql_format(sqldb,szQuery, sizeof(szQuery), "SELECT kills.* FROM kills INNER JOIN players ON kills.killerID = players.ID OR kills.killedID = players.ID WHERE players.ID = '%d' ORDER BY kills.killTS ASC LIMIT 10", PlayerInfo[extraid][pID]);
+	        mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii", THREAD_LOAD_P_ITEMS_CHAIN_3,extraid);
 	    }
 	    case THREAD_LOAD_P_ITEMS_CHAIN_3: {
-	        mysql_store_result(g_MySQLConnections[0]);
+// // mysql_free_result(sqldb);
 
-     	    new
-	        	iSlot = 0;
+     	    // new
+	        	// iSlot = 0;
 
-	        while(mysql_retrieve_row()) {
-	            iSlot++;
-	            switch(iSlot) {
-					case 0: mysql_fetch_field_row(PlayerInfo[extraid][pKillLog0], "killText", g_MySQLConnections[0]);
-					case 1: mysql_fetch_field_row(PlayerInfo[extraid][pKillLog1], "killText", g_MySQLConnections[0]);
-					case 2: mysql_fetch_field_row(PlayerInfo[extraid][pKillLog2], "killText", g_MySQLConnections[0]);
-					case 3: mysql_fetch_field_row(PlayerInfo[extraid][pKillLog3], "killText", g_MySQLConnections[0]);
-					case 4: mysql_fetch_field_row(PlayerInfo[extraid][pKillLog4], "killText", g_MySQLConnections[0]);
-					case 5: mysql_fetch_field_row(PlayerInfo[extraid][pKillLog5], "killText", g_MySQLConnections[0]);
-					case 6: mysql_fetch_field_row(PlayerInfo[extraid][pKillLog6], "killText", g_MySQLConnections[0]);
-					case 7: mysql_fetch_field_row(PlayerInfo[extraid][pKillLog7], "killText", g_MySQLConnections[0]);
-					case 8: mysql_fetch_field_row(PlayerInfo[extraid][pKillLog8], "killText", g_MySQLConnections[0]);
-					case 9: mysql_fetch_field_row(PlayerInfo[extraid][pKillLog9], "killText", g_MySQLConnections[0]);
+	        for(new c=0; c < cache_num_rows(); c++){
+	            // iSlot++;
+	            switch(c) {
+					case 0: cache_get_value_name(c,"killText",PlayerInfo[extraid][pKillLog0]);
+					case 1: cache_get_value_name(c,"killText",PlayerInfo[extraid][pKillLog1]);
+					case 2: cache_get_value_name(c,"killText",PlayerInfo[extraid][pKillLog2]);
+					case 3: cache_get_value_name(c,"killText",PlayerInfo[extraid][pKillLog3]);
+					case 4: cache_get_value_name(c,"killText",PlayerInfo[extraid][pKillLog4]);
+					case 5: cache_get_value_name(c,"killText",PlayerInfo[extraid][pKillLog5]);
+					case 6: cache_get_value_name(c,"killText",PlayerInfo[extraid][pKillLog6]);
+					case 7: cache_get_value_name(c,"killText",PlayerInfo[extraid][pKillLog7]);
+					case 8: cache_get_value_name(c,"killText",PlayerInfo[extraid][pKillLog8]);
+					case 9: cache_get_value_name(c,"killText",PlayerInfo[extraid][pKillLog9]);
 				}
 	        }
 
-	        mysql_free_result(g_MySQLConnections[0]);
+	        // mysql_free_result(sqldb);
 	    }
 	    case THREAD_SAVE_ACCOUNT_CHAIN_1: {
-			format(szQuery, sizeof(szQuery), "UPDATE players SET Job = %d, Job2 = %d, UpgradePoints = %d, SpawnArmor = '%f', Cash = %d, Bank = %d, Insurance = %d, Crimes = %d, Arrested = %d, WantedLevel = %d, Health = '%f', Armor = '%f', \
+			mysql_format(sqldb,szQuery, sizeof(szQuery), "UPDATE players SET Job = %d, Job2 = %d, UpgradePoints = %d, SpawnArmor = '%f', Cash = %d, Bank = %d, Insurance = %d, Crimes = %d, Arrested = %d, WantedLevel = %d, Health = '%f', Armor = '%f', \
 			Pot = %d, Crack = %d, Radio = %d, RadioFreq = %d, Phonebook = %d, Dice = %d, CDPlayer = %d, Materials = %d, Rope = %d, Cigars = %d, Sprunk = %d, Spraycan = %d, House = %d, House2 = %d, Renting = %d, Interior = %d, VirtualWorld = %d, Jailed = %d WHERE ID = %d",
 			PlayerInfo[extraid][pJob], PlayerInfo[extraid][pJob2], PlayerInfo[extraid][gPupgrade], PlayerInfo[extraid][pSarmor], PlayerInfo[extraid][pCash], PlayerInfo[extraid][pBank], PlayerInfo[extraid][pInsurance], PlayerInfo[extraid][pCrimes],
 			PlayerInfo[extraid][pArrested], PlayerInfo[extraid][pWantedLevel], PlayerInfo[extraid][pHealth], PlayerInfo[extraid][pArmor], PlayerInfo[extraid][pPot], PlayerInfo[extraid][pCrack], PlayerInfo[extraid][pRadio], PlayerInfo[extraid][pRadioFreq],
 			PlayerInfo[extraid][pPhoneBook], PlayerInfo[extraid][pDice], PlayerInfo[extraid][pCDPlayer], PlayerInfo[extraid][pMats], PlayerInfo[extraid][pRope], PlayerInfo[extraid][pCigar], PlayerInfo[extraid][pSprunk], PlayerInfo[extraid][pSpraycan], PlayerInfo[extraid][pHouse],
 			PlayerInfo[extraid][pHouse2], PlayerInfo[extraid][pRenting], PlayerInfo[extraid][pInt], PlayerInfo[extraid][pVW], PlayerInfo[extraid][pJailed], PlayerInfo[extraid][pID]);
 
-			mysql_query(szQuery, THREAD_SAVE_ACCOUNT_CHAIN_2, extraid, g_MySQLConnections[0]);
+			mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii", THREAD_SAVE_ACCOUNT_CHAIN_2,extraid);
 	    }
 	    case THREAD_SAVE_ACCOUNT_CHAIN_2: {
-	        format(szQuery, sizeof(szQuery), "UPDATE players SET JailTime = %d, Gun0 = %d, Gun1 = %d, Gun2 = %d, Gun3 = %d, Gun4 = %d, Gun5 = %d, Gun6 = %d, Gun7 = %d, Gun8 = %d, Gun9 = %d, Gun10 = %d, Gun11 = %d, Paycheck = %d, PayReady = %d, Hospital = %d, \
+	        mysql_format(sqldb,szQuery, sizeof(szQuery), "UPDATE players SET JailTime = %d, Gun0 = %d, Gun1 = %d, Gun2 = %d, Gun3 = %d, Gun4 = %d, Gun5 = %d, Gun6 = %d, Gun7 = %d, Gun8 = %d, Gun9 = %d, Gun10 = %d, Gun11 = %d, Paycheck = %d, PayReady = %d, Hospital = %d, \
 			DetSkill = %d, FishSkill = %d, LawSkill = %d, DrugsSkill = %d, SmugglerSkill = %d, ArmsSkill = %d, MechSkill = %d, BoxSkill = %d, TruckSkill = %d, CarSkill = %d, LawyerTime = %d, LawyerFreeTime = %d, DrugsTime = %d, MechTime = %d WHERE ID = %d",
 			PlayerInfo[extraid][pJailTime], PlayerInfo[extraid][pGuns][0], PlayerInfo[extraid][pGuns][1], PlayerInfo[extraid][pGuns][2], PlayerInfo[extraid][pGuns][3], PlayerInfo[extraid][pGuns][4], PlayerInfo[extraid][pGuns][5], PlayerInfo[extraid][pGuns][6], PlayerInfo[extraid][pGuns][7],
 			PlayerInfo[extraid][pGuns][8], PlayerInfo[extraid][pGuns][9], PlayerInfo[extraid][pGuns][10], PlayerInfo[extraid][pGuns][11], PlayerInfo[extraid][pPayCheck], PlayerInfo[extraid][pPayReady], PlayerInfo[extraid][pHospital], PlayerInfo[extraid][pDetSkill], PlayerInfo[extraid][pFishSkill],
 			PlayerInfo[extraid][pLawSkill], PlayerInfo[extraid][pDrugsSkill], PlayerInfo[extraid][pSmugSkill], PlayerInfo[extraid][pArmsSkill], PlayerInfo[extraid][pMechSkill], PlayerInfo[extraid][pBoxSkill], PlayerInfo[extraid][pTruckSkill], PlayerInfo[extraid][pCarSkill], PlayerInfo[extraid][pLawyerTime],
 			PlayerInfo[extraid][pLawyerFreeTime], PlayerInfo[extraid][pDrugsTime], PlayerInfo[extraid][pMechTime], PlayerInfo[extraid][pID]);
 
-			mysql_query(szQuery, THREAD_SAVE_ACCOUNT_CHAIN_3, extraid, g_MySQLConnections[0]);
+			mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii", THREAD_SAVE_ACCOUNT_CHAIN_3,extraid);
 	    }
 	    case THREAD_SAVE_ACCOUNT_CHAIN_3: {
-			format(szQuery, sizeof(szQuery), "UPDATE players SET SexTime = %d, CarTime = %d, Fishes = %d, BiggestFish = %d, pWEXists = %d, pWX = '%f', pWY = '%f', pWZ = '%f', pWVW = %d, pWInt = %d, pWValue = %d, pWSeeds = %d, Wins = %d, Loses = %d, \
+			mysql_format(sqldb,szQuery, sizeof(szQuery), "UPDATE players SET SexTime = %d, CarTime = %d, Fishes = %d, BiggestFish = %d, pWEXists = %d, pWX = '%f', pWY = '%f', pWZ = '%f', pWVW = %d, pWInt = %d, pWValue = %d, pWSeeds = %d, Wins = %d, Loses = %d, \
 			FightingStyle = %d, Screwdriver = %d, Wristwatch = %d, Tire = %d, Firstaid = %d, Rccam = %d, Receiver = %d, GPS = %d, Sweep = %d, SweepLeft = %d, Bugged = %d, OnDuty = %d, CarLic = %d, FlyLic = %d, GunLic = %d, Division = %d WHERE ID = %d",
 			PlayerInfo[extraid][pSexTime], PlayerInfo[extraid][pCarTime], PlayerInfo[extraid][pFishes], PlayerInfo[extraid][pBiggestFish], PlayerInfo[extraid][pWeedObject], PlayerInfo[extraid][pWeedPos][0], PlayerInfo[extraid][pWeedPos][1], PlayerInfo[extraid][pWeedPos][2],
 			PlayerInfo[extraid][pWeedVW], PlayerInfo[extraid][pWeedInt], PlayerInfo[extraid][pWeedGrowth], PlayerInfo[extraid][pWSeeds], PlayerInfo[extraid][pWins], PlayerInfo[extraid][pLoses], PlayerInfo[extraid][pFightStyle], PlayerInfo[extraid][pScrewdriver],
 			PlayerInfo[extraid][pWristwatch], PlayerInfo[extraid][pTire], PlayerInfo[extraid][pFirstaid], PlayerInfo[extraid][pRccam], PlayerInfo[extraid][pReceiver], PlayerInfo[extraid][pGPS], PlayerInfo[extraid][pSweep], PlayerInfo[extraid][pSweepLeft],
 			PlayerInfo[extraid][pBugged], PlayerInfo[extraid][pDuty], PlayerInfo[extraid][pCarLic], PlayerInfo[extraid][pFlyLic], PlayerInfo[extraid][pGunLic], PlayerInfo[extraid][pDivision], PlayerInfo[extraid][pID]);
 
-			mysql_query(szQuery, THREAD_SAVE_ACCOUNT_CHAIN_4, extraid, g_MySQLConnections[0]);
+			mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii",THREAD_SAVE_ACCOUNT_CHAIN_4,extraid);
 	    }
 	    case THREAD_SAVE_ACCOUNT_CHAIN_4: {
 	        // Escape strings for now....
@@ -44692,19 +44690,19 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 	            szContractBy[MAX_PLAYER_NAME],
 	            szContractDetail[128];
 
-			mysql_real_escape_string(PlayerInfo[extraid][pPrisonedBy], szPrisonedBy, g_MySQLConnections[0]);
-			mysql_real_escape_string(PlayerInfo[extraid][pPrisonReason], szPrisonReason, g_MySQLConnections[0]);
+			mysql_escape_string(PlayerInfo[extraid][pPrisonedBy], szPrisonedBy,MAX_PLAYER_NAME,sqldb);
+			mysql_escape_string(PlayerInfo[extraid][pPrisonReason], szPrisonReason,128,sqldb);
 
-			mysql_real_escape_string(PlayerInfo[extraid][pContractBy], szContractBy, g_MySQLConnections[0]);
-			mysql_real_escape_string(PlayerInfo[extraid][pContractDetail], szContractDetail, g_MySQLConnections[0]);
+			mysql_escape_string(PlayerInfo[extraid][pContractBy], szContractBy,MAX_PLAYER_NAME,sqldb);
+			mysql_escape_string(PlayerInfo[extraid][pContractDetail], szContractDetail,128,sqldb);
 
-			format(szQuery, sizeof(szQuery), "UPDATE players SET TicketTime = %d, HeadValue = %d, ContractBy = '%s', ContractDetail = '%s', Bombs = %d, CHits = %d, FHits = %d, PrisonedBy = '%s', PrisonReason = '%s', AcceptReport = %d, TrashReport = %d, Accent = %d, \
+			mysql_format(sqldb,szQuery, sizeof(szQuery), "UPDATE players SET TicketTime = %d, HeadValue = %d, ContractBy = '%s', ContractDetail = '%s', Bombs = %d, CHits = %d, FHits = %d, PrisonedBy = '%s', PrisonReason = '%s', AcceptReport = %d, TrashReport = %d, Accent = %d, \
 			NewMuted = %d, NewMutedTotal = %d, AdMuted = %d, AdMutedTotal = %d, ReportMuted = %d, ReportMutedTotal = %d, ReportMutedTime = %d, Speedo = %d, GCMuted = %d, GCMutedTime = %d, CallsAccepted = %d, PatientsDelivered = %d WHERE ID = %d",
 			PlayerInfo[extraid][pTicketTime], PlayerInfo[extraid][pHeadValue], szContractBy, szContractDetail, PlayerInfo[extraid][pBombs], PlayerInfo[extraid][pCHits], PlayerInfo[extraid][pFHits], szPrisonedBy, szPrisonReason,
 			PlayerInfo[extraid][pAcceptReport], PlayerInfo[extraid][pTrashReport], PlayerInfo[extraid][pAccent], PlayerInfo[extraid][pNMute], PlayerInfo[extraid][pNMuteTotal], PlayerInfo[extraid][pADMute], PlayerInfo[extraid][pADMuteTotal], PlayerInfo[extraid][pRMuted], PlayerInfo[extraid][pRMutedTotal],
 			PlayerInfo[extraid][pRMutedTime], PlayerInfo[extraid][pSpeedo], PlayerInfo[extraid][pGCMuted], PlayerInfo[extraid][pGCMutedTime], PlayerInfo[extraid][pCallsAccepted], PlayerInfo[extraid][pPatientsDelivered], PlayerInfo[extraid][pID]);
 
-			mysql_query(szQuery, THREAD_SAVE_ACCOUNT_CHAIN_5, extraid, g_MySQLConnections[0]);
+			mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii", THREAD_SAVE_ACCOUNT_CHAIN_5,extraid);
 	    }
 	    case THREAD_SAVE_ACCOUNT_CHAIN_5: {
 	        // Escape more strings...
@@ -44713,15 +44711,15 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 	            szFlag[128],
 	            szReferredBy[MAX_PLAYER_NAME];
 
-			mysql_real_escape_string(PlayerInfo[extraid][pMarriedTo], szMarriedTo, g_MySQLConnections[0]);
-			mysql_real_escape_string(PlayerInfo[extraid][pFlag], szFlag, g_MySQLConnections[0]);
-			mysql_real_escape_string(PlayerInfo[extraid][pReferredBy], szReferredBy, g_MySQLConnections[0]);
+			mysql_escape_string(PlayerInfo[extraid][pMarriedTo], szMarriedTo,MAX_PLAYER_NAME,sqldb);
+			mysql_escape_string(PlayerInfo[extraid][pFlag], szFlag,128,sqldb);
+			mysql_escape_string(PlayerInfo[extraid][pReferredBy], szReferredBy,MAX_PLAYER_NAME,sqldb);
 
-			format(szQuery, sizeof(szQuery), "UPDATE players SET SMSLog = %d, TriageTime = %d, Married = %d, MarriedTo = '%s', Flag = '%s', ReferredBy = '%s', RefTokens = %d, RefTokensOffline = %d, Helper = %d, GangMod = %d, LiveBanned = %d WHERE ID = %d",
+			mysql_format(sqldb,szQuery, sizeof(szQuery), "UPDATE players SET SMSLog = %d, TriageTime = %d, Married = %d, MarriedTo = '%s', Flag = '%s', ReferredBy = '%s', RefTokens = %d, RefTokensOffline = %d, Helper = %d, GangMod = %d, LiveBanned = %d WHERE ID = %d",
 			PlayerInfo[extraid][pSmslog], PlayerInfo[extraid][pTriageTime], PlayerInfo[extraid][pMarried], szMarriedTo, szFlag, szReferredBy, PlayerInfo[extraid][pRefTokens], PlayerInfo[extraid][pRefTokensOffline], PlayerInfo[extraid][pHelper],
 			PlayerInfo[extraid][pGangMod], PlayerInfo[extraid][pLiveBanned], PlayerInfo[extraid][pID]);
 
-			mysql_query(szQuery, THREAD_SAVING_FINISHED, extraid, g_MySQLConnections[0]);
+			mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii", THREAD_SAVING_FINISHED,extraid);
 		}
 		case THREAD_SAVING_FINISHED: {
 		    if(GetPVarInt(extraid, "attemptLoginAfter") == 1) { // Log the player back in if we need to (new registrations) and avoid saving things we know don't exist yet (i.e. toys)
@@ -44733,30 +44731,32 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 				// Save player toys
 				for(new v = 0; v < MAX_PLAYERTOYS; v++) {
 				    if(PlayerToyInfo[extraid][v][ptRealID] >= 1) { // Check to ensure the toy has a real ID, in MySQL (if inserted it'll have a "real ID").
-				        format(szQuery, sizeof(szQuery), "UPDATE toys SET ModelID = %d, Bone = %d, PosX = '%f', PosY = '%f', PosZ = '%f', RotX = '%f', RotY = '%f', RotZ = '%f', ScaX = '%f', ScaY = '%f', ScaZ = '%f' WHERE Owner = %d AND ID = %d",
+				        mysql_format(sqldb,szQuery, sizeof(szQuery), "UPDATE toys SET ModelID = %d, Bone = %d, PosX = '%f', PosY = '%f', PosZ = '%f', RotX = '%f', RotY = '%f', RotZ = '%f', ScaX = '%f', ScaY = '%f', ScaZ = '%f' WHERE Owner = %d AND ID = %d",
 						PlayerToyInfo[extraid][v][ptModelID], PlayerToyInfo[extraid][v][ptBone], PlayerToyInfo[extraid][v][ptPosX], PlayerToyInfo[extraid][v][ptPosY], PlayerToyInfo[extraid][v][ptPosZ], PlayerToyInfo[extraid][v][ptRotX], PlayerToyInfo[extraid][v][ptRotY], PlayerToyInfo[extraid][v][ptRotZ],
 						PlayerToyInfo[extraid][v][ptScaleX], PlayerToyInfo[extraid][v][ptScaleY], PlayerToyInfo[extraid][v][ptScaleZ], PlayerInfo[extraid][pID], PlayerToyInfo[extraid][v][ptRealID]);
 
-						mysql_query(szQuery, THREAD_NO_RESULT, 0, g_MySQLConnections[0]);
+						mysql_tquery(sqldb,szQuery);
 				    }
 		   		}
 
 		   		// Save player vehicles
 				for(new v = 0; v < MAX_PLAYERVEHICLES; v++) {
 				    if(PlayerVehicleInfo[extraid][v][pvRealID] >= 1) { // Check to ensure the vehicle has a real ID, in MySQL (if inserted, it'll have a "real ID").
-				        format(szQuery, sizeof(szQuery), "UPDATE playervehicles SET PosX = '%f', PosY = '%f', PosZ = '%f', PosAngle = '%f', ModelID = %d, LockType = %d, Locked = %d, PaintJob = %d, Color1 = %d, Color2 = %d, \
-						Price = %d, Ticket = %d, Weapon0 = %d, Weapon1 = %d, Weapon2 = %d, WepUpgrade = %d, Impound = %d, Spawned = %d, Disabled = %d, NumPlate = '%s', Mod0 = %d, Mod1 = %d, Mod2 = %d,",
+				        mysql_format(sqldb,szQuery, sizeof(szQuery), "UPDATE playervehicles SET PosX = '%f', PosY = '%f', PosZ = '%f', PosAngle = '%f', ModelID = %d, LockType = %d, Locked = %d, PaintJob = %d, Color1 = %d, Color2 = %d, \
+						Price = %d, Ticket = %d, Weapon0 = %d, Weapon1 = %d, Weapon2 = %d, WepUpgrade = %d, Impound = %d, Spawned = %d, Disabled = %d, NumPlate = '%s', Mod0 = %d, Mod1 = %d, Mod2 = %d,%s Mod3 = %d, Mod4 = %d, Mod5 = %d, Mod6 = %d, Mod7 = %d, Mod8 = %d, Mod9 = %d, Mod10 = %d, Mod11 = %d, Mod12 = %d, Mod13 = %d, Mod14 = %d WHERE Owner = %d AND ID = %d",
 						PlayerVehicleInfo[extraid][v][pvPosX], PlayerVehicleInfo[extraid][v][pvPosY], PlayerVehicleInfo[extraid][v][pvPosZ], PlayerVehicleInfo[extraid][v][pvPosAngle], PlayerVehicleInfo[extraid][v][pvModelId], PlayerVehicleInfo[extraid][v][pvLock], PlayerVehicleInfo[extraid][v][pvLocked], PlayerVehicleInfo[extraid][v][pvPaintJob],
 						PlayerVehicleInfo[extraid][v][pvColor1], PlayerVehicleInfo[extraid][v][pvColor2], PlayerVehicleInfo[extraid][v][pvPrice], PlayerVehicleInfo[extraid][v][pvTicket], PlayerVehicleInfo[extraid][v][pvWeapons][0], PlayerVehicleInfo[extraid][v][pvWeapons][1], PlayerVehicleInfo[extraid][v][pvWeapons][2],
-						PlayerVehicleInfo[extraid][v][pvWepUpgrade], PlayerVehicleInfo[extraid][v][pvImpounded], PlayerVehicleInfo[extraid][v][pvSpawned], PlayerVehicleInfo[extraid][v][pvDisabled], PlayerVehicleInfo[extraid][v][pvNumberPlate], PlayerVehicleInfo[extraid][v][pvMods][0], PlayerVehicleInfo[extraid][v][pvMods][1], PlayerVehicleInfo[extraid][v][pvMods][2]);
+						PlayerVehicleInfo[extraid][v][pvWepUpgrade], PlayerVehicleInfo[extraid][v][pvImpounded], PlayerVehicleInfo[extraid][v][pvSpawned], PlayerVehicleInfo[extraid][v][pvDisabled], PlayerVehicleInfo[extraid][v][pvNumberPlate], PlayerVehicleInfo[extraid][v][pvMods][0], PlayerVehicleInfo[extraid][v][pvMods][1], PlayerVehicleInfo[extraid][v][pvMods][2],
+						PlayerVehicleInfo[extraid][v][pvMods][3], PlayerVehicleInfo[extraid][v][pvMods][4], PlayerVehicleInfo[extraid][v][pvMods][5],PlayerVehicleInfo[extraid][v][pvMods][6], PlayerVehicleInfo[extraid][v][pvMods][7], PlayerVehicleInfo[extraid][v][pvMods][8], PlayerVehicleInfo[extraid][v][pvMods][9], PlayerVehicleInfo[extraid][v][pvMods][10],
+						PlayerVehicleInfo[extraid][v][pvMods][11], PlayerVehicleInfo[extraid][v][pvMods][12],PlayerVehicleInfo[extraid][v][pvMods][13], PlayerVehicleInfo[extraid][v][pvMods][14], PlayerInfo[extraid][pID], PlayerVehicleInfo[extraid][v][pvRealID]);
 
-						// Concencating the string seems like the most appropriate method for this type... Don't wanna send more than 1 query per player vehicle.
+						/* Concencating the string seems like the most appropriate method for this type... Don't wanna send more than 1 query per player vehicle.
 						format(szQuery, sizeof(szQuery), "%s Mod3 = %d, Mod4 = %d, Mod5 = %d, Mod6 = %d, Mod7 = %d, Mod8 = %d, Mod9 = %d, Mod10 = %d, Mod11 = %d, Mod12 = %d, Mod13 = %d, Mod14 = %d WHERE Owner = %d AND ID = %d", szQuery, PlayerVehicleInfo[extraid][v][pvMods][3], PlayerVehicleInfo[extraid][v][pvMods][4], PlayerVehicleInfo[extraid][v][pvMods][5],
 						PlayerVehicleInfo[extraid][v][pvMods][6], PlayerVehicleInfo[extraid][v][pvMods][7], PlayerVehicleInfo[extraid][v][pvMods][8], PlayerVehicleInfo[extraid][v][pvMods][9], PlayerVehicleInfo[extraid][v][pvMods][10], PlayerVehicleInfo[extraid][v][pvMods][11], PlayerVehicleInfo[extraid][v][pvMods][12],
 						PlayerVehicleInfo[extraid][v][pvMods][13], PlayerVehicleInfo[extraid][v][pvMods][14], PlayerInfo[extraid][pID], PlayerVehicleInfo[extraid][v][pvRealID]);
-
+						*/
 						// Submit the huge query...
-						mysql_query(szQuery, THREAD_NO_RESULT, 0, g_MySQLConnections[0]);
+						mysql_tquery(sqldb,szQuery);
 				    }
 		   		}
             }
@@ -44765,7 +44765,7 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 			ResetPlayerVariables(extraid);
 
 			gPlayerLogged[extraid] = 1;
-			PlayerInfo[extraid][pID] = mysql_insert_id(g_MySQLConnections[0]);
+			// PlayerInfo[extraid][pID] = mysql_insert_id(sqldb);
 			PlayerInfo[extraid][pReg] = 1;
 			GetPVarString(extraid, "password", PlayerInfo[extraid][pKey], 128);
 			DeletePVar(extraid, "password");
@@ -44773,491 +44773,492 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 			SetPVarInt(extraid, "attemptLoginAfter", 1);
 			SaveAccount(extraid);
 
+
 			TotalRegister++;
 		}
 		case THREAD_LOGIN_ATTEMPT: {
-		    mysql_store_result(g_MySQLConnections[0]);
+		    // mysql_free_result(sqldb);
 
 			if(IsPlayerConnected(extraid)) {
 			    new
 			        szReturn[128],
 				    string[128];
 
-		        if(mysql_num_rows(g_MySQLConnections[0]) == 0) { // No rows exist with the specified criteria, so, wrong password!
-		            mysql_free_result(g_MySQLConnections[0]);
+		        if(cache_num_rows() == 0) { // No rows exist with the specified criteria, so, wrong password!
+		            // mysql_free_result(sqldb);
 					ShowMainMenuDialog(extraid, 3);
 
 					gPlayerLogTries[extraid]++;
 		        } else {
-		            mysql_retrieve_row();
+		            // mysql_retrieve_row();
 
 					// Decided against using sscanf as I'd have to create a variable the size of mars. Old school method it is...
-					mysql_fetch_field_row(szReturn, "ID", g_MySQLConnections[0]);
+					cache_get_value_name(0, "ID",szReturn);
 					PlayerInfo[extraid][pID] = strval(szReturn);
 
-					mysql_fetch_field_row(PlayerInfo[extraid][pKey], "Password", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Password",PlayerInfo[extraid][pKey]);
 
-					mysql_fetch_field_row(szReturn, "Level", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Level",szReturn);
 					PlayerInfo[extraid][pLevel] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "AdminLevel", g_MySQLConnections[0]);
+					cache_get_value_name(0, "AdminLevel",szReturn);
 					PlayerInfo[extraid][pAdmin] = strval(szReturn);
 
-					mysql_fetch_field_row(PlayerInfo[extraid][pAdminName], "AdminName", g_MySQLConnections[0]);
+					cache_get_value_name(0, "AdminName",PlayerInfo[extraid][pAdminName]);
 
-					mysql_fetch_field_row(szReturn, "BanAppealer", g_MySQLConnections[0]);
+					cache_get_value_name(0, "BanAppealer",szReturn);
 					PlayerInfo[extraid][pBanAppealer] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Donator", g_MySQLConnections[0]);
-					PlayerInfo[extraid][pVIP] = strval(szReturn);
+					cache_get_value_name(0, "Donator",szReturn);
+					PlayerInfo[extraid][pVip] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Banned", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Banned",szReturn);
 					PlayerInfo[extraid][pBanned] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Permabanned", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Permabanned",szReturn);
 					PlayerInfo[extraid][pPermaBanned] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Disabled", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Disabled",szReturn);
 					PlayerInfo[extraid][pDisabled] = strval(szReturn);
 
-					mysql_fetch_field_row(PlayerInfo[extraid][pIP], "LastIP", g_MySQLConnections[0]);
+					cache_get_value_name(0, "LastIP",PlayerInfo[extraid][pIP]);
 
-					mysql_fetch_field_row(szReturn, "Registered", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Registered",szReturn);
 					PlayerInfo[extraid][pReg] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Tutorial", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Tutorial",szReturn);
 					PlayerInfo[extraid][pTut] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Sex", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Sex",szReturn);
 					PlayerInfo[extraid][pSex] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Age", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Age",szReturn);
 					PlayerInfo[extraid][pAge] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Skin", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Skin",szReturn);
 					PlayerInfo[extraid][pSkin] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "PosX", g_MySQLConnections[0]);
+					cache_get_value_name(0, "PosX",szReturn);
 					PlayerInfo[extraid][pPos_x] = floatstr(szReturn);
 					SetPVarFloat(extraid, "realX", floatstr(szReturn));
 
-					mysql_fetch_field_row(szReturn, "PosY", g_MySQLConnections[0]);
+					cache_get_value_name(0, "PosY",szReturn);
 					PlayerInfo[extraid][pPos_y] = floatstr(szReturn);
 					SetPVarFloat(extraid, "realY", floatstr(szReturn));
 
-					mysql_fetch_field_row(szReturn, "PosZ", g_MySQLConnections[0]);
+					cache_get_value_name(0, "PosZ",szReturn);
 					PlayerInfo[extraid][pPos_z] = floatstr(szReturn);
 					SetPVarFloat(extraid, "realZ", floatstr(szReturn));
 
-					mysql_fetch_field_row(szReturn, "PosR", g_MySQLConnections[0]);
+					cache_get_value_name(0, "PosR",szReturn);
 					PlayerInfo[extraid][pPos_r] = floatstr(szReturn);
 
-					mysql_fetch_field_row(szReturn, "ConnectTime", g_MySQLConnections[0]);
+					cache_get_value_name(0, "ConnectTime",szReturn);
 					PlayerInfo[extraid][pConnectTime] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Respect", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Respect",szReturn);
 					PlayerInfo[extraid][pRespect] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "PhoneNumber", g_MySQLConnections[0]);
+					cache_get_value_name(0, "PhoneNumber",szReturn);
 					PlayerInfo[extraid][pNumber] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Warnings", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Warnings",szReturn);
 					PlayerInfo[extraid][pWarns] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Gang", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Gang",szReturn);
 					PlayerInfo[extraid][pGang] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Faction", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Faction",szReturn);
 					PlayerInfo[extraid][pFaction] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Leader", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Leader",szReturn);
 					PlayerInfo[extraid][pLeader] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Rankk", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Rankk",szReturn);
 					PlayerInfo[extraid][pRank] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Job", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Job",szReturn);
 					PlayerInfo[extraid][pJob] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Job2", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Job2",szReturn);
 					PlayerInfo[extraid][pJob2] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "UpgradePoints", g_MySQLConnections[0]);
+					cache_get_value_name(0, "UpgradePoints",szReturn);
 					PlayerInfo[extraid][gPupgrade] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "SpawnArmor", g_MySQLConnections[0]);
+					cache_get_value_name(0, "SpawnArmor",szReturn);
 					PlayerInfo[extraid][pSarmor] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Cash", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Cash",szReturn);
 					PlayerInfo[extraid][pCash] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Bank", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Bank",szReturn);
 					PlayerInfo[extraid][pBank] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Insurance", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Insurance",szReturn);
 					PlayerInfo[extraid][pInsurance] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Smslog", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Smslog",szReturn);
 					PlayerInfo[extraid][pSmslog] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Crimes", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Crimes",szReturn);
 					PlayerInfo[extraid][pCrimes] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Arrested", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Arrested",szReturn);
 					PlayerInfo[extraid][pArrested] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "WantedLevel", g_MySQLConnections[0]);
+					cache_get_value_name(0, "WantedLevel",szReturn);
 					PlayerInfo[extraid][pWantedLevel] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Health", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Health",szReturn);
 					PlayerInfo[extraid][pHealth] = floatstr(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Armor", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Armor",szReturn);
 					PlayerInfo[extraid][pArmor] = floatstr(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Pot", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Pot",szReturn);
 					PlayerInfo[extraid][pPot] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Crack", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Crack",szReturn);
 					PlayerInfo[extraid][pCrack] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Radio", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Radio",szReturn);
 					PlayerInfo[extraid][pRadio] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "RadioFreq", g_MySQLConnections[0]);
+					cache_get_value_name(0, "RadioFreq",szReturn);
 					PlayerInfo[extraid][pRadioFreq] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Phonebook", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Phonebook",szReturn);
 					PlayerInfo[extraid][pPhoneBook] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Dice", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Dice",szReturn);
 					PlayerInfo[extraid][pDice] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "CDPlayer", g_MySQLConnections[0]);
+					cache_get_value_name(0, "CDPlayer",szReturn);
 					PlayerInfo[extraid][pCDPlayer] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Materials", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Materials",szReturn);
 					PlayerInfo[extraid][pMats] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Rope", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Rope",szReturn);
 					PlayerInfo[extraid][pRope] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Cigars", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Cigars",szReturn);
 					PlayerInfo[extraid][pCigar] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Sprunk", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Sprunk",szReturn);
 					PlayerInfo[extraid][pSprunk] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Spraycan", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Spraycan",szReturn);
 					PlayerInfo[extraid][pSpraycan] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "House", g_MySQLConnections[0]);
+					cache_get_value_name(0, "House",szReturn);
 					PlayerInfo[extraid][pHouse] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "House2", g_MySQLConnections[0]);
+					cache_get_value_name(0, "House2",szReturn);
 					PlayerInfo[extraid][pHouse2] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Renting", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Renting",szReturn);
 					PlayerInfo[extraid][pRenting] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Interior", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Interior",szReturn);
 					PlayerInfo[extraid][pInt] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "VirtualWorld", g_MySQLConnections[0]);
+					cache_get_value_name(0, "VirtualWorld",szReturn);
 					PlayerInfo[extraid][pVW] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Jailed", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Jailed",szReturn);
 					PlayerInfo[extraid][pJailed] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "JailTime", g_MySQLConnections[0]);
+					cache_get_value_name(0, "JailTime",szReturn);
 					PlayerInfo[extraid][pJailTime] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Gun0", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Gun0",szReturn);
 					PlayerInfo[extraid][pGuns][0] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Gun1", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Gun1",szReturn);
 					PlayerInfo[extraid][pGuns][1] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Gun2", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Gun2",szReturn);
 					PlayerInfo[extraid][pGuns][2] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Gun3", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Gun3",szReturn);
 					PlayerInfo[extraid][pGuns][3] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Gun4", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Gun4",szReturn);
 					PlayerInfo[extraid][pGuns][4] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Gun5", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Gun5",szReturn);
 					PlayerInfo[extraid][pGuns][5] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Gun6", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Gun6",szReturn);
 					PlayerInfo[extraid][pGuns][6] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Gun7", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Gun7",szReturn);
 					PlayerInfo[extraid][pGuns][7] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Gun8", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Gun8",szReturn);
 					PlayerInfo[extraid][pGuns][8] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Gun9", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Gun9",szReturn);
 					PlayerInfo[extraid][pGuns][9] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Gun10", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Gun10",szReturn);
 					PlayerInfo[extraid][pGuns][10] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Gun11", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Gun11",szReturn);
 					PlayerInfo[extraid][pGuns][11] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Paycheck", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Paycheck",szReturn);
 					PlayerInfo[extraid][pPayCheck] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "PayReady", g_MySQLConnections[0]);
+					cache_get_value_name(0, "PayReady",szReturn);
 					PlayerInfo[extraid][pPayReady] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Hospital", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Hospital",szReturn);
 					PlayerInfo[extraid][pHospital] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "DetSkill", g_MySQLConnections[0]);
+					cache_get_value_name(0, "DetSkill",szReturn);
 					PlayerInfo[extraid][pDetSkill] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "LawSkill", g_MySQLConnections[0]);
+					cache_get_value_name(0, "LawSkill",szReturn);
 					PlayerInfo[extraid][pLawSkill] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "SexSkill", g_MySQLConnections[0]);
+					cache_get_value_name(0, "SexSkill",szReturn);
 					PlayerInfo[extraid][pSexSkill] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "DrugsSkill", g_MySQLConnections[0]);
+					cache_get_value_name(0, "DrugsSkill",szReturn);
 					PlayerInfo[extraid][pDrugsSkill] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "SmugglerSkill", g_MySQLConnections[0]);
+					cache_get_value_name(0, "SmugglerSkill",szReturn);
 					PlayerInfo[extraid][pSmugSkill] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "ArmsSkill", g_MySQLConnections[0]);
+					cache_get_value_name(0, "ArmsSkill",szReturn);
 					PlayerInfo[extraid][pArmsSkill] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "MechSkill", g_MySQLConnections[0]);
+					cache_get_value_name(0, "MechSkill",szReturn);
 					PlayerInfo[extraid][pMechSkill] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "FishSkill", g_MySQLConnections[0]);
+					cache_get_value_name(0, "FishSkill",szReturn);
 					PlayerInfo[extraid][pFishSkill] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "BoxSkill", g_MySQLConnections[0]);
+					cache_get_value_name(0, "BoxSkill",szReturn);
 					PlayerInfo[extraid][pBoxSkill] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "TruckSkill", g_MySQLConnections[0]);
+					cache_get_value_name(0, "TruckSkill",szReturn);
 					PlayerInfo[extraid][pTruckSkill] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "CarSkill", g_MySQLConnections[0]);
+					cache_get_value_name(0, "CarSkill",szReturn);
 					PlayerInfo[extraid][pCarSkill] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "LawyerTime", g_MySQLConnections[0]);
+					cache_get_value_name(0, "LawyerTime",szReturn);
 					PlayerInfo[extraid][pLawyerTime] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "LawyerFreeTime", g_MySQLConnections[0]);
+					cache_get_value_name(0, "LawyerFreeTime",szReturn);
 					PlayerInfo[extraid][pLawyerFreeTime] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "DrugsTime", g_MySQLConnections[0]);
+					cache_get_value_name(0, "DrugsTime",szReturn);
 					PlayerInfo[extraid][pDrugsTime] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "MechTime", g_MySQLConnections[0]);
+					cache_get_value_name(0, "MechTime",szReturn);
 					PlayerInfo[extraid][pMechTime] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "SexTime", g_MySQLConnections[0]);
+					cache_get_value_name(0, "SexTime",szReturn);
 					PlayerInfo[extraid][pSexTime] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "CarTime", g_MySQLConnections[0]);
+					cache_get_value_name(0, "CarTime",szReturn);
 					PlayerInfo[extraid][pCarTime] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Fishes", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Fishes",szReturn);
 					PlayerInfo[extraid][pFishes] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "BiggestFish", g_MySQLConnections[0]);
+					cache_get_value_name(0, "BiggestFish",szReturn);
 					PlayerInfo[extraid][pBiggestFish] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "pWEXists", g_MySQLConnections[0]);
+					cache_get_value_name(0, "pWEXists",szReturn);
 					PlayerInfo[extraid][pWeedObject] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "pWX", g_MySQLConnections[0]);
+					cache_get_value_name(0, "pWX",szReturn);
 					PlayerInfo[extraid][pWeedPos][0] = floatstr(szReturn);
 
-					mysql_fetch_field_row(szReturn, "pWY", g_MySQLConnections[0]);
+					cache_get_value_name(0, "pWY",szReturn);
 					PlayerInfo[extraid][pWeedPos][1] = floatstr(szReturn);
 
-					mysql_fetch_field_row(szReturn, "pWZ", g_MySQLConnections[0]);
+					cache_get_value_name(0, "pWZ",szReturn);
 					PlayerInfo[extraid][pWeedPos][2] = floatstr(szReturn);
 
-					mysql_fetch_field_row(szReturn, "pWVW", g_MySQLConnections[0]);
+					cache_get_value_name(0, "pWVW",szReturn);
 					PlayerInfo[extraid][pWeedVW] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "pWInt", g_MySQLConnections[0]);
+					cache_get_value_name(0, "pWInt",szReturn);
 					PlayerInfo[extraid][pWeedInt] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "pWValue", g_MySQLConnections[0]);
+					cache_get_value_name(0, "pWValue",szReturn);
 					PlayerInfo[extraid][pWeedGrowth] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "pWSeeds", g_MySQLConnections[0]);
+					cache_get_value_name(0, "pWSeeds",szReturn);
 					PlayerInfo[extraid][pWSeeds] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Wins", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Wins",szReturn);
 					PlayerInfo[extraid][pWins] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Loses", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Loses",szReturn);
 					PlayerInfo[extraid][pLoses] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "FightingStyle", g_MySQLConnections[0]);
+					cache_get_value_name(0, "FightingStyle",szReturn);
 					PlayerInfo[extraid][pFightStyle] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Screwdriver", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Screwdriver",szReturn);
 					PlayerInfo[extraid][pScrewdriver] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Wristwatch", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Wristwatch",szReturn);
 					PlayerInfo[extraid][pWristwatch] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Tire", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Tire",szReturn);
 					PlayerInfo[extraid][pTire] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Firstaid", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Firstaid",szReturn);
 					PlayerInfo[extraid][pFirstaid] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Rccam", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Rccam",szReturn);
 					PlayerInfo[extraid][pRccam] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Receiver", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Receiver",szReturn);
 					PlayerInfo[extraid][pReceiver] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "GPS", g_MySQLConnections[0]);
+					cache_get_value_name(0, "GPS",szReturn);
 					PlayerInfo[extraid][pGPS] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Sweep", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Sweep",szReturn);
 					PlayerInfo[extraid][pSweep] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "SweepLeft", g_MySQLConnections[0]);
+					cache_get_value_name(0, "SweepLeft",szReturn);
 					PlayerInfo[extraid][pSweepLeft] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Bugged", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Bugged",szReturn);
 					PlayerInfo[extraid][pBugged] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "CarLic", g_MySQLConnections[0]);
+					cache_get_value_name(0, "CarLic",szReturn);
 					PlayerInfo[extraid][pCarLic] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "FlyLic", g_MySQLConnections[0]);
+					cache_get_value_name(0, "FlyLic",szReturn);
 					PlayerInfo[extraid][pFlyLic] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "BoatLic", g_MySQLConnections[0]);
+					cache_get_value_name(0, "BoatLic",szReturn);
 					PlayerInfo[extraid][pBoatLic] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "FishLic", g_MySQLConnections[0]);
+					cache_get_value_name(0, "FishLic",szReturn);
 					PlayerInfo[extraid][pFishLic] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "GunLic", g_MySQLConnections[0]);
+					cache_get_value_name(0, "GunLic",szReturn);
 					PlayerInfo[extraid][pGunLic] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Division", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Division",szReturn);
 					PlayerInfo[extraid][pDivision] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "TicketTime", g_MySQLConnections[0]);
+					cache_get_value_name(0, "TicketTime",szReturn);
 					PlayerInfo[extraid][pTicketTime] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "HeadValue", g_MySQLConnections[0]);
+					cache_get_value_name(0, "HeadValue",szReturn);
 					PlayerInfo[extraid][pHeadValue] = strval(szReturn);
 
-					mysql_fetch_field_row(PlayerInfo[extraid][pContractBy], "ContractBy", g_MySQLConnections[0]);
+					cache_get_value_name(0, "ContractBy",PlayerInfo[extraid][pContractBy]);
 
-		            mysql_fetch_field_row(PlayerInfo[extraid][pContractDetail], "ContractBy", g_MySQLConnections[0]);
+		            cache_get_value_name(0, "ContractBy",PlayerInfo[extraid][pContractDetail]);
 
-					mysql_fetch_field_row(szReturn, "Bombs", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Bombs",szReturn);
 					PlayerInfo[extraid][pBombs] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "CHits", g_MySQLConnections[0]);
+					cache_get_value_name(0, "CHits",szReturn);
 					PlayerInfo[extraid][pCHits] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "FHits", g_MySQLConnections[0]);
+					cache_get_value_name(0, "FHits",szReturn);
 					PlayerInfo[extraid][pFHits] = strval(szReturn);
 
-					mysql_fetch_field_row(PlayerInfo[extraid][pPrisonedBy], "PrisonedBy", g_MySQLConnections[0]);
+					cache_get_value_name(0, "PrisonedBy",PlayerInfo[extraid][pPrisonedBy]);
 
-					mysql_fetch_field_row(PlayerInfo[extraid][pPrisonReason], "PrisonReason", g_MySQLConnections[0]);
+					cache_get_value_name(0, "PrisonReason",PlayerInfo[extraid][pPrisonReason]);
 
-					mysql_fetch_field_row(szReturn, "AcceptReport", g_MySQLConnections[0]);
+					cache_get_value_name(0, "AcceptReport",szReturn);
 					PlayerInfo[extraid][pAcceptReport] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "TrashReport", g_MySQLConnections[0]);
+					cache_get_value_name(0, "TrashReport",szReturn);
 					PlayerInfo[extraid][pTrashReport] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Accent", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Accent",szReturn);
 					PlayerInfo[extraid][pAccent] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "NewMuted", g_MySQLConnections[0]);
+					cache_get_value_name(0, "NewMuted",szReturn);
 					PlayerInfo[extraid][pNMute] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "NewMutedTotal", g_MySQLConnections[0]);
+					cache_get_value_name(0, "NewMutedTotal",szReturn);
 					PlayerInfo[extraid][pNMuteTotal] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "AdMuted", g_MySQLConnections[0]);
+					cache_get_value_name(0, "AdMuted",szReturn);
 					PlayerInfo[extraid][pADMute] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "AdMutedTotal", g_MySQLConnections[0]);
+					cache_get_value_name(0, "AdMutedTotal",szReturn);
 					PlayerInfo[extraid][pADMuteTotal] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "ReportMuted", g_MySQLConnections[0]);
+					cache_get_value_name(0, "ReportMuted",szReturn);
 					PlayerInfo[extraid][pRMuted] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "ReportMutedTotal", g_MySQLConnections[0]);
+					cache_get_value_name(0, "ReportMutedTotal",szReturn);
 					PlayerInfo[extraid][pRMutedTotal] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "ReportMutedTime", g_MySQLConnections[0]);
+					cache_get_value_name(0, "ReportMutedTime",szReturn);
 					PlayerInfo[extraid][pRMutedTime] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Speedo", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Speedo",szReturn);
 					PlayerInfo[extraid][pSpeedo] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "GCMuted", g_MySQLConnections[0]);
+					cache_get_value_name(0, "GCMuted",szReturn);
 					PlayerInfo[extraid][pGCMuted] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "GCMutedTime", g_MySQLConnections[0]);
+					cache_get_value_name(0, "GCMutedTime",szReturn);
 					PlayerInfo[extraid][pGCMutedTime] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "CallsAccepted", g_MySQLConnections[0]);
+					cache_get_value_name(0, "CallsAccepted",szReturn);
 					PlayerInfo[extraid][pCallsAccepted] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "PatientsDelivered", g_MySQLConnections[0]);
+					cache_get_value_name(0, "PatientsDelivered",szReturn);
 					PlayerInfo[extraid][pPatientsDelivered] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "TriageTime", g_MySQLConnections[0]);
+					cache_get_value_name(0, "TriageTime",szReturn);
 					PlayerInfo[extraid][pTriageTime] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Married", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Married",szReturn);
 					PlayerInfo[extraid][pMarried] = strval(szReturn);
 
-					mysql_fetch_field_row(PlayerInfo[extraid][pMarriedTo], "MarriedTo", g_MySQLConnections[0]);
+					cache_get_value_name(0, "MarriedTo",PlayerInfo[extraid][pMarriedTo]);
 
-					mysql_fetch_field_row(szReturn, "OnDuty", g_MySQLConnections[0]);
+					cache_get_value_name(0, "OnDuty",szReturn);
 					PlayerInfo[extraid][pDuty] = strval(szReturn);
 
-					mysql_fetch_field_row(PlayerInfo[extraid][pFlag], "Flag", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Flag",PlayerInfo[extraid][pFlag]);
 
-					mysql_fetch_field_row(PlayerInfo[extraid][pReferredBy], "ReferredBy", g_MySQLConnections[0]);
+					cache_get_value_name(0, "ReferredBy",PlayerInfo[extraid][pReferredBy]);
 
-					mysql_fetch_field_row(szReturn, "ReferredBy", g_MySQLConnections[0]);
+					cache_get_value_name(0, "ReferredBy",szReturn);
 					PlayerInfo[extraid][pRefTokens] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "RefTokens", g_MySQLConnections[0]);
+					cache_get_value_name(0, "RefTokens",szReturn);
 					PlayerInfo[extraid][pRefTokens] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "RefTokensOffline", g_MySQLConnections[0]);
+					cache_get_value_name(0, "RefTokensOffline",szReturn);
 					PlayerInfo[extraid][pRefTokensOffline] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "Helper", g_MySQLConnections[0]);
+					cache_get_value_name(0, "Helper",szReturn);
 					PlayerInfo[extraid][pHelper] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "GangMod", g_MySQLConnections[0]);
+					cache_get_value_name(0, "GangMod",szReturn);
 					PlayerInfo[extraid][pGangMod] = strval(szReturn);
 
-					mysql_fetch_field_row(szReturn, "LiveBanned", g_MySQLConnections[0]);
+					cache_get_value_name(0, "LiveBanned",szReturn);
 					PlayerInfo[extraid][pLiveBanned] = strval(szReturn);
 
 					// Free the result (of the entire player record) when we're done with loading it...
-					mysql_free_result(g_MySQLConnections[0]);
+					// mysql_free_result(sqldb);
 
 					if(PlayerInfo[extraid][pHospital] == 1) {
 					    PlayerInfo[extraid][pHospital] = 0;
@@ -45378,7 +45379,7 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 				  		    PlayerInfo[extraid][pRefTokens] += PlayerInfo[extraid][pRefTokensOffline];
 				  		    PlayerInfo[extraid][pRefTokensOffline] = 0;
 				  		}
-			   			if(PlayerInfo[extraid][pJob2] >= 1 && PlayerInfo[extraid][pVIP] < 2 && PlayerInfo[extraid][pLevel] < 25) {
+			   			if(PlayerInfo[extraid][pJob2] >= 1 && PlayerInfo[extraid][pVip] < 2 && PlayerInfo[extraid][pLevel] < 25) {
 							PlayerInfo[extraid][pJob2] = 0;
 							SendClientMessage(extraid, COLOR_YELLOW, "You have lost your secondary job due to the fact that you no longer have a VIP package or are below level 25.");
 						}
@@ -45386,8 +45387,8 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 
 					/* --------- Load alternative player items (vehicles, toys, etc) --------- */
 					LoadPlayerDynamicItems(extraid);
-					format(szQuery, sizeof(szQuery), "UPDATE connections SET AccountID = %d WHERE PlayerID = %d", PlayerInfo[extraid][pID], extraid);
-					mysql_query(szQuery, THREAD_NO_RESULT, extraid, g_MySQLConnections[0]);
+					// format(szQuery, sizeof(szQuery), "UPDATE connections SET AccountID = %d WHERE PlayerID = %d", PlayerInfo[extraid][pID], extraid);
+					// mysql_tquery(szQuery, THREAD_NO_RESULT, extraid,sqldb);
 
 					if(PlayerInfo[extraid][pWeedObject] != 0) {
 						PlayerInfo[extraid][pWeedObject] = CreateDynamicObject(3409, PlayerInfo[extraid][pWeedPos][0], PlayerInfo[extraid][pWeedPos][1], PlayerInfo[extraid][pWeedPos][2], 0.0, 0.0, 0.0, PlayerInfo[extraid][pWeedVW], PlayerInfo[extraid][pWeedInt]);
@@ -45418,7 +45419,7 @@ public OnQueryFinish(query[], resultid, extraid, connectionHandle) {
 						PlayerInfo[extraid][pRenting] = INVALID_HOUSE_ID;
 					}
 				}
-			} else mysql_free_result(g_MySQLConnections[0]); // The player logged off before we could get their result, so we need to free it.
+			} // mysql_free_result(sqldb); // The player logged off before we could get their result, so we need to free it.
 		}
 	}
 	return 1;
@@ -45442,11 +45443,11 @@ public Login(playerid)
 
 	GetPlayerName(playerid, szPlayerName, sizeof(szPlayerName));
 
-	mysql_real_escape_string(szPlayerName, szPlayerName2, g_MySQLConnections[0]);
+	mysql_escape_string(szPlayerName, szPlayerName2,MAX_PLAYER_NAME,sqldb);
 
 	// Check MySQL to see if any accounts exist with the specified username on login.
-	format(szQuery, sizeof(szQuery), "SELECT COUNT(*) FROM players WHERE Username = '%s'", szPlayerName);
-	mysql_query(szQuery, THREAD_CONFIRM_USERNAME, playerid, g_MySQLConnections[0]);
+	mysql_format(sqldb,szQuery, sizeof(szQuery), "SELECT COUNT(*) FROM players WHERE Username = '%s'", szPlayerName);
+	mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii",THREAD_CONFIRM_USERNAME, playerid);
 
 	//ConnectionLog(playerid, PlayerInfo[playerid][pID], szPlayerName);
 	return 1;
@@ -45672,32 +45673,34 @@ public OnPlayerDeath(playerid, killerid, reason) {
 			    if(GetPVarInt(playerid, "PBM") == GetPVarInt(i, "PBM"))
 			        SendClientMessage(i, COLOR_RED, string);
 			}
+		}
+			
+			// format(PlayerInfo[playerid][pKillLog9], 128, "%s", PlayerInfo[playerid][pKillLog8]);
+			// format(PlayerInfo[playerid][pKillLog8], 128, "%s", PlayerInfo[playerid][pKillLog7]);
+			// format(PlayerInfo[playerid][pKillLog7], 128, "%s", PlayerInfo[playerid][pKillLog6]);
+			// format(PlayerInfo[playerid][pKillLog6], 128, "%s", PlayerInfo[playerid][pKillLog5]);
+			// format(PlayerInfo[playerid][pKillLog5], 128, "%s", PlayerInfo[playerid][pKillLog4]);
+			// format(PlayerInfo[playerid][pKillLog4], 128, "%s", PlayerInfo[playerid][pKillLog3]);
+			// format(PlayerInfo[playerid][pKillLog3], 128, "%s", PlayerInfo[playerid][pKillLog2]);
+			// format(PlayerInfo[playerid][pKillLog2], 128, "%s", PlayerInfo[playerid][pKillLog1]);
+			// format(PlayerInfo[playerid][pKillLog1], 128, "%s", PlayerInfo[playerid][pKillLog0]);
+			// format(PlayerInfo[playerid][pKillLog0], 128, "(%d:%d:%d) %s killed me with %s (in paintball)", hour,minute,second,GetPlayerNameEx(killerid), weaponname);
 
-			format(PlayerInfo[playerid][pKillLog9], 128, "%s", PlayerInfo[playerid][pKillLog8]);
-			format(PlayerInfo[playerid][pKillLog8], 128, "%s", PlayerInfo[playerid][pKillLog7]);
-			format(PlayerInfo[playerid][pKillLog7], 128, "%s", PlayerInfo[playerid][pKillLog6]);
-			format(PlayerInfo[playerid][pKillLog6], 128, "%s", PlayerInfo[playerid][pKillLog5]);
-			format(PlayerInfo[playerid][pKillLog5], 128, "%s", PlayerInfo[playerid][pKillLog4]);
-			format(PlayerInfo[playerid][pKillLog4], 128, "%s", PlayerInfo[playerid][pKillLog3]);
-			format(PlayerInfo[playerid][pKillLog3], 128, "%s", PlayerInfo[playerid][pKillLog2]);
-			format(PlayerInfo[playerid][pKillLog2], 128, "%s", PlayerInfo[playerid][pKillLog1]);
-			format(PlayerInfo[playerid][pKillLog1], 128, "%s", PlayerInfo[playerid][pKillLog0]);
-			format(PlayerInfo[playerid][pKillLog0], 128, "(%d:%d:%d) %s killed me with %s (in paintball)", hour,minute,second,GetPlayerNameEx(killerid), weaponname);
+			// format(PlayerInfo[killerid][pKillLog9], 128, "%s", PlayerInfo[killerid][pKillLog8]);
+			// format(PlayerInfo[killerid][pKillLog8], 128, "%s", PlayerInfo[killerid][pKillLog7]);
+			// format(PlayerInfo[killerid][pKillLog7], 128, "%s", PlayerInfo[killerid][pKillLog6]);
+			// format(PlayerInfo[killerid][pKillLog6], 128, "%s", PlayerInfo[killerid][pKillLog5]);
+			// format(PlayerInfo[killerid][pKillLog5], 128, "%s", PlayerInfo[killerid][pKillLog4]);
+			// format(PlayerInfo[killerid][pKillLog4], 128, "%s", PlayerInfo[killerid][pKillLog3]);
+			// format(PlayerInfo[killerid][pKillLog3], 128, "%s", PlayerInfo[killerid][pKillLog2]);
+			// format(PlayerInfo[killerid][pKillLog2], 128, "%s", PlayerInfo[killerid][pKillLog1]);
+			// format(PlayerInfo[killerid][pKillLog1], 128, "%s", PlayerInfo[killerid][pKillLog0]);
+		 	// format(PlayerInfo[killerid][pKillLog0], 128, "(%d:%d:%d) %s killed %s with %s (in paintball)", hour,minute,second, GetPlayerNameEx(killerid), GetPlayerNameEx(playerid), weaponname);
 
-			format(PlayerInfo[killerid][pKillLog9], 128, "%s", PlayerInfo[killerid][pKillLog8]);
-			format(PlayerInfo[killerid][pKillLog8], 128, "%s", PlayerInfo[killerid][pKillLog7]);
-			format(PlayerInfo[killerid][pKillLog7], 128, "%s", PlayerInfo[killerid][pKillLog6]);
-			format(PlayerInfo[killerid][pKillLog6], 128, "%s", PlayerInfo[killerid][pKillLog5]);
-			format(PlayerInfo[killerid][pKillLog5], 128, "%s", PlayerInfo[killerid][pKillLog4]);
-			format(PlayerInfo[killerid][pKillLog4], 128, "%s", PlayerInfo[killerid][pKillLog3]);
-			format(PlayerInfo[killerid][pKillLog3], 128, "%s", PlayerInfo[killerid][pKillLog2]);
-			format(PlayerInfo[killerid][pKillLog2], 128, "%s", PlayerInfo[killerid][pKillLog1]);
-			format(PlayerInfo[killerid][pKillLog1], 128, "%s", PlayerInfo[killerid][pKillLog0]);
-		 	format(PlayerInfo[killerid][pKillLog0], 128, "(%d:%d:%d) %s killed %s with %s (in paintball)", hour,minute,second, GetPlayerNameEx(killerid), GetPlayerNameEx(playerid), weaponname);
-
-		 	format(szQuery, sizeof(szQuery), "INSERT INTO kills (killerID, killedID, killTS, killText) VALUES(%d, %d, %d, '%s')", PlayerInfo[killerid][pID], PlayerInfo[playerid][pID], gettime(), PlayerInfo[killerid][pKillLog0]);
-		 	mysql_query(szQuery, THREAD_NO_RESULT, 0, g_MySQLConnections[0]);
-	    } else if(GetPVarInt(playerid, "EventToken") > 0) {
+		 	// mysql_format(sqldb,szQuery, sizeof(szQuery), "INSERT INTO kills (killerID, killedID, killTS, killText) VALUES(%d, %d, %d, '%s')", PlayerInfo[killerid][pID], PlayerInfo[playerid][pID], gettime(), PlayerInfo[killerid][pKillLog0]);
+		 	// mysql_tquery(sqldb,szQuery);
+	    else if(GetPVarInt(playerid, "EventToken") > 0)
+		{
 			format(PlayerInfo[playerid][pKillLog9], 128, "%s", PlayerInfo[playerid][pKillLog8]);
 			format(PlayerInfo[playerid][pKillLog8], 128, "%s", PlayerInfo[playerid][pKillLog7]);
 			format(PlayerInfo[playerid][pKillLog7], 128, "%s", PlayerInfo[playerid][pKillLog6]);
@@ -45720,9 +45723,11 @@ public OnPlayerDeath(playerid, killerid, reason) {
 			format(PlayerInfo[killerid][pKillLog1], 128, "%s", PlayerInfo[killerid][pKillLog0]);
 		 	format(PlayerInfo[killerid][pKillLog0], 128, "(%d:%d:%d) %s killed %s with %s (in event)", hour,minute,second, GetPlayerNameEx(killerid), GetPlayerNameEx(playerid), weaponname);
 
-		 	format(szQuery, sizeof(szQuery), "INSERT INTO kills (killerID, killedID, killTS, killText) VALUES(%d, %d, %d, '%s')", PlayerInfo[killerid][pID], PlayerInfo[playerid][pID], gettime(), PlayerInfo[killerid][pKillLog0]);
-		 	mysql_query(szQuery, THREAD_NO_RESULT, 0, g_MySQLConnections[0]);
-	    } else {
+		 	mysql_format(sqldb,szQuery, sizeof(szQuery), "INSERT INTO kills (killerID, killedID, killTS, killText) VALUES(%d, %d, %d, '%s')", PlayerInfo[killerid][pID], PlayerInfo[playerid][pID], gettime(), PlayerInfo[killerid][pKillLog0]);
+		 	mysql_tquery(sqldb,szQuery);
+	    }
+		else
+		{
 			format(PlayerInfo[playerid][pKillLog9], 128, "%s", PlayerInfo[playerid][pKillLog8]);
 			format(PlayerInfo[playerid][pKillLog8], 128, "%s", PlayerInfo[playerid][pKillLog7]);
 			format(PlayerInfo[playerid][pKillLog7], 128, "%s", PlayerInfo[playerid][pKillLog6]);
@@ -45746,12 +45751,13 @@ public OnPlayerDeath(playerid, killerid, reason) {
 			if(JustSuicided[playerid]) {
 				JustSuicided[playerid] = 0;
 				format(PlayerInfo[killerid][pKillLog0], 128, "(%d:%d:%d) %s commited suicide", hour,minute,second, GetPlayerNameEx(killerid));
-			} else {
+			}
+			else {
 				format(PlayerInfo[killerid][pKillLog0], 128, "(%d:%d:%d) %s killed %s with %s", hour,minute,second, GetPlayerNameEx(killerid), GetPlayerNameEx(playerid), weaponname);
 			}
 
-		 	format(szQuery, sizeof(szQuery), "INSERT INTO kills (killerID, killedID, killTS, killText) VALUES(%d, %d, %d, '%s')", PlayerInfo[killerid][pID], PlayerInfo[playerid][pID], gettime(), PlayerInfo[killerid][pKillLog0]);
-		 	mysql_query(szQuery, THREAD_NO_RESULT, 0, g_MySQLConnections[0]);
+		 	mysql_format(sqldb,szQuery, sizeof(szQuery), "INSERT INTO kills (killerID, killedID, killTS, killText) VALUES(%d, %d, %d, '%s')", PlayerInfo[killerid][pID], PlayerInfo[playerid][pID], gettime(), PlayerInfo[killerid][pKillLog0]);
+		 	mysql_tquery(sqldb,szQuery);
 	 	}
 	} else {
 	    if(GetPVarInt(playerid, "PBM") > 0) {
@@ -48899,7 +48905,7 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys) {
 
         for(new i = 0; i < sizeof(DDoorsInfo); i++) {
             if(IsPlayerInRangeOfPoint(playerid,3.0,DDoorsInfo[i][ddExteriorX], DDoorsInfo[i][ddExteriorY], DDoorsInfo[i][ddExteriorZ]) && PlayerInfo[playerid][pVW] == DDoorsInfo[i][ddExteriorVW]) {
-                if(DDoorsInfo[i][ddVIP] > 0 && PlayerInfo[playerid][pVIP] < DDoorsInfo[i][ddVIP])
+                if(DDoorsInfo[i][ddVIP] > 0 && PlayerInfo[playerid][pVip] < DDoorsInfo[i][ddVIP])
                     return SendClientMessage(playerid, COLOR_GRAD2, "You can't enter, you're not a high enough VIP level.");
 
 
@@ -49053,8 +49059,9 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys) {
             PlayerInfo[playerid][pVW] = 363636;
             SetPlayerInterior(playerid, 36);
             PlayerInfo[playerid][pInt] = 36;
-            SetPlayerPos(playerid, 308.045654, 1053.886840, 1098.540039);
-            SetPlayerFacingAngle(playerid, 267.57);
+            SetPlayerPos(playerid, 2580.1853,1417.4607,7701.9907);
+            // SetPlayerPos(playerid, 308.045654, 1053.886840, 1098.540039);
+            SetPlayerFacingAngle(playerid, 93.0);
             SetCameraBehindPlayer(playerid);
 
             LoadObjectsForPlayer(playerid);
@@ -49064,7 +49071,7 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys) {
         }
 
 		// The VIP club (VIP ROOM)
-        else if(IsPlayerInRangeOfPoint(playerid, 3.0,  1798.08,-1578.68,14.09)) {
+        else if(IsPlayerInRangeOfPoint(playerid, 3.0,  0,0,0)) { // To be done Second VIP... idk cords?
             if(GetPlayerCash(playerid) >= 100) {
                 format(string, sizeof(string), "* %s has entered The VIP Lounge.", GetPlayerNameEx(playerid));
                 ProxDetector(25.0, playerid, string, COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE);
@@ -49206,7 +49213,7 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys) {
         }
 
 		// The Tableau Club
-        else if(IsPlayerInRangeOfPoint(playerid, 3.0, 308.045654, 1053.886840, 1098.540039) && (GetPlayerVirtualWorld(playerid) == 363636)) {
+        else if(IsPlayerInRangeOfPoint(playerid, 3.0, 2580.1853,1417.4607,7701.9907)) {
             format(string, sizeof(string), "* %s has exited the building.", GetPlayerNameEx(playerid));
             ProxDetector(25.0, playerid, string, COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE);
 
@@ -49214,8 +49221,9 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys) {
             PlayerInfo[playerid][pVW] = 0;
             SetPlayerInterior(playerid, 0);
             PlayerInfo[playerid][pInt] = 0;
-            SetPlayerPos(playerid, 561.802795, -1506.722412, 14.548986);
-            SetPlayerFacingAngle(playerid, 86.78);
+            SetPlayerPos(playerid, 1798.08,-1578.68,14.09);
+            // SetPlayerPos(playerid, 561.802795, -1506.722412, 14.548986);
+            SetPlayerFacingAngle(playerid, 0.0);
             SetCameraBehindPlayer(playerid);
 
             StopAudioStreamForPlayer(playerid);
@@ -50190,7 +50198,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 		}
 		else SendClientMessage(playerid, COLOR_WHITE, "You must be a platinum VIP to use this feature!");
 	}
-	
+
 	if(dialogid == DIALOG_VIPLOCKER)
 	{
 	    if(response)
@@ -50609,12 +50617,12 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
                 szPlayerName[MAX_PLAYER_NAME],
                 szQuery[128];
 
-			mysql_real_escape_string(inputtext, szPlayerName, g_MySQLConnections[0]);
+			mysql_escape_string(inputtext, szPlayerName,MAX_PLAYER_NAME,sqldb);
 
 			format(PlayerInfo[playerid][pReferredBy], MAX_PLAYER_NAME, "%s", szPlayerName);
 
-			format(szQuery, sizeof(szQuery), "SELECT Username FROM players WHERE Username = '%s'", szPlayerName);
-			mysql_query(szQuery, THREAD_REFERRAL_MENU, playerid, g_MySQLConnections[0]);
+			mysql_format(sqldb,szQuery, sizeof(szQuery), "SELECT Username FROM players WHERE Username = '%s'", szPlayerName);
+			mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii", THREAD_REFERRAL_MENU,playerid);
         }
         else
         {
@@ -51264,7 +51272,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
             PayCheckCode[playerid] = 0;
 
 			// VIP Disabled
-			/*if(PlayerInfo[i][pVIP] > 0)
+			/*if(PlayerInfo[i][pVip] > 0)
 			{
     			PlayerInfo[i][pPayCheck] += PlayerInfo[i][pPayCheck] / 2;
 			}*/
@@ -51305,7 +51313,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
             SendClientMessage(playerid, COLOR_GRAD1, string);
 
 			// VIP Disabled
-			/*switch(PlayerInfo[i][pVIP])
+			/*switch(PlayerInfo[i][pVip])
 			{
     			case 0:
     			{
@@ -51340,17 +51348,17 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 			}*/
 
             new interest;
-            if(PlayerInfo[playerid][pVIP] == 0) interest = PlayerInfo[playerid][pBank] / 1000;
-            else if(PlayerInfo[playerid][pVIP] == 1) interest = PlayerInfo[playerid][pBank] / 500;
-            else if(PlayerInfo[playerid][pVIP] == 2) interest = PlayerInfo[playerid][pBank] / 333;
-            else if(PlayerInfo[playerid][pVIP] == 3) interest = PlayerInfo[playerid][pBank] / 200;
+            if(PlayerInfo[playerid][pVip] == 0) interest = PlayerInfo[playerid][pBank] / 1000;
+            else if(PlayerInfo[playerid][pVip] == 1) interest = PlayerInfo[playerid][pBank] / 500;
+            else if(PlayerInfo[playerid][pVip] == 2) interest = PlayerInfo[playerid][pBank] / 333;
+            else if(PlayerInfo[playerid][pVip] == 3) interest = PlayerInfo[playerid][pBank] / 200;
 
             if(interest > 5000) interest = 5000;
 
-            if(PlayerInfo[playerid][pVIP] == 0) format(string, sizeof(string), "  Old balance: $%d  |  Interest rate: 0.1 percent (5k max)", PlayerInfo[playerid][pBank]);
-            else if(PlayerInfo[playerid][pVIP] == 1) format(string, sizeof(string), "  Old balance: $%d  |  Interest rate: 0.2 percent (5k max)", PlayerInfo[playerid][pBank]);
-            else if(PlayerInfo[playerid][pVIP] == 2) format(string, sizeof(string), "  Old balance: $%d  |  Interest rate: 0.3 percent (5k max)", PlayerInfo[playerid][pBank]);
-            else if(PlayerInfo[playerid][pVIP] == 3) format(string, sizeof(string), "  Old balance: $%d  |  Interest rate: 0.5 percent (5k max)", PlayerInfo[playerid][pBank]);
+            if(PlayerInfo[playerid][pVip] == 0) format(string, sizeof(string), "  Old balance: $%d  |  Interest rate: 0.1 percent (5k max)", PlayerInfo[playerid][pBank]);
+            else if(PlayerInfo[playerid][pVip] == 1) format(string, sizeof(string), "  Old balance: $%d  |  Interest rate: 0.2 percent (5k max)", PlayerInfo[playerid][pBank]);
+            else if(PlayerInfo[playerid][pVip] == 2) format(string, sizeof(string), "  Old balance: $%d  |  Interest rate: 0.3 percent (5k max)", PlayerInfo[playerid][pBank]);
+            else if(PlayerInfo[playerid][pVip] == 3) format(string, sizeof(string), "  Old balance: $%d  |  Interest rate: 0.5 percent (5k max)", PlayerInfo[playerid][pBank]);
 
             SendClientMessage(playerid, COLOR_GRAD1, string);
 
@@ -51424,8 +51432,8 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 				    new
 				        szQuery[128];
 
-					format(szQuery, sizeof(szQuery), "SELECT RefTokensOffline FROM players WHERE Username = '%s'", PlayerInfo[playerid][pReferredBy]);
-					mysql_query(szQuery, THREAD_GIVE_REF_TOKENS, playerid, g_MySQLConnections[0]);
+					mysql_format(sqldb,szQuery, sizeof(szQuery), "SELECT RefTokensOffline FROM players WHERE Username = '%s'", PlayerInfo[playerid][pReferredBy]);
+					mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii", THREAD_GIVE_REF_TOKENS, playerid);
 				}
             }
         }
@@ -51707,9 +51715,9 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 	}
 	if((dialogid == BUYTOYS2) && response)
 	{
-	    if(listitem == 5 && PlayerInfo[playerid][pVIP] < 1) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Bronze VIP to use that slot!");
-	    if(listitem == 6 && PlayerInfo[playerid][pVIP] < 2) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Silver VIP to use that slot!");
-        if(listitem == 7 && PlayerInfo[playerid][pVIP] < 3) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Gold VIP to use that slot!");
+	    if(listitem == 5 && PlayerInfo[playerid][pVip] < 1) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Bronze VIP to use that slot!");
+	    if(listitem == 6 && PlayerInfo[playerid][pVip] < 2) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Silver VIP to use that slot!");
+        if(listitem == 7 && PlayerInfo[playerid][pVip] < 3) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Gold VIP to use that slot!");
 
 	    if(PlayerToyInfo[playerid][listitem][ptModelID] != 0) return SendClientMessage(playerid, COLOR_YELLOW, "* You already have something in that slot. Delete it with /toys");
 
@@ -51810,12 +51818,12 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 
 			new
 			    szQuery[460];
-			format(szQuery, sizeof(szQuery),"INSERT INTO toys (Owner, ModelID, Bone, PosX, PosY, PosZ, RotX, RotY, RotZ, ScaX, ScaY, ScaZ) VALUES(%d, %d, %d, '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f')",
+			mysql_format(sqldb,szQuery, sizeof(szQuery),"INSERT INTO toys (Owner, ModelID, Bone, PosX, PosY, PosZ, RotX, RotY, RotZ, ScaX, ScaY, ScaZ) VALUES(%d, %d, %d, '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f')",
 			PlayerInfo[playerid][pID], PlayerToyInfo[playerid][slotselection[playerid]][ptModelID], PlayerToyInfo[playerid][slotselection[playerid]][ptPosX], PlayerToyInfo[playerid][slotselection[playerid]][ptPosY], PlayerToyInfo[playerid][slotselection[playerid]][ptPosZ],
 			PlayerToyInfo[playerid][slotselection[playerid]][ptRotX], PlayerToyInfo[playerid][slotselection[playerid]][ptRotY], PlayerToyInfo[playerid][slotselection[playerid]][ptRotZ], PlayerToyInfo[playerid][slotselection[playerid]][ptScaleX], PlayerToyInfo[playerid][slotselection[playerid]][ptScaleY],
 			PlayerToyInfo[playerid][slotselection[playerid]][ptScaleZ]);
-			mysql_query(szQuery);
-			PlayerToyInfo[playerid][slotselection[playerid]][ptRealID] = mysql_insert_id();
+			mysql_tquery(sqldb,szQuery);
+			// PlayerToyInfo[playerid][slotselection[playerid]][ptRealID] = mysql_insert_id();
 
 			format(string, sizeof(string), "* You have purchased %s for $%d (Slot: %d)", HoldingObjects[listitem][holdingmodelname], HoldingObjects[listitem][holdingprice], slotselection[playerid]);
 		    SendClientMessage(playerid, COLOR_RED, string);
@@ -52060,9 +52068,9 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 			}
 			else
 			{
-				if(listitem == 5 && PlayerInfo[playerid][pVIP] < 1) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Bronze VIP to use that slot!");
-			 	if(listitem == 6 && PlayerInfo[playerid][pVIP] < 2) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Silver VIP to use that slot!");
-        		if(listitem == 7 && PlayerInfo[playerid][pVIP] < 3) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Gold VIP to use that slot!");
+				if(listitem == 5 && PlayerInfo[playerid][pVip] < 1) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Bronze VIP to use that slot!");
+			 	if(listitem == 6 && PlayerInfo[playerid][pVip] < 2) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Silver VIP to use that slot!");
+        		if(listitem == 7 && PlayerInfo[playerid][pVip] < 3) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Gold VIP to use that slot!");
 
 				if(PlayerToyInfo[playerid][listitem][ptScaleX] == 0) {
 					PlayerToyInfo[playerid][listitem][ptScaleX] = 1.0;
@@ -52096,8 +52104,8 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 	        szQuery[128];
 
 		SetPVarInt(playerid, "deleteObject", listitem);
-     	format(szQuery, sizeof(szQuery), "DELETE FROM toys WHERE Owner = %d AND ID = %d", PlayerInfo[playerid][pID], PlayerToyInfo[playerid][listitem][ptRealID]);
-		mysql_query(szQuery, THREAD_DELETE_PLAYER_OBJECT, playerid, g_MySQLConnections[0]);
+     	mysql_format(sqldb,szQuery, sizeof(szQuery), "DELETE FROM toys WHERE Owner = %d AND ID = %d", PlayerInfo[playerid][pID], PlayerToyInfo[playerid][listitem][ptRealID]);
+		mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii", THREAD_DELETE_PLAYER_OBJECT,playerid);
 	}
 	if((dialogid == BUYTOYSCOP) && response)
 	{
@@ -52122,9 +52130,9 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 	if((dialogid == BUYTOYSCOP2) && response)
 	{
 	    // (TEMPORARY - ZHAO NOTE) NO VIP added yet
-	    /*if(listitem >= 3 && PlayerInfo[playerid][pVIP] < 1 || listitem >= 3 && PlayerInfo[playerid][pBuddyInvited] == 1) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Bronze VIP to use that slot!");
-	    if(listitem >= 4 && PlayerInfo[playerid][pVIP] < 2) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Silver VIP to use that slot!");
-        if(listitem >= 5 && PlayerInfo[playerid][pVIP] < 3) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Gold VIP to use that slot!");
+	    /*if(listitem >= 3 && PlayerInfo[playerid][pVip] < 1 || listitem >= 3 && PlayerInfo[playerid][pBuddyInvited] == 1) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Bronze VIP to use that slot!");
+	    if(listitem >= 4 && PlayerInfo[playerid][pVip] < 2) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Silver VIP to use that slot!");
+        if(listitem >= 5 && PlayerInfo[playerid][pVip] < 3) return SendClientMessage(playerid, COLOR_WHITE, "* You must be a Gold VIP to use that slot!");
 	    if(PlayerToyInfo[playerid][listitem][ptModelID] != 0) return SendClientMessage(playerid, COLOR_YELLOW, "* You already have something in that slot. Delete it with /toys");*/
 
 		slotselection[playerid] = listitem;
@@ -52224,12 +52232,12 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 
 			new
 			    szQuery[460];
-			format(szQuery, sizeof(szQuery),"INSERT INTO toys (Owner, ModelID, Bone, PosX, PosY, PosZ, RotX, RotY, RotZ, ScaX, ScaY, ScaZ) VALUES(%d, %d, %d, '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f')",
+			mysql_format(sqldb,szQuery, sizeof(szQuery),"INSERT INTO toys (Owner, ModelID, Bone, PosX, PosY, PosZ, RotX, RotY, RotZ, ScaX, ScaY, ScaZ) VALUES(%d, %d, %d, '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f')",
 			PlayerInfo[playerid][pID], PlayerToyInfo[playerid][slotselection[playerid]][ptModelID], PlayerToyInfo[playerid][slotselection[playerid]][ptPosX], PlayerToyInfo[playerid][slotselection[playerid]][ptPosY], PlayerToyInfo[playerid][slotselection[playerid]][ptPosZ],
 			PlayerToyInfo[playerid][slotselection[playerid]][ptRotX], PlayerToyInfo[playerid][slotselection[playerid]][ptRotY], PlayerToyInfo[playerid][slotselection[playerid]][ptRotZ], PlayerToyInfo[playerid][slotselection[playerid]][ptScaleX], PlayerToyInfo[playerid][slotselection[playerid]][ptScaleY],
 			PlayerToyInfo[playerid][slotselection[playerid]][ptScaleZ]);
-			mysql_query(szQuery);
-			PlayerToyInfo[playerid][slotselection[playerid]][ptRealID] = mysql_insert_id();
+			mysql_tquery(sqldb,szQuery);
+			// PlayerToyInfo[playerid][slotselection[playerid]][ptRealID] = mysql_insert_id();
 
 			format(string, sizeof(string), "* You have purchased %s for $%d (Slot: %d)", HoldingObjectsCop[listitem][holdingmodelname], HoldingObjectsCop[listitem][holdingprice], slotselection[playerid]);
 		    SendClientMessage(playerid, COLOR_RED, string);
@@ -54423,19 +54431,19 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 		if(!response)
 		    return 1;
 
-        if(IsValidSkin(skinid) == 0 && PlayerInfo[playerid][pVIP] < 1) {
+        if(IsValidSkin(skinid) == 0 && PlayerInfo[playerid][pVip] < 1) {
 			SendClientMessage(playerid, COLOR_GREY, "That skin ID is either invalid or restricted to faction or family!");
    			ShowPlayerDialogEx(playerid, 3495, DIALOG_STYLE_INPUT, "Skin Selection","Please enter a Skin ID!\n\nNote: Skin Changes cost $250.", "Buy", "Cancel");
 		} else {
 			if(GetPlayerCash(playerid) < 250 && PlayerInfo[playerid][pFaction] == 0 && PlayerInfo[playerid][pLeader] == 0)
 			   	return SendClientMessage(playerid, COLOR_GRAD2, "You can't afford these clothes!");
 
-			if(PlayerInfo[playerid][pVIP] > 0 && IsInvalidSkin(skinid)) {
+			if(PlayerInfo[playerid][pVip] > 0 && IsInvalidSkin(skinid)) {
 			    ShowPlayerDialogEx(playerid, 3495, DIALOG_STYLE_INPUT, "Skin Selection","Please enter a Skin ID!\n\nNote: Skin Changes are free for VIP.", "Buy", "Cancel");
 			    return SendClientMessage(playerid, COLOR_GREY, "Invalid skin ID, try again.");
 			}
 
-			if(PlayerInfo[playerid][pFaction] == 0 && PlayerInfo[playerid][pLeader] == 0 && PlayerInfo[playerid][pVIP] == 0) {
+			if(PlayerInfo[playerid][pFaction] == 0 && PlayerInfo[playerid][pLeader] == 0 && PlayerInfo[playerid][pVip] == 0) {
 				GivePlayerCash(playerid, -250);
 				GameTextForPlayer(playerid, "~g~Skin purchased! ~n~ ~r~- $250", 2000, 1);
 			} else {
@@ -54727,8 +54735,8 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 			if(PlayerInfo[giveplayerid][pWantedLevel] == 0) {
 				ShowPlayerDialogEx(playerid, MDC_END_ID, DIALOG_STYLE_MSGBOX, "SA-MDC - Logged in | ERROR ", "There is no record of that person.", "OK", "Cancel");
 			} else {
-				format(szQuery, sizeof(szQuery), "SELECT crimes.* FROM crimes INNER JOIN players ON crimes.crimeIssuedTo = players.ID OR crimes.crimeIssuedTo = players.ID WHERE players.ID = '%d' ORDER BY crimes.crimeID DESC LIMIT %d", PlayerInfo[giveplayerid][pID], PlayerInfo[giveplayerid][pWantedLevel]);
-				mysql_query(szQuery, THREAD_MDC_CHECK, playerid, g_MySQLConnections[0]);
+				mysql_format(sqldb,szQuery, sizeof(szQuery), "SELECT crimes.* FROM crimes INNER JOIN players ON crimes.crimeIssuedTo = players.ID OR crimes.crimeIssuedTo = players.ID WHERE players.ID = '%d' ORDER BY crimes.crimeID DESC LIMIT %d", PlayerInfo[giveplayerid][pID], PlayerInfo[giveplayerid][pWantedLevel]);
+				mysql_tquery(sqldb,szQuery,"OnQueryFinished","ii", THREAD_MDC_CHECK,playerid);
 				SetPVarInt(playerid, "MDCCHECK", giveplayerid);
 			}
 			return 1;
@@ -56416,7 +56424,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 				TogglePlayerControllable(playerid, 1);
 				return 1;
             }
-            if(CarDealershipInfo[d][cdDonator] == 1 && PlayerInfo[playerid][pVIP] < 1)
+            if(CarDealershipInfo[d][cdDonator] == 1 && PlayerInfo[playerid][pVip] < 1)
             {
  				SendClientMessage(playerid, COLOR_GREY, "The vehicles in this dealership are only available for Bronze VIP.");
 				RemovePlayerFromVehicle(playerid);
@@ -56426,7 +56434,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 				TogglePlayerControllable(playerid, 1);
 				return 1;
             }
-            if(CarDealershipInfo[d][cdDonator] == 2 && PlayerInfo[playerid][pVIP] < 2)
+            if(CarDealershipInfo[d][cdDonator] == 2 && PlayerInfo[playerid][pVip] < 2)
             {
  				SendClientMessage(playerid, COLOR_GREY, "The vehicles in this dealership are only available for Silver VIP.");
 				RemovePlayerFromVehicle(playerid);
@@ -56436,7 +56444,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 				TogglePlayerControllable(playerid, 1);
 				return 1;
             }
-            if(CarDealershipInfo[d][cdDonator] == 3 && PlayerInfo[playerid][pVIP] < 3)
+            if(CarDealershipInfo[d][cdDonator] == 3 && PlayerInfo[playerid][pVip] < 3)
             {
  				SendClientMessage(playerid, COLOR_GREY, "The vehicles in this dealership are only available for Gold VIP.");
 				RemovePlayerFromVehicle(playerid);
@@ -56450,7 +56458,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
             new playervehicleid = GetPlayerFreeVehicleId(playerid),
 				totalvehicles = GetPlayerVehicleCountEx(playerid);
             // (TEMPORARY - ZHAO NOTE) TempVIP not added yet
-			if(PlayerInfo[playerid][pVIP] == 0 && totalvehicles >= 5) //PlayerInfo[playerid][pTempVIP] > 0) && carsamount >= 5)
+			if(PlayerInfo[playerid][pVip] == 0 && totalvehicles >= 5) //PlayerInfo[playerid][pTempVIP] > 0) && carsamount >= 5)
 			{
                 SendClientMessage(playerid, COLOR_GREY, "ERROR: You can't have more cars, non-VIP can only own 5 cars.");
                 RemovePlayerFromVehicle(playerid);
@@ -56460,7 +56468,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
                 TogglePlayerControllable(playerid, 1);
                 return 1;
 			}
-            if(PlayerInfo[playerid][pVIP] == 1 && totalvehicles >= 7)
+            if(PlayerInfo[playerid][pVip] == 1 && totalvehicles >= 7)
             {
                 SendClientMessage(playerid, COLOR_GREY, "ERROR: You can't have more cars, Bronze VIP can only own 7 cars.");
                 RemovePlayerFromVehicle(playerid);
@@ -56470,7 +56478,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
                 TogglePlayerControllable(playerid, 1);
                 return 1;
             }
-            if(PlayerInfo[playerid][pVIP] == 2 && totalvehicles >= 8)
+            if(PlayerInfo[playerid][pVip] == 2 && totalvehicles >= 8)
             {
                 SendClientMessage(playerid, COLOR_GREY, "ERROR: You can't have more cars, Silver VIP can only own 8 cars.");
                 RemovePlayerFromVehicle(playerid);
@@ -56480,7 +56488,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
                 TogglePlayerControllable(playerid, 1);
                 return 1;
             }
-            if(PlayerInfo[playerid][pVIP] == 3 && totalvehicles >= 10)
+            if(PlayerInfo[playerid][pVip] == 3 && totalvehicles >= 10)
             {
                 SendClientMessage(playerid, COLOR_GREY, "ERROR: You can't have more cars, Gold VIP can only own 10 cars.");
                 RemovePlayerFromVehicle(playerid);
@@ -56500,7 +56508,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
                 TogglePlayerControllable(playerid, 1);
                 return 1;
 		    }
-           	if(PlayerInfo[playerid][pVIP] == 0 && VehicleSpawned[playerid] > 0)
+           	if(PlayerInfo[playerid][pVip] == 0 && VehicleSpawned[playerid] > 0)
            	{
             	SendClientMessage(playerid, COLOR_GREY, "ERROR: You can only have 1 vehicle spawned at a time as non-VIP. Store that vehicle in order to purchase one.");
                 RemovePlayerFromVehicle(playerid);
@@ -56510,7 +56518,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
                 TogglePlayerControllable(playerid, 1);
 				return 1;
            	}
-         	if(PlayerInfo[playerid][pVIP] == 1 && VehicleSpawned[playerid] > 1)
+         	if(PlayerInfo[playerid][pVip] == 1 && VehicleSpawned[playerid] > 1)
          	{
          		SendClientMessage(playerid, COLOR_GREY, "ERROR: You can only have 2 vehicles spawned at a time as Bronze VIP. Store that vehicle in order to purchase one.");
                 RemovePlayerFromVehicle(playerid);
@@ -56520,7 +56528,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
                 TogglePlayerControllable(playerid, 1);
 				return 1;
            	}
-         	if(PlayerInfo[playerid][pVIP] == 2 && VehicleSpawned[playerid] > 2)
+         	if(PlayerInfo[playerid][pVip] == 2 && VehicleSpawned[playerid] > 2)
          	{
         		SendClientMessage(playerid, COLOR_GREY, "ERROR: You can only have 3 vehicles spawned at a time as Silver VIP. Store one vehicle in order to purchase one.");
                 RemovePlayerFromVehicle(playerid);
@@ -56530,7 +56538,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
                 TogglePlayerControllable(playerid, 1);
 				return 1;
            	}
-          	if(PlayerInfo[playerid][pVIP] == 3 && VehicleSpawned[playerid] > 3)
+          	if(PlayerInfo[playerid][pVip] == 3 && VehicleSpawned[playerid] > 3)
           	{
   				SendClientMessage(playerid, COLOR_GREY, "ERROR: You can only have 4 vehicles spawned at a time as Gold VIP. Store one vehicle in order to purchase one.");
                 RemovePlayerFromVehicle(playerid);
@@ -56540,7 +56548,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
                 TogglePlayerControllable(playerid, 1);
 				return 1;
            	}
-           	/*if(PlayerInfo[playerid][pVIP] == 4 && VehicleSpawned[playerid] >= 5)
+           	/*if(PlayerInfo[playerid][pVip] == 4 && VehicleSpawned[playerid] >= 5)
            	{
 				SendClientMessage(playerid, COLOR_GREY, "ERROR: You can only have 5 vehicles spawned at a time as Undefined VIP. Store one vehicle in order to purchase one.");
                 RemovePlayerFromVehicle(playerid);
@@ -56550,7 +56558,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
                 TogglePlayerControllable(playerid, 1);
 				return 1;
            	}
-           	if(PlayerInfo[playerid][pVIP] == 5 && VehicleSpawned[playerid] >= 5)
+           	if(PlayerInfo[playerid][pVip] == 5 && VehicleSpawned[playerid] >= 5)
            	{
 				SendClientMessage(playerid, COLOR_GREY, "ERROR: You can only have 5 vehicles spawned at a time as VIP Moderator. Store one vehicle in order to purchase one.");
                 RemovePlayerFromVehicle(playerid);
@@ -56560,7 +56568,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
                 TogglePlayerControllable(playerid, 1);
 				return 1;
            	}*/
-           	if(PlayerInfo[playerid][pVIP] < 0 || PlayerInfo[playerid][pVIP] > 3)
+           	if(PlayerInfo[playerid][pVip] < 0 || PlayerInfo[playerid][pVip] > 3)
            	{
            	    SendClientMessage(playerid, COLOR_GREY, "ERROR: Invalid VIP level.");
             	RemovePlayerFromVehicle(playerid);
@@ -56575,7 +56583,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 		    SetPlayerPos(playerid, CarDealershipInfo[d][cdVehicleSpawn][0], CarDealershipInfo[d][cdVehicleSpawn][1], CarDealershipInfo[d][cdVehicleSpawn][2]+2);
 		    TogglePlayerControllable(playerid, 1);
 		    new cost;
-		    if(PlayerInfo[playerid][pVIP] < 1)
+		    if(PlayerInfo[playerid][pVip] < 1)
             {
                 cost = CarDealershipInfo[d][cdVehicleCost][v];
 	            if(PlayerInfo[playerid][pCash] < CarDealershipInfo[d][cdVehicleCost][v])
@@ -56786,37 +56794,37 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 			}
 			else if(PlayerVehicleInfo[iTargetID][listitem][pvImpounded])
 			{
-				if(PlayerInfo[iTargetID][pVIP] == 0 && VehicleSpawned[iTargetID] >= 1)
+				if(PlayerInfo[iTargetID][pVip] == 0 && VehicleSpawned[iTargetID] >= 1)
 				{
 					SendClientMessage(playerid, COLOR_GREY, "That player has too many vehicles out of storage for this vehicle to be released.");
 					return 1;
 				}
-				if(PlayerInfo[iTargetID][pVIP] == 1 && VehicleSpawned[iTargetID] >= 1)
+				if(PlayerInfo[iTargetID][pVip] == 1 && VehicleSpawned[iTargetID] >= 1)
 				{
 					SendClientMessage(playerid, COLOR_GREY, "That player has too many vehicles out of storage for this vehicle to be released.");
 					return 1;
 				}
-				if(PlayerInfo[iTargetID][pVIP] == 2 && VehicleSpawned[iTargetID] >= 2)
+				if(PlayerInfo[iTargetID][pVip] == 2 && VehicleSpawned[iTargetID] >= 2)
 				{
 					SendClientMessage(playerid, COLOR_GREY, "That player has too many vehicles out of storage for this vehicle to be released.");
 					return 1;
 				}
-				if(PlayerInfo[iTargetID][pVIP] == 3 && VehicleSpawned[iTargetID] >= 3)
+				if(PlayerInfo[iTargetID][pVip] == 3 && VehicleSpawned[iTargetID] >= 3)
 	 			{
 					SendClientMessage(playerid, COLOR_GREY, "That player has too many vehicles out of storage for this vehicle to be released.");
 					return 1;
 			 	}
-				if(PlayerInfo[iTargetID][pVIP] == 4 && VehicleSpawned[iTargetID] >= 5)
+				if(PlayerInfo[iTargetID][pVip] == 4 && VehicleSpawned[iTargetID] >= 5)
 				{
 					SendClientMessage(playerid, COLOR_GREY, "That player has too many vehicles out of storage for this vehicle to be released.");
 					return 1;
 				}
-				if(PlayerInfo[iTargetID][pVIP] == 5 && VehicleSpawned[iTargetID] >= 5)
+				if(PlayerInfo[iTargetID][pVip] == 5 && VehicleSpawned[iTargetID] >= 5)
 				{
 					SendClientMessage(playerid, COLOR_GREY, "That player has too many vehicles out of storage for this vehicle to be released.");
 					return 1;
 				}
-				if(PlayerInfo[iTargetID][pVIP] < 0 || PlayerInfo[iTargetID][pVIP] > 5)
+				if(PlayerInfo[iTargetID][pVip] < 0 || PlayerInfo[iTargetID][pVip] > 5)
 				{
 					SendClientMessage(playerid, COLOR_GREY, "That player has too many vehicles out of storage for this vehicle to be released.");
 					return 1;
@@ -56887,37 +56895,37 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 					return SendClientMessage(playerid, COLOR_GRAD2, "You don't have enough money on you.");
 				}
 
-    			if(PlayerInfo[playerid][pVIP] == 0 && VehicleSpawned[playerid] > 0)
+    			if(PlayerInfo[playerid][pVip] == 0 && VehicleSpawned[playerid] > 0)
 				{
 					SendClientMessage(playerid, COLOR_GREY, "As non-VIP you can only have 1 vehicle spawned. You must store a vehicle in order to spawn another one.");
 					return 1;
 				}
-				if(PlayerInfo[playerid][pVIP] == 1 && VehicleSpawned[playerid] > 1)
+				if(PlayerInfo[playerid][pVip] == 1 && VehicleSpawned[playerid] > 1)
 				{
 					SendClientMessage(playerid, COLOR_GREY, "As Bronze VIP you can only have 2 vehicles spawned. You must store a vehicle in order to spawn another one.");
 					return 1;
 				}
-				if(PlayerInfo[playerid][pVIP] == 2 && VehicleSpawned[playerid] > 2)
+				if(PlayerInfo[playerid][pVip] == 2 && VehicleSpawned[playerid] > 2)
 				{
 					SendClientMessage(playerid, COLOR_GREY, "As Silver VIP you can only have 3 vehicles spawned. You must store a vehicle in order to spawn another one.");
 					return 1;
 				}
-				if(PlayerInfo[playerid][pVIP] == 3 && VehicleSpawned[playerid] > 3)
+				if(PlayerInfo[playerid][pVip] == 3 && VehicleSpawned[playerid] > 3)
 	 			{
 					SendClientMessage(playerid, COLOR_GREY, "As Gold VIP you can only have 4 vehicles spawned. You must store a vehicle in order to spawn another one.");
 					return 1;
 			 	}
-				/*if(PlayerInfo[playerid][pVIP] == 4 && VehicleSpawned[playerid] >= 5)
+				/*if(PlayerInfo[playerid][pVip] == 4 && VehicleSpawned[playerid] >= 5)
 				{
 					SendClientMessage(playerid, COLOR_GREY, "As Undefined VIP you can only have 5 vehicles spawned. You must store a vehicle in order to spawn another one.");
 					return 1;
 				}
-				if(PlayerInfo[playerid][pVIP] == 5 && VehicleSpawned[playerid] >= 5)
+				if(PlayerInfo[playerid][pVip] == 5 && VehicleSpawned[playerid] >= 5)
 				{
 					SendClientMessage(playerid, COLOR_GREY, "As VIP Moderator you can only have 5 vehicles spawned. You must store a vehicle in order to spawn another one.");
 					return 1;
 				}*/
-				if(PlayerInfo[playerid][pVIP] < 0 || PlayerInfo[playerid][pVIP] > 3)
+				if(PlayerInfo[playerid][pVip] < 0 || PlayerInfo[playerid][pVip] > 3)
 				{
 					SendClientMessage(playerid, COLOR_GREY, "You have an invalid VIP level.");
 					return 1;
@@ -57045,25 +57053,25 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 			SendClientMessage(playerid, COLOR_WHITE, "You can't spawn a disabled vehicle. It is disabled due to your VIP level (vehicle restrictions).");
 		}
 		else if(PlayerVehicleInfo[playerid][listitem][pvSpawned] == 0) {
-			if(PlayerInfo[playerid][pVIP] == 0 && VehicleSpawned[playerid] > 0) {
+			if(PlayerInfo[playerid][pVip] == 0 && VehicleSpawned[playerid] > 0) {
 				SendClientMessage(playerid, COLOR_GREY, "As non-VIP you can only have 1 vehicle spawned. You must store a vehicle in order to spawn another one.");
 			}
-			else if(PlayerInfo[playerid][pVIP] == 1 && VehicleSpawned[playerid] > 1) {
+			else if(PlayerInfo[playerid][pVip] == 1 && VehicleSpawned[playerid] > 1) {
 				SendClientMessage(playerid, COLOR_GREY, "As Bronze VIP you can only have 2 vehicles spawned. You must store a vehicle in order to spawn another one.");
 			}
-			else if(PlayerInfo[playerid][pVIP] == 2 && VehicleSpawned[playerid] > 2) {
+			else if(PlayerInfo[playerid][pVip] == 2 && VehicleSpawned[playerid] > 2) {
 				SendClientMessage(playerid, COLOR_GREY, "As Silver VIP you can only have 3 vehicles spawned. You must store a vehicle in order to spawn another one.");
 			}
-			else if(PlayerInfo[playerid][pVIP] == 3 && VehicleSpawned[playerid] > 3) {
+			else if(PlayerInfo[playerid][pVip] == 3 && VehicleSpawned[playerid] > 3) {
 				SendClientMessage(playerid, COLOR_GREY, "As Gold VIP you can only have 4 vehicles spawned. You must store a vehicle in order to spawn another one.");
 			}
-			/*else if(PlayerInfo[playerid][pVIP] == 4 && VehicleSpawned[playerid] >= 5) {
+			/*else if(PlayerInfo[playerid][pVip] == 4 && VehicleSpawned[playerid] >= 5) {
 				SendClientMessage(playerid, COLOR_GREY, "As Undefined Donator you can only have 5 vehicles spawned. You must store a vehicle in order to spawn another one.");
 			}
-			else if(PlayerInfo[playerid][pVIP] == 5 && VehicleSpawned[playerid] >= 5){
+			else if(PlayerInfo[playerid][pVip] == 5 && VehicleSpawned[playerid] >= 5){
 				SendClientMessage(playerid, COLOR_GREY, "As VIP Moderator you can only have 5 vehicles spawned. You must store a vehicle in order to spawn another one.");
 			}*/
-			else if(!(0 <= PlayerInfo[playerid][pVIP] <= 3)) {
+			else if(!(0 <= PlayerInfo[playerid][pVip] <= 3)) {
 				SendClientMessage(playerid, COLOR_GREY, "You have an invalid Donator level.");
 			}
 			else {
@@ -57652,9 +57660,9 @@ stock CreatePlayerVehicle(playerid, playervehicleid, modelid, Float: x, Float: y
 
 		new
 		    szQuery[300];
-		format(szQuery, sizeof(szQuery), "INSERT INTO playervehicles (Owner, PosX, PosY, PosZ, PosAngle, ModelID, Color1, Color2, Price, Spawned) VALUES(%d, '%f', '%f', '%f', '%f', %d, %d, %d, %d, 1)", PlayerInfo[playerid][pID], x, y, z, angle, modelid, color1, color2, price);
-		mysql_query(szQuery);
-		PlayerVehicleInfo[playerid][playervehicleid][pvRealID] = mysql_insert_id();
+		mysql_format(sqldb,szQuery, sizeof(szQuery), "INSERT INTO playervehicles (Owner, PosX, PosY, PosZ, PosAngle, ModelID, Color1, Color2, Price, Spawned) VALUES(%d, '%f', '%f', '%f', '%f', %d, %d, %d, %d, 1)", PlayerInfo[playerid][pID], x, y, z, angle, modelid, color1, color2, price);
+		mysql_tquery(sqldb,szQuery);
+		// PlayerVehicleInfo[playerid][playervehicleid][pvRealID] = mysql_insert_id();
 		return carcreated;
 	}
 	return INVALID_PLAYER_VEHICLE_ID;
@@ -57665,8 +57673,8 @@ stock DestroyPlayerVehicle(playerid, playervehicleid) {
 	    new
 	        szQuery[50];
 
-		format(szQuery, sizeof(szQuery), "DELETE FROM playervehicles WHERE ID = %d", PlayerVehicleInfo[playerid][playervehicleid][pvRealID]);
-		mysql_query(szQuery, THREAD_NO_RESULT, 0, g_MySQLConnections[0]);
+		mysql_format(sqldb,szQuery, sizeof(szQuery), "DELETE FROM playervehicles WHERE ID = %d", PlayerVehicleInfo[playerid][playervehicleid][pvRealID]);
+		mysql_tquery(sqldb,szQuery);
 
 	    VehicleSpawned[playerid]--;
 
@@ -57700,7 +57708,7 @@ stock DestroyPlayerVehicle(playerid, playervehicleid) {
 }
 
 stock LoadPlayerVehicles(playerid) {
-	switch(PlayerInfo[playerid][pVIP]) {
+	switch(PlayerInfo[playerid][pVip]) {
 		case 0: {
 			PlayerVehicleInfo[playerid][0][pvDisabled] = 0;
 			PlayerVehicleInfo[playerid][1][pvDisabled] = 0;
@@ -57794,7 +57802,7 @@ stock LoadPlayerVehicles(playerid) {
 }
 
 vehicleCountCheck(playerid) {
-	switch(PlayerInfo[playerid][pVIP]) {
+	switch(PlayerInfo[playerid][pVip]) {
 		case 0, 1: if(VehicleSpawned[playerid] >= 1) return 0;
 		case 2: if(VehicleSpawned[playerid] >= 2) return 0;
 		case 3: if(VehicleSpawned[playerid] >= 3) return 0;
@@ -60885,7 +60893,7 @@ CMD:viplocker(playerid, params[])
 {
 	if(PlayerInfo[playerid][pVip] >= 2)
 	{
-	if(IsPlayerInRangeOfPoint(playerid, 2.0, 1804.9323,-1573.8809,13.4290))
+	if(IsPlayerInRangeOfPoint(playerid, 2.0, 2561.32519531,1403.24609375,7699.56640625))
 	{
 	    ShowPlayerDialog(playerid, DIALOG_VIPLOCKER, DIALOG_STYLE_LIST, "VIP Locker", "Medical Kit(free)\nKelvar Vest(free)\nWeapons\nJob Picker\nVIP Color", "Select", "Cancel");
 	}

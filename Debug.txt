@@ -9316,3 +9316,982 @@
 [18:46:19] OnQueryFinish(1,"UPDATE playervehicles SET PosX = '1006.271667', PosY = '-1344.774291', PosZ = '13.355360', PosAngle = '258.676849', ModelID = 520, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 98") - Called.
 [18:46:19] CMySQLHandler::ProcessQueryThread(UPDATE playervehicles SET PosX = '1009.582092', PosY = '-1340.931884', PosZ = '13.365679', PosAngle = '119.242202', ModelID = 526, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 99) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
 [18:46:19] OnQueryFinish(1,"UPDATE playervehicles SET PosX = '1009.582092', PosY = '-1340.931884', PosZ = '13.365679', PosAngle = '119.242202', ModelID = 526, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 99") - Called.
+[10:58:10]  
+[10:58:10] ---------------------------
+[10:58:10] MySQL Debugging activated (05/28/21)
+[10:58:10] ---------------------------
+[10:58:10]  
+[10:58:10] >> mysql_query( Connection handle: 1 )
+[10:58:10] CMySQLHandler::Query() - You cannot call this function now. (Reason: Connection is dead)
+[11:34:52]  
+[11:34:52] ---------------------------
+[11:34:52] MySQL Debugging activated (05/28/21)
+[11:34:52] ---------------------------
+[11:34:52]  
+[11:34:52] >> mysql_query( Connection handle: 1 )
+[11:34:52] CMySQLHandler::Query(resultID) - Threaded query with id 1 started. (Extra ID: 0)
+[11:34:52] CMySQLHandler::ProcessQueryThread(set session query_cache_type=0;) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:35:06] OnQueryFinish(1,"set session query_cache_type=0;") - Called.
+[11:35:32] >> mysql_real_escape_string( Connection handle: 1 )
+[11:35:32] CMySQLHandler::EscapeString(Upender_Lakhwan); - Escaped 15 characters to Upender_Lakhwan.
+[11:35:32] >> mysql_query( Connection handle: 1 )
+[11:35:32] CMySQLHandler::Query(resultID) - Threaded query with id 2 started. (Extra ID: 0)
+[11:35:33] CMySQLHandler::ProcessQueryThread(SELECT COUNT(*) FROM players WHERE Username = 'Upender_Lakhwan') - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:35:33] OnQueryFinish(2,"SELECT COUNT(*) FROM players WHERE Username = 'Upender_Lakhwan'") - Called.
+[11:35:33] >> mysql_store_result( Connection handle: 1 )
+[11:35:33] CMySQLHandler::StoreResult() - Result was stored.
+[11:35:33] >> mysql_fetch_int( Connection handle: 1 )
+[11:35:33] CMySQLHandler::FetchRow() - Return: 1
+[11:35:33] >> mysql_free_result( Connection handle: 1 )
+[11:35:33] CMySQLHandler::FreeResult() - Result was successfully free'd.
+[11:35:39] >> mysql_real_escape_string( Connection handle: 1 )
+[11:35:39] CMySQLHandler::EscapeString(Upender_Lakhwan); - Escaped 15 characters to Upender_Lakhwan.
+[11:35:39] >> mysql_query( Connection handle: 1 )
+[11:35:39] CMySQLHandler::Query(resultID) - Threaded query with id 3 started. (Extra ID: 0)
+[11:35:39] CMySQLHandler::ProcessQueryThread(SELECT * FROM players WHERE Username = 'Upender_Lakhwan' AND Password = 'FF79037E6780FD109E67A016B69052E546B58646126BBFFB25070E33438E8CF760D2BE4F8724F6D2973F60193CFD30381DAE17AAABA94355F07B64A26EA427D7') - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:35:39] OnQueryFinish(3,"SELECT * FROM players WHERE Username = 'Upender_Lakhwan' AND Password = 'FF79037E6780FD109E67A016B69052E546B58646126BBFFB25070E33438E8CF760D2BE4F8724F6D2973F60193CFD30381DAE17AAABA94355F07B64A26EA427D7'") - Called.
+[11:35:39] >> mysql_store_result( Connection handle: 1 )
+[11:35:39] CMySQLHandler::StoreResult() - Result was stored.
+[11:35:39] >> mysql_num_rows( Connection handle: 1 )
+[11:35:39] CMySQLHandler::NumRows() - Returned 1 row(s)
+[11:35:39] >> mysql_retrieve_row( Connection handle: 1 )
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("ID") - 2
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Password") - FF79037E6780FD109E67A016B69052E546B58646126BBFFB25070E33438E8CF760D2BE4F8724F6D2973F60193CFD30381DAE17AAABA94355F07B64A26EA427D7
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Level") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("AdminLevel") - 6
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("AdminName") - LaKhWaN
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("BanAppealer") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Donator") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Banned") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Permabanned") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Disabled") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("LastIP") - 192.168.29.204
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Registered") - 1
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Tutorial") - 1
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Sex") - 1
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Age") - 20
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Skin") - 29
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PosX") - 1503.109130
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PosY") - -1589.544799
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PosZ") - -51.704063
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PosR") - 20.889469
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("ConnectTime") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Respect") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PhoneNumber") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Warnings") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Gang") - 255
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Faction") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Leader") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Rankk") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Job") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Job2") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("UpgradePoints") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("SpawnArmor") - 0.000000
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Cash") - 50
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Bank") - 50
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Insurance") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Smslog") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Crimes") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Arrested") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("WantedLevel") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Health") - 65.000000
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Armor") - 0.000000
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Pot") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Crack") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Radio") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("RadioFreq") - -1
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Phonebook") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Dice") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("CDPlayer") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Materials") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Rope") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Cigars") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Sprunk") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Spraycan") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("House") - -1
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("House2") - -1
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Renting") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Interior") - 1
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("VirtualWorld") - 8124
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Jailed") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("JailTime") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Gun0") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Gun1") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Gun2") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Gun3") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Gun4") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Gun5") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Gun6") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Gun7") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Gun8") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Gun9") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Gun10") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Gun11") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Paycheck") - 3708
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PayReady") - 4
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Hospital") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("DetSkill") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("LawSkill") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("SexSkill") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("DrugsSkill") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("SmugglerSkill") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("ArmsSkill") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("MechSkill") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("FishSkill") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("BoxSkill") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("TruckSkill") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("CarSkill") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("LawyerTime") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("LawyerFreeTime") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("DrugsTime") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("MechTime") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("SexTime") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("CarTime") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Fishes") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("BiggestFish") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("pWEXists") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("pWX") - 0.000000
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("pWY") - 0.000000
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("pWZ") - 0.000000
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("pWVW") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("pWInt") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("pWValue") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("pWSeeds") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Wins") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Loses") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("FightingStyle") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Screwdriver") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Wristwatch") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Tire") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Firstaid") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Rccam") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Receiver") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("GPS") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Sweep") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("SweepLeft") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Bugged") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("CarLic") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("FlyLic") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("BoatLic") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("FishLic") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("GunLic") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Division") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("TicketTime") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("HeadValue") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("ContractBy") - 
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("ContractBy") - 
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Bombs") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("CHits") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("FHits") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PrisonedBy") - Nobody
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PrisonReason") - None
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("AcceptReport") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("TrashReport") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Accent") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("NewMuted") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("NewMutedTotal") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("AdMuted") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("AdMutedTotal") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("ReportMuted") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("ReportMutedTotal") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("ReportMutedTime") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Speedo") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("GCMuted") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("GCMutedTime") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("CallsAccepted") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PatientsDelivered") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("TriageTime") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Married") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("MarriedTo") - 
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("OnDuty") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Flag") - Upender Lakhwan has possibly tried to spoof a dialog ID. - Server (24/5/2021)
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("ReferredBy") - 
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("ReferredBy") - 
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("RefTokens") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("RefTokensOffline") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Helper") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("GangMod") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("LiveBanned") - 0
+[11:35:39] >> mysql_free_result( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FreeResult() - Result was successfully free'd.
+[11:35:39] >> mysql_query( Connection handle: 1 )
+[11:35:39] CMySQLHandler::Query(resultID) - Threaded query with id 11 started. (Extra ID: 0)
+[11:35:39] >> mysql_query( Connection handle: 1 )
+[11:35:39] CMySQLHandler::Query(resultID) - Threaded query with id 1 started. (Extra ID: 0)
+[11:35:39] CMySQLHandler::ProcessQueryThread(SELECT toys.* FROM toys INNER JOIN players ON toys.Owner = players.ID WHERE players.ID = '2' ORDER BY toys.ID ASC LIMIT 8) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:35:39] OnQueryFinish(11,"SELECT toys.* FROM toys INNER JOIN players ON toys.Owner = players.ID WHERE players.ID = '2' ORDER BY toys.ID ASC LIMIT 8") - Called.
+[11:35:39] >> mysql_store_result( Connection handle: 1 )
+[11:35:39] CMySQLHandler::StoreResult() - Result was stored.
+[11:35:39] >> mysql_retrieve_row( Connection handle: 1 )
+[11:35:39] >> mysql_free_result( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FreeResult() - Result was successfully free'd.
+[11:35:39] >> mysql_query( Connection handle: 1 )
+[11:35:39] CMySQLHandler::Query(resultID) - Threaded query with id 14 started. (Extra ID: 0)
+[11:35:39] CMySQLHandler::ProcessQueryThread() - Error will be triggered to OnQueryError()
+[11:35:39] OnQueryError() - Called.
+[11:35:39] CMySQLHandler::ProcessQueryThread(SELECT playervehicles.* FROM playervehicles INNER JOIN players ON playervehicles.Owner = players.ID WHERE players.ID = '2' ORDER BY playervehicles.Owner ASC LIMIT 10) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:35:39] OnQueryFinish(14,"SELECT playervehicles.* FROM playervehicles INNER JOIN players ON playervehicles.Owner = players.ID WHERE players.ID = '2' ORDER BY playervehicles.Owner ASC LIMIT 10") - Called.
+[11:35:39] >> mysql_store_result( Connection handle: 1 )
+[11:35:39] CMySQLHandler::StoreResult() - Result was stored.
+[11:35:39] >> mysql_retrieve_row( Connection handle: 1 )
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("ID") - 87
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PosX") - 2092.924072
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PosY") - -1802.088867
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PosZ") - 13.382804
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PosAngle") - 71.661445
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("ModelID") - 522
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("LockType") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Locked") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PaintJob") - -1
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Color1") - 6
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Color2") - 6
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Price") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Ticket") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Weapon0") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Weapon1") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Weapon2") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("WepUpgrade") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Impound") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Spawned") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Disabled") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("NumPlate") - 
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Disabled") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod0") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod1") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod2") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod3") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod4") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod5") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod6") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod7") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod8") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod9") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod10") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod11") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod12") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod13") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod14") - 0
+[11:35:39] >> mysql_retrieve_row( Connection handle: 1 )
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("ID") - 96
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PosX") - 1534.669189
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PosY") - -1710.791381
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PosZ") - 13.546875
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PosAngle") - 12.711074
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("ModelID") - 522
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("LockType") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Locked") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PaintJob") - -1
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Color1") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Color2") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Price") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Ticket") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Weapon0") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Weapon1") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Weapon2") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("WepUpgrade") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Impound") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Spawned") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Disabled") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("NumPlate") - 
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Disabled") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod0") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod1") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod2") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod3") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod4") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod5") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod6") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod7") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod8") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod9") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod10") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod11") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod12") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod13") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod14") - 0
+[11:35:39] >> mysql_retrieve_row( Connection handle: 1 )
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("ID") - 97
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PosX") - 1820.017578
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PosY") - -1599.555786
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PosZ") - 13.359951
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PosAngle") - 57.014698
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("ModelID") - 522
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("LockType") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Locked") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PaintJob") - -1
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Color1") - 6
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Color2") - 6
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Price") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Ticket") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Weapon0") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Weapon1") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Weapon2") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("WepUpgrade") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Impound") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Spawned") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Disabled") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("NumPlate") - 
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Disabled") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod0") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod1") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod2") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod3") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod4") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod5") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod6") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod7") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod8") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod9") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod10") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod11") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod12") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod13") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod14") - 0
+[11:35:39] >> mysql_retrieve_row( Connection handle: 1 )
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("ID") - 98
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PosX") - 1006.271667
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PosY") - -1344.774291
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PosZ") - 13.355360
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PosAngle") - 258.676849
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("ModelID") - 520
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("LockType") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Locked") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PaintJob") - -1
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Color1") - 6
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Color2") - 6
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Price") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Ticket") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Weapon0") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Weapon1") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Weapon2") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("WepUpgrade") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Impound") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Spawned") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Disabled") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("NumPlate") - 
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Disabled") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod0") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod1") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod2") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod3") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod4") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod5") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod6") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod7") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod8") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod9") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod10") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod11") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod12") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod13") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod14") - 0
+[11:35:39] >> mysql_retrieve_row( Connection handle: 1 )
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("ID") - 99
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PosX") - 1009.582092
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PosY") - -1340.931884
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PosZ") - 13.365679
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PosAngle") - 119.242202
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("ModelID") - 526
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("LockType") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Locked") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("PaintJob") - -1
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Color1") - 6
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Color2") - 6
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Price") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Ticket") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Weapon0") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Weapon1") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Weapon2") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("WepUpgrade") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Impound") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Spawned") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Disabled") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("NumPlate") - 
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Disabled") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod0") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod1") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod2") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod3") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod4") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod5") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod6") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod7") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod8") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod9") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod10") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod11") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod12") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod13") - 0
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("Mod14") - 0
+[11:35:39] >> mysql_retrieve_row( Connection handle: 1 )
+[11:35:39] >> mysql_free_result( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FreeResult() - Result was successfully free'd.
+[11:35:39] >> mysql_query( Connection handle: 1 )
+[11:35:39] CMySQLHandler::Query(resultID) - Threaded query with id 20 started. (Extra ID: 0)
+[11:35:39] CMySQLHandler::ProcessQueryThread(SELECT kills.* FROM kills INNER JOIN players ON kills.killerID = players.ID OR kills.killedID = players.ID WHERE players.ID = '2' ORDER BY kills.killTS ASC LIMIT 10) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:35:39] OnQueryFinish(20,"SELECT kills.* FROM kills INNER JOIN players ON kills.killerID = players.ID OR kills.killedID = players.ID WHERE players.ID = '2' ORDER BY kills.killTS ASC LIMIT 10") - Called.
+[11:35:39] >> mysql_store_result( Connection handle: 1 )
+[11:35:39] CMySQLHandler::StoreResult() - Result was stored.
+[11:35:39] >> mysql_retrieve_row( Connection handle: 1 )
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("killText") - (16:14:9) Robin Hellman killed DeCoyz with Dildo
+[11:35:39] >> mysql_retrieve_row( Connection handle: 1 )
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("killText") - (16:25:20) Sven Assarsson killed Robin Hellman with Combat Shotgun
+[11:35:39] >> mysql_retrieve_row( Connection handle: 1 )
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("killText") - (12:57:57) Lask Task killed N0FeaR with 
+[11:35:39] >> mysql_retrieve_row( Connection handle: 1 )
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("killText") - (16:57:24) Akiyama Shikuru killed Robin Hellman with Rifle
+[11:35:39] >> mysql_retrieve_row( Connection handle: 1 )
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("killText") - (16:57:37) Robin Hellman killed Akiyama Shikuru with Desert Eagle
+[11:35:39] >> mysql_retrieve_row( Connection handle: 1 )
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("killText") - (16:57:47) Sven Assarsson killed Robin Hellman with Sawn-off Shotgun
+[11:35:39] >> mysql_retrieve_row( Connection handle: 1 )
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("killText") - (16:58:14) Akiyama Shikuru killed Robin Hellman with 
+[11:35:39] >> mysql_retrieve_row( Connection handle: 1 )
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("killText") - (17:0:23) Base3000 killed Robin Hellman with M4
+[11:35:39] >> mysql_retrieve_row( Connection handle: 1 )
+[11:35:39] >> mysql_fetch_field_row( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FetchField("killText") - (17:0:53) Base3000 killed Robin Hellman with 
+[11:35:39] >> mysql_retrieve_row( Connection handle: 1 )
+[11:35:39] >> mysql_retrieve_row( Connection handle: 1 )
+[11:35:39] >> mysql_free_result( Connection handle: 1 )
+[11:35:39] CMySQLHandler::FreeResult() - Result was successfully free'd.
+[11:43:04] >> mysql_real_escape_string( Connection handle: 1 )
+[11:43:04] CMySQLHandler::EscapeString(Upender_Lakhwan); - Escaped 15 characters to Upender_Lakhwan.
+[11:43:04] >> mysql_real_escape_string( Connection handle: 1 )
+[11:43:04] CMySQLHandler::EscapeString(LaKhWaN); - Escaped 7 characters to LaKhWaN.
+[11:43:04] >> mysql_query( Connection handle: 1 )
+[11:43:04] CMySQLHandler::Query(resultID) - Threaded query with id 5 started. (Extra ID: 0)
+[11:43:04] CMySQLHandler::ProcessQueryThread(UPDATE players SET Password = 'FF79037E6780FD109E67A016B69052E546B58646126BBFFB25070E33438E8CF760D2BE4F8724F6D2973F60193CFD30381DAE17AAABA94355F07B64A26EA427D7', Level = 0, AdminLevel = 6, AdminName = 'LaKhWaN', BanAppealer = 0, Donator = 0, Banned = 0, Permabanned = 0, Disabled = 0, LastIP = '192.168.29.204', Registered = 1, Tutorial = 1, Sex = 1, Age = 20, Skin = 29, PosX = '1529.599975', PosY = '-1691.199951', PosZ = '13.382812', PosR = '20.889469', ConnectTime = 0, Respect = 0, PhoneNumber = 0, Warnings = 0, Gang = 255, Faction = 0, Leader = 0, Rankk = 0 WHERE Username = 'Upender_Lakhwan') - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:43:04] OnQueryFinish(5,"UPDATE players SET Password = 'FF79037E6780FD109E67A016B69052E546B58646126BBFFB25070E33438E8CF760D2BE4F8724F6D2973F60193CFD30381DAE17AAABA94355F07B64A26EA427D7', Level = 0, AdminLevel = 6, AdminName = 'LaKhWaN', BanAppealer = 0, Donator = 0, Banned = 0, Permabanned = 0, Disabled = 0, LastIP = '192.168.29.204', Registered = 1, Tutorial = 1, Sex = 1, Age = 20, Skin = 29, PosX = '1529.599975', PosY = '-1691.199951', PosZ = '13.382812', PosR = '20.889469', ConnectTime = 0, Respect = 0, PhoneNumber = 0, Warnings = 0, Gang = 255, Faction = 0, Leader = 0, Rankk = 0 WHERE Username = 'Upender_Lakhwan'") - Called.
+[11:43:04] >> mysql_query( Connection handle: 1 )
+[11:43:04] CMySQLHandler::Query(resultID) - Threaded query with id 6 started. (Extra ID: 0)
+[11:43:04] CMySQLHandler::ProcessQueryThread(UPDATE players SET Job = 0, Job2 = 0, UpgradePoints = 0, SpawnArmor = '0.000000', Cash = 50, Bank = 50, Insurance = 0, Crimes = 0, Arrested = 0, WantedLevel = 0, Health = '65.000000', Armor = '0.000000', Pot = 0, Crack = 0, Radio = 0, RadioFreq = -1, Phonebook = 0, Dice = 0, CDPlayer = 0, Materials = 0, Rope = 0, Cigars = 0, Sprunk = 0, Spraycan = 0, House = -1, House2 = -1, Renting = 0, Interior = 0, VirtualWorld = 0, Jailed = 0 WHERE ID = 2) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:43:04] OnQueryFinish(6,"UPDATE players SET Job = 0, Job2 = 0, UpgradePoints = 0, SpawnArmor = '0.000000', Cash = 50, Bank = 50, Insurance = 0, Crimes = 0, Arrested = 0, WantedLevel = 0, Health = '65.000000', Armor = '0.000000', Pot = 0, Crack = 0, Radio = 0, RadioFreq = -1, Phonebook = 0, Dice = 0, CDPlayer = 0, Materials = 0, Rope = 0, Cigars = 0, Sprunk = 0, Spraycan = 0, House = -1, House2 = -1, Renting = 0, Interior = 0, VirtualWorld = 0, Jailed = 0 WHERE ID = 2") - Called.
+[11:43:04] >> mysql_query( Connection handle: 1 )
+[11:43:04] CMySQLHandler::Query(resultID) - Threaded query with id 7 started. (Extra ID: 0)
+[11:43:04] CMySQLHandler::ProcessQueryThread(UPDATE players SET JailTime = 0, Gun0 = 0, Gun1 = 0, Gun2 = 0, Gun3 = 0, Gun4 = 0, Gun5 = 0, Gun6 = 0, Gun7 = 0, Gun8 = 0, Gun9 = 0, Gun10 = 0, Gun11 = 0, Paycheck = 3770, PayReady = 4, Hospital = 0, DetSkill = 0, FishSkill = 0, LawSkill = 0, DrugsSkill = 0, SmugglerSkill = 0, ArmsSkill = 0, MechSkill = 0, BoxSkill = 0, TruckSkill = 0, CarSkill = 0, LawyerTime = 0, LawyerFreeTime = 0, DrugsTime = 0, MechTime = 0 WHERE ID = 2) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:43:04] OnQueryFinish(7,"UPDATE players SET JailTime = 0, Gun0 = 0, Gun1 = 0, Gun2 = 0, Gun3 = 0, Gun4 = 0, Gun5 = 0, Gun6 = 0, Gun7 = 0, Gun8 = 0, Gun9 = 0, Gun10 = 0, Gun11 = 0, Paycheck = 3770, PayReady = 4, Hospital = 0, DetSkill = 0, FishSkill = 0, LawSkill = 0, DrugsSkill = 0, SmugglerSkill = 0, ArmsSkill = 0, MechSkill = 0, BoxSkill = 0, TruckSkill = 0, CarSkill = 0, LawyerTime = 0, LawyerFreeTime = 0, DrugsTime = 0, MechTime = 0 WHERE ID = 2") - Called.
+[11:43:04] >> mysql_query( Connection handle: 1 )
+[11:43:04] CMySQLHandler::Query(resultID) - Threaded query with id 8 started. (Extra ID: 0)
+[11:43:04] CMySQLHandler::ProcessQueryThread(UPDATE players SET SexTime = 0, CarTime = 0, Fishes = 0, BiggestFish = 0, pWEXists = 0, pWX = '0.000000', pWY = '0.000000', pWZ = '0.000000', pWVW = 0, pWInt = 0, pWValue = 0, pWSeeds = 0, Wins = 0, Loses = 0, FightingStyle = 0, Screwdriver = 0, Wristwatch = 0, Tire = 0, Firstaid = 0, Rccam = 0, Receiver = 0, GPS = 0, Sweep = 0, SweepLeft = 0, Bugged = 0, OnDuty = 0, CarLic = 0, FlyLic = 0, GunLic = 0, Division = 0 WHERE ID = 2) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:43:04] OnQueryFinish(8,"UPDATE players SET SexTime = 0, CarTime = 0, Fishes = 0, BiggestFish = 0, pWEXists = 0, pWX = '0.000000', pWY = '0.000000', pWZ = '0.000000', pWVW = 0, pWInt = 0, pWValue = 0, pWSeeds = 0, Wins = 0, Loses = 0, FightingStyle = 0, Screwdriver = 0, Wristwatch = 0, Tire = 0, Firstaid = 0, Rccam = 0, Receiver = 0, GPS = 0, Sweep = 0, SweepLeft = 0, Bugged = 0, OnDuty = 0, CarLic = 0, FlyLic = 0, GunLic = 0, Division = 0 WHERE ID = 2") - Called.
+[11:43:04] >> mysql_real_escape_string( Connection handle: 1 )
+[11:43:04] CMySQLHandler::EscapeString(Nobody); - Escaped 6 characters to Nobody.
+[11:43:04] >> mysql_real_escape_string( Connection handle: 1 )
+[11:43:04] CMySQLHandler::EscapeString(None); - Escaped 4 characters to None.
+[11:43:04] >> mysql_real_escape_string( Connection handle: 1 )
+[11:43:04] CMySQLHandler::EscapeString(); - Escaped 0 characters to .
+[11:43:04] >> mysql_real_escape_string( Connection handle: 1 )
+[11:43:04] CMySQLHandler::EscapeString(); - Escaped 0 characters to .
+[11:43:04] >> mysql_query( Connection handle: 1 )
+[11:43:04] CMySQLHandler::Query(resultID) - Threaded query with id 9 started. (Extra ID: 0)
+[11:43:04] CMySQLHandler::ProcessQueryThread(UPDATE players SET TicketTime = 0, HeadValue = 0, ContractBy = '', ContractDetail = '', Bombs = 0, CHits = 0, FHits = 0, PrisonedBy = 'Nobody', PrisonReason = 'None', AcceptReport = 0, TrashReport = 0, Accent = 0, NewMuted = 0, NewMutedTotal = 0, AdMuted = 0, AdMutedTotal = 0, ReportMuted = 0, ReportMutedTotal = 0, ReportMutedTime = 0, Speedo = 0, GCMuted = 0, GCMutedTime = 0, CallsAccepted = 0, PatientsDelivered = 0 WHERE ID = 2) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:43:04] OnQueryFinish(9,"UPDATE players SET TicketTime = 0, HeadValue = 0, ContractBy = '', ContractDetail = '', Bombs = 0, CHits = 0, FHits = 0, PrisonedBy = 'Nobody', PrisonReason = 'None', AcceptReport = 0, TrashReport = 0, Accent = 0, NewMuted = 0, NewMutedTotal = 0, AdMuted = 0, AdMutedTotal = 0, ReportMuted = 0, ReportMutedTotal = 0, ReportMutedTime = 0, Speedo = 0, GCMuted = 0, GCMutedTime = 0, CallsAccepted = 0, PatientsDelivered = 0 WHERE ID = 2") - Called.
+[11:43:04] >> mysql_real_escape_string( Connection handle: 1 )
+[11:43:04] CMySQLHandler::EscapeString(); - Escaped 0 characters to .
+[11:43:04] >> mysql_real_escape_string( Connection handle: 1 )
+[11:43:04] CMySQLHandler::EscapeString(Upender Lakhwan has possibly tried to spoof a dialog ID. - Server (24/5/2021)); - Escaped 77 characters to Upender Lakhwan has possibly tried to spoof a dialog ID. - Server (24/5/2021).
+[11:43:04] >> mysql_real_escape_string( Connection handle: 1 )
+[11:43:04] CMySQLHandler::EscapeString(); - Escaped 0 characters to .
+[11:43:04] >> mysql_query( Connection handle: 1 )
+[11:43:04] CMySQLHandler::Query(resultID) - Threaded query with id 10 started. (Extra ID: 0)
+[11:43:04] CMySQLHandler::ProcessQueryThread(UPDATE players SET SMSLog = 0, TriageTime = 0, Married = 0, MarriedTo = '', Flag = 'Upender Lakhwan has possibly tried to spoof a dialog ID. - Server (24/5/2021)', ReferredBy = '', RefTokens = 0, RefTokensOffline = 0, Helper = 0, GangMod = 0, LiveBanned = 0 WHERE ID = 2) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:43:04] OnQueryFinish(10,"UPDATE players SET SMSLog = 0, TriageTime = 0, Married = 0, MarriedTo = '', Flag = 'Upender Lakhwan has possibly tried to spoof a dialog ID. - Server (24/5/2021)', ReferredBy = '', RefTokens = 0, RefTokensOffline = 0, Helper = 0, GangMod = 0, LiveBanned = 0 WHERE ID = 2") - Called.
+[11:43:04] >> mysql_query( Connection handle: 1 )
+[11:43:04] CMySQLHandler::Query(resultID) - Threaded query with id 1 started. (Extra ID: 0)
+[11:43:04] >> mysql_query( Connection handle: 1 )
+[11:43:04] CMySQLHandler::Query(resultID) - Threaded query with id 1 started. (Extra ID: 0)
+[11:43:04] >> mysql_query( Connection handle: 1 )
+[11:43:04] CMySQLHandler::Query(resultID) - Threaded query with id 1 started. (Extra ID: 0)
+[11:43:04] >> mysql_query( Connection handle: 1 )
+[11:43:04] CMySQLHandler::Query(resultID) - Threaded query with id 1 started. (Extra ID: 0)
+[11:43:04] >> mysql_query( Connection handle: 1 )
+[11:43:04] CMySQLHandler::Query(resultID) - Threaded query with id 1 started. (Extra ID: 0)
+[11:43:05] CMySQLHandler::ProcessQueryThread(UPDATE playervehicles SET PosX = '2092.924072', PosY = '-1802.088867', PosZ = '13.382803', PosAngle = '71.661445', ModelID = 522, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 87) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:43:05] OnQueryFinish(1,"UPDATE playervehicles SET PosX = '2092.924072', PosY = '-1802.088867', PosZ = '13.382803', PosAngle = '71.661445', ModelID = 522, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 87") - Called.
+[11:43:05] CMySQLHandler::ProcessQueryThread(UPDATE playervehicles SET PosX = '1534.669189', PosY = '-1710.791381', PosZ = '13.546875', PosAngle = '12.711073', ModelID = 522, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 0, Color2 = 0, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 96) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:43:05] OnQueryFinish(1,"UPDATE playervehicles SET PosX = '1534.669189', PosY = '-1710.791381', PosZ = '13.546875', PosAngle = '12.711073', ModelID = 522, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 0, Color2 = 0, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 96") - Called.
+[11:43:05] CMySQLHandler::ProcessQueryThread(UPDATE playervehicles SET PosX = '1820.017578', PosY = '-1599.555786', PosZ = '13.359951', PosAngle = '57.014698', ModelID = 522, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 97) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:43:05] OnQueryFinish(1,"UPDATE playervehicles SET PosX = '1820.017578', PosY = '-1599.555786', PosZ = '13.359951', PosAngle = '57.014698', ModelID = 522, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 97") - Called.
+[11:43:05] CMySQLHandler::ProcessQueryThread(UPDATE playervehicles SET PosX = '1006.271667', PosY = '-1344.774291', PosZ = '13.355360', PosAngle = '258.676849', ModelID = 520, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 98) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:43:05] OnQueryFinish(1,"UPDATE playervehicles SET PosX = '1006.271667', PosY = '-1344.774291', PosZ = '13.355360', PosAngle = '258.676849', ModelID = 520, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 98") - Called.
+[11:43:05] CMySQLHandler::ProcessQueryThread(UPDATE playervehicles SET PosX = '1009.582092', PosY = '-1340.931884', PosZ = '13.365678', PosAngle = '119.242202', ModelID = 526, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 99) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:43:05] OnQueryFinish(1,"UPDATE playervehicles SET PosX = '1009.582092', PosY = '-1340.931884', PosZ = '13.365678', PosAngle = '119.242202', ModelID = 526, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 99") - Called.
+[11:48:32] >> mysql_real_escape_string( Connection handle: 1 )
+[11:48:32] CMySQLHandler::EscapeString(Upender_Lakhwan); - Escaped 15 characters to Upender_Lakhwan.
+[11:48:32] >> mysql_real_escape_string( Connection handle: 1 )
+[11:48:32] CMySQLHandler::EscapeString(LaKhWaN); - Escaped 7 characters to LaKhWaN.
+[11:48:32] >> mysql_query( Connection handle: 1 )
+[11:48:32] CMySQLHandler::Query(resultID) - Threaded query with id 5 started. (Extra ID: 0)
+[11:48:32] CMySQLHandler::ProcessQueryThread(UPDATE players SET Password = 'FF79037E6780FD109E67A016B69052E546B58646126BBFFB25070E33438E8CF760D2BE4F8724F6D2973F60193CFD30381DAE17AAABA94355F07B64A26EA427D7', Level = 0, AdminLevel = 6, AdminName = 'LaKhWaN', BanAppealer = 0, Donator = 0, Banned = 0, Permabanned = 0, Disabled = 0, LastIP = '192.168.29.204', Registered = 1, Tutorial = 1, Sex = 1, Age = 20, Skin = 29, PosX = '2503.296386', PosY = '1405.136718', PosZ = '7686.265625', PosR = '20.889469', ConnectTime = 0, Respect = 0, PhoneNumber = 0, Warnings = 0, Gang = 255, Faction = 0, Leader = 0, Rankk = 0 WHERE Username = 'Upender_Lakhwan') - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:48:32] OnQueryFinish(5,"UPDATE players SET Password = 'FF79037E6780FD109E67A016B69052E546B58646126BBFFB25070E33438E8CF760D2BE4F8724F6D2973F60193CFD30381DAE17AAABA94355F07B64A26EA427D7', Level = 0, AdminLevel = 6, AdminName = 'LaKhWaN', BanAppealer = 0, Donator = 0, Banned = 0, Permabanned = 0, Disabled = 0, LastIP = '192.168.29.204', Registered = 1, Tutorial = 1, Sex = 1, Age = 20, Skin = 29, PosX = '2503.296386', PosY = '1405.136718', PosZ = '7686.265625', PosR = '20.889469', ConnectTime = 0, Respect = 0, PhoneNumber = 0, Warnings = 0, Gang = 255, Faction = 0, Leader = 0, Rankk = 0 WHERE Username = 'Upender_Lakhwan'") - Called.
+[11:48:32] >> mysql_query( Connection handle: 1 )
+[11:48:32] CMySQLHandler::Query(resultID) - Threaded query with id 6 started. (Extra ID: 0)
+[11:48:33] CMySQLHandler::ProcessQueryThread(UPDATE players SET Job = 0, Job2 = 0, UpgradePoints = 0, SpawnArmor = '0.000000', Cash = 50, Bank = 50, Insurance = 0, Crimes = 0, Arrested = 0, WantedLevel = 0, Health = '60.000000', Armor = '0.000000', Pot = 0, Crack = 0, Radio = 0, RadioFreq = -1, Phonebook = 0, Dice = 0, CDPlayer = 0, Materials = 0, Rope = 0, Cigars = 0, Sprunk = 0, Spraycan = 0, House = -1, House2 = -1, Renting = 0, Interior = 0, VirtualWorld = 0, Jailed = 0 WHERE ID = 2) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:48:33] OnQueryFinish(6,"UPDATE players SET Job = 0, Job2 = 0, UpgradePoints = 0, SpawnArmor = '0.000000', Cash = 50, Bank = 50, Insurance = 0, Crimes = 0, Arrested = 0, WantedLevel = 0, Health = '60.000000', Armor = '0.000000', Pot = 0, Crack = 0, Radio = 0, RadioFreq = -1, Phonebook = 0, Dice = 0, CDPlayer = 0, Materials = 0, Rope = 0, Cigars = 0, Sprunk = 0, Spraycan = 0, House = -1, House2 = -1, Renting = 0, Interior = 0, VirtualWorld = 0, Jailed = 0 WHERE ID = 2") - Called.
+[11:48:33] >> mysql_query( Connection handle: 1 )
+[11:48:33] CMySQLHandler::Query(resultID) - Threaded query with id 7 started. (Extra ID: 0)
+[11:48:33] CMySQLHandler::ProcessQueryThread(UPDATE players SET JailTime = 0, Gun0 = 0, Gun1 = 0, Gun2 = 0, Gun3 = 0, Gun4 = 0, Gun5 = 0, Gun6 = 0, Gun7 = 0, Gun8 = 0, Gun9 = 0, Gun10 = 0, Gun11 = 0, Paycheck = 3785, PayReady = 4, Hospital = 0, DetSkill = 0, FishSkill = 0, LawSkill = 0, DrugsSkill = 0, SmugglerSkill = 0, ArmsSkill = 0, MechSkill = 0, BoxSkill = 0, TruckSkill = 0, CarSkill = 0, LawyerTime = 0, LawyerFreeTime = 0, DrugsTime = 0, MechTime = 0 WHERE ID = 2) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:48:33] OnQueryFinish(7,"UPDATE players SET JailTime = 0, Gun0 = 0, Gun1 = 0, Gun2 = 0, Gun3 = 0, Gun4 = 0, Gun5 = 0, Gun6 = 0, Gun7 = 0, Gun8 = 0, Gun9 = 0, Gun10 = 0, Gun11 = 0, Paycheck = 3785, PayReady = 4, Hospital = 0, DetSkill = 0, FishSkill = 0, LawSkill = 0, DrugsSkill = 0, SmugglerSkill = 0, ArmsSkill = 0, MechSkill = 0, BoxSkill = 0, TruckSkill = 0, CarSkill = 0, LawyerTime = 0, LawyerFreeTime = 0, DrugsTime = 0, MechTime = 0 WHERE ID = 2") - Called.
+[11:48:33] >> mysql_query( Connection handle: 1 )
+[11:48:33] CMySQLHandler::Query(resultID) - Threaded query with id 8 started. (Extra ID: 0)
+[11:48:33] CMySQLHandler::ProcessQueryThread(UPDATE players SET SexTime = 0, CarTime = 0, Fishes = 0, BiggestFish = 0, pWEXists = 0, pWX = '0.000000', pWY = '0.000000', pWZ = '0.000000', pWVW = 0, pWInt = 0, pWValue = 0, pWSeeds = 0, Wins = 0, Loses = 0, FightingStyle = 0, Screwdriver = 0, Wristwatch = 0, Tire = 0, Firstaid = 0, Rccam = 0, Receiver = 0, GPS = 0, Sweep = 0, SweepLeft = 0, Bugged = 0, OnDuty = 0, CarLic = 0, FlyLic = 0, GunLic = 0, Division = 0 WHERE ID = 2) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:48:33] OnQueryFinish(8,"UPDATE players SET SexTime = 0, CarTime = 0, Fishes = 0, BiggestFish = 0, pWEXists = 0, pWX = '0.000000', pWY = '0.000000', pWZ = '0.000000', pWVW = 0, pWInt = 0, pWValue = 0, pWSeeds = 0, Wins = 0, Loses = 0, FightingStyle = 0, Screwdriver = 0, Wristwatch = 0, Tire = 0, Firstaid = 0, Rccam = 0, Receiver = 0, GPS = 0, Sweep = 0, SweepLeft = 0, Bugged = 0, OnDuty = 0, CarLic = 0, FlyLic = 0, GunLic = 0, Division = 0 WHERE ID = 2") - Called.
+[11:48:33] >> mysql_real_escape_string( Connection handle: 1 )
+[11:48:33] CMySQLHandler::EscapeString(Nobody); - Escaped 6 characters to Nobody.
+[11:48:33] >> mysql_real_escape_string( Connection handle: 1 )
+[11:48:33] CMySQLHandler::EscapeString(None); - Escaped 4 characters to None.
+[11:48:33] >> mysql_real_escape_string( Connection handle: 1 )
+[11:48:33] CMySQLHandler::EscapeString(); - Escaped 0 characters to .
+[11:48:33] >> mysql_real_escape_string( Connection handle: 1 )
+[11:48:33] CMySQLHandler::EscapeString(); - Escaped 0 characters to .
+[11:48:33] >> mysql_query( Connection handle: 1 )
+[11:48:33] CMySQLHandler::Query(resultID) - Threaded query with id 9 started. (Extra ID: 0)
+[11:48:33] CMySQLHandler::ProcessQueryThread(UPDATE players SET TicketTime = 0, HeadValue = 0, ContractBy = '', ContractDetail = '', Bombs = 0, CHits = 0, FHits = 0, PrisonedBy = 'Nobody', PrisonReason = 'None', AcceptReport = 0, TrashReport = 0, Accent = 0, NewMuted = 0, NewMutedTotal = 0, AdMuted = 0, AdMutedTotal = 0, ReportMuted = 0, ReportMutedTotal = 0, ReportMutedTime = 0, Speedo = 0, GCMuted = 0, GCMutedTime = 0, CallsAccepted = 0, PatientsDelivered = 0 WHERE ID = 2) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:48:33] OnQueryFinish(9,"UPDATE players SET TicketTime = 0, HeadValue = 0, ContractBy = '', ContractDetail = '', Bombs = 0, CHits = 0, FHits = 0, PrisonedBy = 'Nobody', PrisonReason = 'None', AcceptReport = 0, TrashReport = 0, Accent = 0, NewMuted = 0, NewMutedTotal = 0, AdMuted = 0, AdMutedTotal = 0, ReportMuted = 0, ReportMutedTotal = 0, ReportMutedTime = 0, Speedo = 0, GCMuted = 0, GCMutedTime = 0, CallsAccepted = 0, PatientsDelivered = 0 WHERE ID = 2") - Called.
+[11:48:33] >> mysql_real_escape_string( Connection handle: 1 )
+[11:48:33] CMySQLHandler::EscapeString(); - Escaped 0 characters to .
+[11:48:33] >> mysql_real_escape_string( Connection handle: 1 )
+[11:48:33] CMySQLHandler::EscapeString(Upender Lakhwan has possibly tried to spoof a dialog ID. - Server (24/5/2021)); - Escaped 77 characters to Upender Lakhwan has possibly tried to spoof a dialog ID. - Server (24/5/2021).
+[11:48:33] >> mysql_real_escape_string( Connection handle: 1 )
+[11:48:33] CMySQLHandler::EscapeString(); - Escaped 0 characters to .
+[11:48:33] >> mysql_query( Connection handle: 1 )
+[11:48:33] CMySQLHandler::Query(resultID) - Threaded query with id 10 started. (Extra ID: 0)
+[11:48:33] CMySQLHandler::ProcessQueryThread(UPDATE players SET SMSLog = 0, TriageTime = 0, Married = 0, MarriedTo = '', Flag = 'Upender Lakhwan has possibly tried to spoof a dialog ID. - Server (24/5/2021)', ReferredBy = '', RefTokens = 0, RefTokensOffline = 0, Helper = 0, GangMod = 0, LiveBanned = 0 WHERE ID = 2) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:48:33] OnQueryFinish(10,"UPDATE players SET SMSLog = 0, TriageTime = 0, Married = 0, MarriedTo = '', Flag = 'Upender Lakhwan has possibly tried to spoof a dialog ID. - Server (24/5/2021)', ReferredBy = '', RefTokens = 0, RefTokensOffline = 0, Helper = 0, GangMod = 0, LiveBanned = 0 WHERE ID = 2") - Called.
+[11:48:33] >> mysql_query( Connection handle: 1 )
+[11:48:33] CMySQLHandler::Query(resultID) - Threaded query with id 1 started. (Extra ID: 0)
+[11:48:33] >> mysql_query( Connection handle: 1 )
+[11:48:33] CMySQLHandler::Query(resultID) - Threaded query with id 1 started. (Extra ID: 0)
+[11:48:33] >> mysql_query( Connection handle: 1 )
+[11:48:33] CMySQLHandler::Query(resultID) - Threaded query with id 1 started. (Extra ID: 0)
+[11:48:33] >> mysql_query( Connection handle: 1 )
+[11:48:33] CMySQLHandler::Query(resultID) - Threaded query with id 1 started. (Extra ID: 0)
+[11:48:33] >> mysql_query( Connection handle: 1 )
+[11:48:33] CMySQLHandler::Query(resultID) - Threaded query with id 1 started. (Extra ID: 0)
+[11:48:33] CMySQLHandler::ProcessQueryThread(UPDATE playervehicles SET PosX = '2092.924072', PosY = '-1802.088867', PosZ = '13.382803', PosAngle = '71.661445', ModelID = 522, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 87) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:48:33] OnQueryFinish(1,"UPDATE playervehicles SET PosX = '2092.924072', PosY = '-1802.088867', PosZ = '13.382803', PosAngle = '71.661445', ModelID = 522, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 87") - Called.
+[11:48:33] CMySQLHandler::ProcessQueryThread(UPDATE playervehicles SET PosX = '1534.669189', PosY = '-1710.791381', PosZ = '13.546875', PosAngle = '12.711073', ModelID = 522, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 0, Color2 = 0, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 96) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:48:33] OnQueryFinish(1,"UPDATE playervehicles SET PosX = '1534.669189', PosY = '-1710.791381', PosZ = '13.546875', PosAngle = '12.711073', ModelID = 522, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 0, Color2 = 0, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 96") - Called.
+[11:48:33] CMySQLHandler::ProcessQueryThread(UPDATE playervehicles SET PosX = '1820.017578', PosY = '-1599.555786', PosZ = '13.359951', PosAngle = '57.014698', ModelID = 522, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 97) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:48:33] OnQueryFinish(1,"UPDATE playervehicles SET PosX = '1820.017578', PosY = '-1599.555786', PosZ = '13.359951', PosAngle = '57.014698', ModelID = 522, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 97") - Called.
+[11:48:33] CMySQLHandler::ProcessQueryThread(UPDATE playervehicles SET PosX = '1006.271667', PosY = '-1344.774291', PosZ = '13.355360', PosAngle = '258.676849', ModelID = 520, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 98) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:48:33] OnQueryFinish(1,"UPDATE playervehicles SET PosX = '1006.271667', PosY = '-1344.774291', PosZ = '13.355360', PosAngle = '258.676849', ModelID = 520, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 98") - Called.
+[11:48:33] CMySQLHandler::ProcessQueryThread(UPDATE playervehicles SET PosX = '1009.582092', PosY = '-1340.931884', PosZ = '13.365678', PosAngle = '119.242202', ModelID = 526, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 99) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:48:33] OnQueryFinish(1,"UPDATE playervehicles SET PosX = '1009.582092', PosY = '-1340.931884', PosZ = '13.365678', PosAngle = '119.242202', ModelID = 526, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 99") - Called.
+[11:52:32] >> mysql_query( Connection handle: 1 )
+[11:52:32] CMySQLHandler::Query(resultID) - Threaded query with id 1 started. (Extra ID: 0)
+[11:52:32] >> mysql_real_escape_string( Connection handle: 1 )
+[11:52:32] CMySQLHandler::EscapeString(Upender_Lakhwan); - Escaped 15 characters to Upender_Lakhwan.
+[11:52:32] >> mysql_real_escape_string( Connection handle: 1 )
+[11:52:32] CMySQLHandler::EscapeString(LaKhWaN); - Escaped 7 characters to LaKhWaN.
+[11:52:32] >> mysql_query( Connection handle: 1 )
+[11:52:32] CMySQLHandler::Query(resultID) - Threaded query with id 5 started. (Extra ID: 0)
+[11:52:32] CMySQLHandler::ProcessQueryThread() - Error will be triggered to OnQueryError()
+[11:52:32] OnQueryError() - Called.
+[11:52:32] CMySQLHandler::ProcessQueryThread(UPDATE players SET Password = 'FF79037E6780FD109E67A016B69052E546B58646126BBFFB25070E33438E8CF760D2BE4F8724F6D2973F60193CFD30381DAE17AAABA94355F07B64A26EA427D7', Level = 0, AdminLevel = 6, AdminName = 'LaKhWaN', BanAppealer = 0, Donator = 0, Banned = 0, Permabanned = 0, Disabled = 0, LastIP = '192.168.29.204', Registered = 1, Tutorial = 1, Sex = 1, Age = 20, Skin = 29, PosX = '1589.976196', PosY = '-1636.159179', PosZ = '13.447668', PosR = '89.042579', ConnectTime = 0, Respect = 0, PhoneNumber = 0, Warnings = 0, Gang = 255, Faction = 0, Leader = 0, Rankk = 0 WHERE Username = 'Upender_Lakhwan') - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:52:32] OnQueryFinish(5,"UPDATE players SET Password = 'FF79037E6780FD109E67A016B69052E546B58646126BBFFB25070E33438E8CF760D2BE4F8724F6D2973F60193CFD30381DAE17AAABA94355F07B64A26EA427D7', Level = 0, AdminLevel = 6, AdminName = 'LaKhWaN', BanAppealer = 0, Donator = 0, Banned = 0, Permabanned = 0, Disabled = 0, LastIP = '192.168.29.204', Registered = 1, Tutorial = 1, Sex = 1, Age = 20, Skin = 29, PosX = '1589.976196', PosY = '-1636.159179', PosZ = '13.447668', PosR = '89.042579', ConnectTime = 0, Respect = 0, PhoneNumber = 0, Warnings = 0, Gang = 255, Faction = 0, Leader = 0, Rankk = 0 WHERE Username = 'Upender_Lakhwan'") - Called.
+[11:52:32] >> mysql_query( Connection handle: 1 )
+[11:52:32] CMySQLHandler::Query(resultID) - Threaded query with id 6 started. (Extra ID: 0)
+[11:52:32] CMySQLHandler::ProcessQueryThread(UPDATE players SET Job = 0, Job2 = 0, UpgradePoints = 0, SpawnArmor = '0.000000', Cash = 50, Bank = 50, Insurance = 0, Crimes = 0, Arrested = 0, WantedLevel = 0, Health = '60.000000', Armor = '0.000000', Pot = 0, Crack = 0, Radio = 0, RadioFreq = -1, Phonebook = 0, Dice = 0, CDPlayer = 0, Materials = 0, Rope = 0, Cigars = 0, Sprunk = 0, Spraycan = 0, House = -1, House2 = -1, Renting = 0, Interior = 0, VirtualWorld = 0, Jailed = 0 WHERE ID = 2) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:52:32] OnQueryFinish(6,"UPDATE players SET Job = 0, Job2 = 0, UpgradePoints = 0, SpawnArmor = '0.000000', Cash = 50, Bank = 50, Insurance = 0, Crimes = 0, Arrested = 0, WantedLevel = 0, Health = '60.000000', Armor = '0.000000', Pot = 0, Crack = 0, Radio = 0, RadioFreq = -1, Phonebook = 0, Dice = 0, CDPlayer = 0, Materials = 0, Rope = 0, Cigars = 0, Sprunk = 0, Spraycan = 0, House = -1, House2 = -1, Renting = 0, Interior = 0, VirtualWorld = 0, Jailed = 0 WHERE ID = 2") - Called.
+[11:52:32] >> mysql_query( Connection handle: 1 )
+[11:52:32] CMySQLHandler::Query(resultID) - Threaded query with id 7 started. (Extra ID: 0)
+[11:52:32] CMySQLHandler::ProcessQueryThread(UPDATE players SET JailTime = 0, Gun0 = 0, Gun1 = 0, Gun2 = 0, Gun3 = 0, Gun4 = 0, Gun5 = 0, Gun6 = 0, Gun7 = 0, Gun8 = 0, Gun9 = 0, Gun10 = 0, Gun11 = 0, Paycheck = 3826, PayReady = 4, Hospital = 0, DetSkill = 0, FishSkill = 0, LawSkill = 0, DrugsSkill = 0, SmugglerSkill = 0, ArmsSkill = 0, MechSkill = 0, BoxSkill = 0, TruckSkill = 0, CarSkill = 0, LawyerTime = 0, LawyerFreeTime = 0, DrugsTime = 0, MechTime = 0 WHERE ID = 2) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:52:32] OnQueryFinish(7,"UPDATE players SET JailTime = 0, Gun0 = 0, Gun1 = 0, Gun2 = 0, Gun3 = 0, Gun4 = 0, Gun5 = 0, Gun6 = 0, Gun7 = 0, Gun8 = 0, Gun9 = 0, Gun10 = 0, Gun11 = 0, Paycheck = 3826, PayReady = 4, Hospital = 0, DetSkill = 0, FishSkill = 0, LawSkill = 0, DrugsSkill = 0, SmugglerSkill = 0, ArmsSkill = 0, MechSkill = 0, BoxSkill = 0, TruckSkill = 0, CarSkill = 0, LawyerTime = 0, LawyerFreeTime = 0, DrugsTime = 0, MechTime = 0 WHERE ID = 2") - Called.
+[11:52:32] >> mysql_query( Connection handle: 1 )
+[11:52:32] CMySQLHandler::Query(resultID) - Threaded query with id 8 started. (Extra ID: 0)
+[11:52:33] CMySQLHandler::ProcessQueryThread(UPDATE players SET SexTime = 0, CarTime = 0, Fishes = 0, BiggestFish = 0, pWEXists = 0, pWX = '0.000000', pWY = '0.000000', pWZ = '0.000000', pWVW = 0, pWInt = 0, pWValue = 0, pWSeeds = 0, Wins = 0, Loses = 0, FightingStyle = 0, Screwdriver = 0, Wristwatch = 0, Tire = 0, Firstaid = 0, Rccam = 0, Receiver = 0, GPS = 0, Sweep = 0, SweepLeft = 0, Bugged = 0, OnDuty = 0, CarLic = 0, FlyLic = 0, GunLic = 0, Division = 0 WHERE ID = 2) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:52:33] OnQueryFinish(8,"UPDATE players SET SexTime = 0, CarTime = 0, Fishes = 0, BiggestFish = 0, pWEXists = 0, pWX = '0.000000', pWY = '0.000000', pWZ = '0.000000', pWVW = 0, pWInt = 0, pWValue = 0, pWSeeds = 0, Wins = 0, Loses = 0, FightingStyle = 0, Screwdriver = 0, Wristwatch = 0, Tire = 0, Firstaid = 0, Rccam = 0, Receiver = 0, GPS = 0, Sweep = 0, SweepLeft = 0, Bugged = 0, OnDuty = 0, CarLic = 0, FlyLic = 0, GunLic = 0, Division = 0 WHERE ID = 2") - Called.
+[11:52:33] >> mysql_real_escape_string( Connection handle: 1 )
+[11:52:33] CMySQLHandler::EscapeString(Nobody); - Escaped 6 characters to Nobody.
+[11:52:33] >> mysql_real_escape_string( Connection handle: 1 )
+[11:52:33] CMySQLHandler::EscapeString(None); - Escaped 4 characters to None.
+[11:52:33] >> mysql_real_escape_string( Connection handle: 1 )
+[11:52:33] CMySQLHandler::EscapeString(); - Escaped 0 characters to .
+[11:52:33] >> mysql_real_escape_string( Connection handle: 1 )
+[11:52:33] CMySQLHandler::EscapeString(); - Escaped 0 characters to .
+[11:52:33] >> mysql_query( Connection handle: 1 )
+[11:52:33] CMySQLHandler::Query(resultID) - Threaded query with id 9 started. (Extra ID: 0)
+[11:52:33] CMySQLHandler::ProcessQueryThread(UPDATE players SET TicketTime = 0, HeadValue = 0, ContractBy = '', ContractDetail = '', Bombs = 0, CHits = 0, FHits = 0, PrisonedBy = 'Nobody', PrisonReason = 'None', AcceptReport = 0, TrashReport = 0, Accent = 0, NewMuted = 0, NewMutedTotal = 0, AdMuted = 0, AdMutedTotal = 0, ReportMuted = 0, ReportMutedTotal = 0, ReportMutedTime = 0, Speedo = 0, GCMuted = 0, GCMutedTime = 0, CallsAccepted = 0, PatientsDelivered = 0 WHERE ID = 2) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:52:33] OnQueryFinish(9,"UPDATE players SET TicketTime = 0, HeadValue = 0, ContractBy = '', ContractDetail = '', Bombs = 0, CHits = 0, FHits = 0, PrisonedBy = 'Nobody', PrisonReason = 'None', AcceptReport = 0, TrashReport = 0, Accent = 0, NewMuted = 0, NewMutedTotal = 0, AdMuted = 0, AdMutedTotal = 0, ReportMuted = 0, ReportMutedTotal = 0, ReportMutedTime = 0, Speedo = 0, GCMuted = 0, GCMutedTime = 0, CallsAccepted = 0, PatientsDelivered = 0 WHERE ID = 2") - Called.
+[11:52:33] >> mysql_real_escape_string( Connection handle: 1 )
+[11:52:33] CMySQLHandler::EscapeString(); - Escaped 0 characters to .
+[11:52:33] >> mysql_real_escape_string( Connection handle: 1 )
+[11:52:33] CMySQLHandler::EscapeString(Upender Lakhwan has possibly tried to spoof a dialog ID. - Server (24/5/2021)); - Escaped 77 characters to Upender Lakhwan has possibly tried to spoof a dialog ID. - Server (24/5/2021).
+[11:52:33] >> mysql_real_escape_string( Connection handle: 1 )
+[11:52:33] CMySQLHandler::EscapeString(); - Escaped 0 characters to .
+[11:52:33] >> mysql_query( Connection handle: 1 )
+[11:52:33] CMySQLHandler::Query(resultID) - Threaded query with id 10 started. (Extra ID: 0)
+[11:52:33] CMySQLHandler::ProcessQueryThread(UPDATE players SET SMSLog = 0, TriageTime = 0, Married = 0, MarriedTo = '', Flag = 'Upender Lakhwan has possibly tried to spoof a dialog ID. - Server (24/5/2021)', ReferredBy = '', RefTokens = 0, RefTokensOffline = 0, Helper = 0, GangMod = 0, LiveBanned = 0 WHERE ID = 2) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:52:33] OnQueryFinish(10,"UPDATE players SET SMSLog = 0, TriageTime = 0, Married = 0, MarriedTo = '', Flag = 'Upender Lakhwan has possibly tried to spoof a dialog ID. - Server (24/5/2021)', ReferredBy = '', RefTokens = 0, RefTokensOffline = 0, Helper = 0, GangMod = 0, LiveBanned = 0 WHERE ID = 2") - Called.
+[11:52:33] >> mysql_query( Connection handle: 1 )
+[11:52:33] CMySQLHandler::Query(resultID) - Threaded query with id 1 started. (Extra ID: 0)
+[11:52:33] >> mysql_query( Connection handle: 1 )
+[11:52:33] CMySQLHandler::Query(resultID) - Threaded query with id 1 started. (Extra ID: 0)
+[11:52:33] >> mysql_query( Connection handle: 1 )
+[11:52:33] CMySQLHandler::Query(resultID) - Threaded query with id 1 started. (Extra ID: 0)
+[11:52:33] >> mysql_query( Connection handle: 1 )
+[11:52:33] CMySQLHandler::Query(resultID) - Threaded query with id 1 started. (Extra ID: 0)
+[11:52:33] >> mysql_query( Connection handle: 1 )
+[11:52:33] CMySQLHandler::Query(resultID) - Threaded query with id 1 started. (Extra ID: 0)
+[11:52:33] CMySQLHandler::ProcessQueryThread(UPDATE playervehicles SET PosX = '2092.924072', PosY = '-1802.088867', PosZ = '13.382803', PosAngle = '71.661445', ModelID = 522, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 87) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:52:33] OnQueryFinish(1,"UPDATE playervehicles SET PosX = '2092.924072', PosY = '-1802.088867', PosZ = '13.382803', PosAngle = '71.661445', ModelID = 522, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 87") - Called.
+[11:52:33] CMySQLHandler::ProcessQueryThread(UPDATE playervehicles SET PosX = '1534.669189', PosY = '-1710.791381', PosZ = '13.546875', PosAngle = '12.711073', ModelID = 522, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 0, Color2 = 0, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 96) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:52:33] OnQueryFinish(1,"UPDATE playervehicles SET PosX = '1534.669189', PosY = '-1710.791381', PosZ = '13.546875', PosAngle = '12.711073', ModelID = 522, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 0, Color2 = 0, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 96") - Called.
+[11:52:33] CMySQLHandler::ProcessQueryThread(UPDATE playervehicles SET PosX = '1820.017578', PosY = '-1599.555786', PosZ = '13.359951', PosAngle = '57.014698', ModelID = 522, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 97) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:52:33] OnQueryFinish(1,"UPDATE playervehicles SET PosX = '1820.017578', PosY = '-1599.555786', PosZ = '13.359951', PosAngle = '57.014698', ModelID = 522, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 97") - Called.
+[11:52:33] CMySQLHandler::ProcessQueryThread(UPDATE playervehicles SET PosX = '1006.271667', PosY = '-1344.774291', PosZ = '13.355360', PosAngle = '258.676849', ModelID = 520, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 98) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:52:33] OnQueryFinish(1,"UPDATE playervehicles SET PosX = '1006.271667', PosY = '-1344.774291', PosZ = '13.355360', PosAngle = '258.676849', ModelID = 520, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 98") - Called.
+[11:52:33] CMySQLHandler::ProcessQueryThread(UPDATE playervehicles SET PosX = '1009.582092', PosY = '-1340.931884', PosZ = '13.365678', PosAngle = '119.242202', ModelID = 526, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 99) - Data is getting passed to OnQueryFinish() - (Threadsafe: Yes)
+[11:52:33] OnQueryFinish(1,"UPDATE playervehicles SET PosX = '1009.582092', PosY = '-1340.931884', PosZ = '13.365678', PosAngle = '119.242202', ModelID = 526, LockType = 0, Locked = 0, PaintJob = -1, Color1 = 6, Color2 = 6, Price = 0, Ticket = 0, Weapon0 = 0, Weapon1 = 0, Weapon2 = 0, WepUpgrade = 0, Impound = 0, Spawned = 0, Disabled = 0, NumPlate = '', Mod0 = 0, Mod1 = 0, Mod2 = 0, Mod3 = 0, Mod4 = 0, Mod5 = 0, Mod6 = 0, Mod7 = 0, Mod8 = 0, Mod9 = 0, Mod10 = 0, Mod11 = 0, Mod12 = 0, Mod13 = 0, Mod14 = 0 WHERE Owner = 2 AND ID = 99") - Called.
