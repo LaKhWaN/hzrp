@@ -28,10 +28,11 @@
 #include 					<a_mysql>
 
 
-// #define SQL_HOST	"localhost"
-// #define SQL_USER	"root"
-// #define SQL_PASS	""
-// #define SQL_DATA	"ngrp"
+//#define SQL_HOST	"localhost"
+
+//#define SQL_USER	"root"
+//#define SQL_PASS	""
+//#define SQL_DATA	"ngrp"
 
 #define SQL_HOST	"localhost"
 #define SQL_USER	"NextGenerati"
@@ -335,7 +336,7 @@
 #define						SOUND_OFF 		 					(1098)
 #define 					DIALOG_VIPLOCKER 					(7832)
 #define 					DIALOG_VWEAPONS 					(7833)
-#define                     DIALOG_TOKENSHOP                    (18340)
+//#define                     DIALOG_HERBSMENU                    (18340)
 #define                     DIALOG_VJOBS                        (18341)
 #define 					COLOR_VIP 							0xC93CCE00
 
@@ -1365,7 +1366,6 @@ enum cdInfo
 	cdPickupID, // non-saved
 	Text3D:cdTextLabel, // non-saved
 	Text3D:cdVehicleLabel[MAX_DEALERSHIPVEHICLES], // non-saved
-	cdDonator,
 };
 new CarDealershipInfo[MAX_CARDEALERSHIPS][cdInfo];
 
@@ -4296,8 +4296,6 @@ stock LoadcDealerships()
 					format(string, 128, "cd%dVehicleCost%d", f, m);
 					if(strcmp(key , string , true) == 0) { val = Ini_Value(Data); CarDealershipInfo[f][cdVehicleCost][m] = strval(val); }
             	}
- 				format(string, 128, "cd%dDonator",f);
-				if(strcmp(key , string , true) == 0) { val = Ini_Value(Data); CarDealershipInfo[f][cdDonator] = strval(val); }
             }
 		}
 		fclose(Dealerships);
@@ -4357,7 +4355,6 @@ stock SavecDealerships()
    				format(var, 32, "cd%dVehicleModel%d=%d\n", f, m, CarDealershipInfo[f][cdVehicleModel][m]); fwrite(hFile, var);
    				format(var, 32, "cd%dVehicleCost%d=%d\n", f, m, CarDealershipInfo[f][cdVehicleCost][m]); fwrite(hFile, var);
 			}
-			format(var, 32, "cd%dDonator=%d\n", f, CarDealershipInfo[f][cdDonator]); fwrite(hFile, var);
 		}
 		fclose(hFile);
 	}
@@ -7746,7 +7743,7 @@ stock ShowStats(playerid,targetid)
 		}
    		format(coordsstring, sizeof(coordsstring),"(Crimes: %d) - (Arrests: %d) - (Wanted Level: %d) - (Materials: %d) - (Pot: %d) - (Crack: %d) - (Packages: %d) - (Crates: %d)", crimes, arrests, wanted, mats, pot, crack, packages, crates);
    		SendClientMessage(playerid, COLOR_WHITE, coordsstring);
-   		format(coordsstring, sizeof(coordsstring),"(Rope: %d) - (Cigars: %d) - (Sprunk: %d) - (Spray: %d) - (Seeds: %d) -  (Biggest fish: %d) - (Referral Tokens: %d) - (Donator: %s)", rope, cigars, sprunk, spray, PlayerInfo[targetid][pWSeeds], bigfish, reftokens, drank);
+   		format(coordsstring, sizeof(coordsstring),"(Rope: %d) - (Cigars: %d) - (Sprunk: %d) - (Spray: %d) - (Seeds: %d) -  (Biggest fish: %d) - (Referral Tokens: %d) - (ViP: %s)", rope, cigars, sprunk, spray, PlayerInfo[targetid][pWSeeds], bigfish, reftokens, drank);
         SendClientMessage(playerid, COLOR_GREY, coordsstring);
 
 		if(PlayerInfo[playerid][pAdmin] >= 1) {
@@ -9408,7 +9405,7 @@ CMD:accept(playerid, params[])
                             SendClientMessage(playerid, COLOR_GREY, "You can't spawn a weapon whilst in Hospital.");
                             return 1;
                         }
-                        if(PlayerInfo[playerid][pConnectTime] < 2) return SendClientMessage(playerid, COLOR_GRAD2, "You can't use this as you're currently restricted from possessing weapons!");
+                        if(PlayerInfo[playerid][pConnectTime] < 0) return SendClientMessage(playerid, COLOR_GRAD2, "You can't use this as you're currently restricted from possessing weapons!");
                         if(IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, COLOR_GRAD2, "Please exit the vehicle, before using this command.");
                         new weaponname[32];
                         GetWeaponName(GunId[playerid], weaponname, sizeof(weaponname));
@@ -10389,8 +10386,8 @@ CMD:signcheck(playerid, params[])
 	if(PayCheckCode[playerid] == 0) return SendClientMessage(playerid, COLOR_WHITE, "There is no paycheck to sign. Please wait for the next paycheck.");
 
  	new string[128];
-	format(string, sizeof(string), "Check code: %d\n\nEnter your check code to receive your paycheck:", PayCheckCode[playerid]);
-	ShowPlayerDialogEx(playerid, SIGNCHECK, DIALOG_STYLE_INPUT, "Sign check", string, "Sign check","Cancel");
+	format(string, sizeof(string), "Thanks for Playing NGG:OS\n\n    Click OK to get paid");
+	ShowPlayerDialogEx(playerid, SIGNCHECK,DIALOG_STYLE_MSGBOX, "--------Cash Your Paycheck--------", string, "Ok","");
     return 1;
 }
 
@@ -20073,7 +20070,7 @@ CMD:joinevent(playerid, params[]) {
 	if(PlayerCuffed[playerid] >= 1 || PlayerInfo[playerid][pJailTime] > 0 || GetPVarInt(playerid, "Hospital") > 0)
 		return SendClientMessage(playerid, COLOR_WHITE, "You can't do this right now.");
 
-	if(PlayerInfo[playerid][pConnectTime] < 2)
+	if(PlayerInfo[playerid][pConnectTime] < 0)
 		return SendClientMessage(playerid, COLOR_GRAD2, "Young padawan, you can't join an event before you've played 2 full hours due to the weapon restrictions.");
 
 	if(EventInfo[EventPlayers] >= EventInfo[EventLimit] && EventInfo[EventTime] == 0)
@@ -22774,7 +22771,7 @@ CMD:order(playerid, params[])
 	    if(IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, COLOR_GREY, "You can't do this right now.");
 		if(IsPlayerInRangeOfPoint(playerid, 20.0, 1236.112182, -751.863220, 5080.765136))
 		{
-			if(PlayerInfo[playerid][pConnectTime] < 2) return SendClientMessage(playerid, COLOR_GRAD2, "You can't use this as you're currently restricted from possessing weapons!");
+			if(PlayerInfo[playerid][pConnectTime] < 0) return SendClientMessage(playerid, COLOR_GRAD2, "You can't use this as you're currently restricted from possessing weapons!");
 			new Hitman[32], skin = -1;
 			if(sscanf(params, "s[32]D", Hitman, skin))
 			{
@@ -24559,7 +24556,7 @@ CMD:tazer(playerid, params[])
 	if(IsACop(playerid)|| PlayerInfo[playerid][pFaction] == 5 && PlayerInfo[playerid][pDivision] == 5 || PlayerInfo[playerid][pFaction] == 5 && PlayerInfo[playerid][pDivision] == 2) {
 		new
 			string[128];
-		if(PlayerInfo[playerid][pConnectTime] < 2)
+		if(PlayerInfo[playerid][pConnectTime] < 0)
 			return SendClientMessage(playerid, COLOR_GRAD2, "You can't use this as you're currently restricted from possessing weapons!");
 
 		if(IsPlayerInAnyVehicle(playerid))
@@ -27780,7 +27777,7 @@ CMD:trunktake(playerid, params[]) {
 	else if(GetPVarInt(playerid, "EventToken") != 0) {
 		return SendClientMessage(playerid, COLOR_GREY, "You can't use this while you're in an event.");
 	}
-	else if(PlayerInfo[playerid][pConnectTime] < 2) {
+	else if(PlayerInfo[playerid][pConnectTime] < 0) {
 		return SendClientMessage(playerid, COLOR_GRAD2, "You can't use this as you're currently restricted from possessing weapons!");
 	}
 	else if(GetPVarInt(playerid, "GiveWeaponTimer") >= 1) {
@@ -27868,7 +27865,7 @@ CMD:trunkbalance(playerid, params[]) {
 	if(GetPVarInt(playerid, "EventToken") != 0)
 		return SendClientMessage(playerid, COLOR_GREY, "You can't use this while you're in an event.");
 
-	if(PlayerInfo[playerid][pConnectTime] < 2)
+	if(PlayerInfo[playerid][pConnectTime] < 0)
 		return SendClientMessage(playerid, COLOR_GRAD2, "You can't use this as you're currently restricted from possessing weapons!");
 
 	new
@@ -29995,7 +29992,7 @@ CMD:sellcar(playerid, params[])
 			SendClientMessage(playerid, COLOR_WHITE, "Please ensure that your current checkpoint is destroyed first (you either have material packages, or another existing checkpoint).");
 			return 1;
  		}
- 		if(PlayerInfo[playerid][pConnectTime] < 2)
+ 		if(PlayerInfo[playerid][pConnectTime] < 0)
  		{
  		    SendClientMessage(playerid, COLOR_GREY, "You need at least 2 playing hours before you can drop off a car.");
  		    return 1;
@@ -32041,7 +32038,7 @@ CMD:fgetgun(playerid, params[])
 	}
 	new string[128], slot;
 
-	if(PlayerInfo[playerid][pConnectTime] < 2)
+	if(PlayerInfo[playerid][pConnectTime] < 0)
 		return SendClientMessage(playerid, COLOR_GRAD2, "You can't use this as you're currently restricted from possessing weapons!");
 
 	new family;
@@ -34988,7 +34985,7 @@ CMD:exitpaintball(playerid, params[]) {
 }
 
 CMD:paintball(playerid, params[]) {
-    if(PlayerInfo[playerid][pConnectTime] < 2)
+    if(PlayerInfo[playerid][pConnectTime] < 0)
         return SendClientMessage(playerid, COLOR_GREY, "You can't play paintball yet. Play 2 full hours first.");
 
 	if(AdminDuty[playerid] != 0)
@@ -37227,7 +37224,7 @@ CMD:getgun(playerid, params[])
 	{
 		if(PlayerInfo[playerid][pHouse])
 		{
-			if(PlayerInfo[playerid][pConnectTime] < 2) return SendClientMessage(playerid, COLOR_GRAD2, "You can't use this as you're currently restricted from possessing weapons!");
+			if(PlayerInfo[playerid][pConnectTime] < 0) return SendClientMessage(playerid, COLOR_GRAD2, "You can't use this as you're currently restricted from possessing weapons!");
 
 			if(sscanf(params, "d", slot))
 			{
@@ -37364,7 +37361,7 @@ CMD:getgun(playerid, params[])
 	{
 		if(PlayerInfo[playerid][pHouse2] != INVALID_HOUSE_ID)
 		{
-			if(PlayerInfo[playerid][pConnectTime] < 2) return SendClientMessage(playerid, COLOR_GRAD2, "You can't use this as you're currently restricted from possessing weapons!");
+			if(PlayerInfo[playerid][pConnectTime] < 0) return SendClientMessage(playerid, COLOR_GRAD2, "You can't use this as you're currently restricted from possessing weapons!");
 
 			if(sscanf(params, "d", slot))
 			{
@@ -41363,7 +41360,7 @@ public OnGameModeInit()
 	// Streamer_Update()
 
 	//VIP
-	Create3DTextLabel("{FFFFFF}VIP Locker\n{EEE72A}(/viplocker to access the locker)", 0x008080FF, 2561.32519531,1403.24609375,7699.56640625,5.0, 363636, 0);
+	CreateDynamic3DTextLabel("Vip Locker \nType /Viplocker",COLOR_YELLOW,2556.66, 1403.92, 7699.58+0.5,4.0);
 	CreateDynamicObject(14614,2533.68457031,1416.85351562,7705.11816406,0.00000000,0.00000000,0.00000000); //object(triad_main3) (1)
 	CreateDynamicObject(14607,2533.54492188,1417.93652344,7705.11572266,0.00000000,0.00000000,359.74731445); //object(triad_main2) (2)
 	CreateDynamicObject(14563,2533.70019531,1419.26757812,7705.11376953,0.00000000,0.00000000,0.00000000); //object(triad_main) (1)
@@ -43396,7 +43393,7 @@ stock SaveAccount(playerid) {
 		mysql_escape_string(szPlayerName, szPlayerName2,MAX_PLAYER_NAME,sqldb);
 		mysql_escape_string(PlayerInfo[playerid][pAdminName], szAdminName,MAX_PLAYER_NAME,sqldb);
 
-		mysql_format(sqldb,szQuery, sizeof(szQuery), "UPDATE players SET Password = '%s', Level = %d, AdminLevel = %d, AdminName = '%s', BanAppealer = %d, Donator = %d, Banned = %d, Permabanned = %d, Disabled = %d, LastIP = '%s', Registered = %d, \
+		mysql_format(sqldb,szQuery, sizeof(szQuery), "UPDATE players SET Password = '%s', Level = %d, AdminLevel = %d, AdminName = '%s', BanAppealer = %d, ViP = %d, Banned = %d, Permabanned = %d, Disabled = %d, LastIP = '%s', Registered = %d, \
 		Tutorial = %i, Sex = %d, Age = %d, Skin = %d, PosX = '%f', PosY = '%f', PosZ = '%f', PosR = '%f', ConnectTime = %d, Respect = %d, PhoneNumber = %d, Warnings = %d, Gang = %d, Faction = %d, Leader = %d, Rankk = %d WHERE Username = '%s'",
 		PlayerInfo[playerid][pKey], PlayerInfo[playerid][pLevel], PlayerInfo[playerid][pAdmin], szAdminName, PlayerInfo[playerid][pBanAppealer], PlayerInfo[playerid][pVip], PlayerInfo[playerid][pBanned],
 		PlayerInfo[playerid][pPermaBanned], PlayerInfo[playerid][pDisabled], PlayerInfo[playerid][pIP], PlayerInfo[playerid][pReg], PlayerInfo[playerid][pTut], PlayerInfo[playerid][pSex], PlayerInfo[playerid][pAge], PlayerInfo[playerid][pSkin], PlayerInfo[playerid][pPos_x],
@@ -43625,7 +43622,7 @@ public OnQueryFinished(resultid, extraid)
 			}
 
 			if(PlayerInfo[extraid][pVip] >= 1) {
-				format(string, sizeof(string), "[DONATOR NAMECHANGES] %s has changed their name to %s.", GetPlayerNameEx(extraid), szPlayerName);
+				format(string, sizeof(string), "[VIP NAMECHANGES] %s has changed their name to %s.", GetPlayerNameEx(extraid), szPlayerName);
 				Log("logs/donatornames.log", string);
 			}
 
@@ -44241,7 +44238,7 @@ public OnQueryFinished(resultid, extraid)
 					SendClientMessage(extraid, COLOR_FORSTATS, coordsstring);
 			   		format(coordsstring, sizeof(coordsstring),"(Crimes: %d) - (Arrests: %d) - (Wanted Level: %d) - (Materials: %d) - (Pot: %d) - (Crack: %d)", crimes, arrests, wanted, mats, pot, crack);
 			   		SendClientMessage(extraid, COLOR_WHITE, coordsstring);
-			   		format(coordsstring, sizeof(coordsstring),"(Rope: %d) - (Cigars: %d) - (Sprunk: %d) - (Spray: %d) -  (Biggest fish: %d) - (Referral Tokens: %d) - (Donator: %s)", rope, cigars, sprunk, spray, bigfish, reftokens, donatortxt);
+			   		format(coordsstring, sizeof(coordsstring),"(Rope: %d) - (Cigars: %d) - (Sprunk: %d) - (Spray: %d) -  (Biggest fish: %d) - (Referral Tokens: %d) - (ViP: %s)", rope, cigars, sprunk, spray, bigfish, reftokens, donatortxt);
 			        SendClientMessage(extraid, COLOR_FORSTATS, coordsstring);
 					format(coordsstring, sizeof(coordsstring), "(Admin Level: %d) - (Banned: %d) - (Permabanned: %d) - (Account disabled: %d)", adminlevel, banned, permabanned, disabled);
 			  		SendClientMessage(extraid, COLOR_WHITE,coordsstring);
@@ -48088,7 +48085,7 @@ public OnPlayerEnterCheckpoint(playerid)
 			 	if(truckdeliver == 12)
 				{
 				    new randomweapon = Random(1, 3);
-					if(PlayerInfo[playerid][pConnectTime] < 2)
+					if(PlayerInfo[playerid][pConnectTime] < 0)
 				    {
 				        SendClientMessage(playerid, COLOR_LIGHTBLUE, "* You did not receive a weapon bonus since your weapons are currently restricted.");
 				    }
@@ -48106,7 +48103,7 @@ public OnPlayerEnterCheckpoint(playerid)
 				else if(truckdeliver == 13)
 				{
 				    new randomweapon = Random(1, 4);
-					if(PlayerInfo[playerid][pConnectTime] < 2)
+					if(PlayerInfo[playerid][pConnectTime] < 0)
 				    {
 				        SendClientMessage(playerid, COLOR_LIGHTBLUE, "* You did not receive a weapon bonus since your weapons are currently restricted.");
 				    }
@@ -48129,7 +48126,7 @@ public OnPlayerEnterCheckpoint(playerid)
 				else if(truckdeliver == 14)
 				{
 				    new randomweapon = Random(1, 5);
-					if(PlayerInfo[playerid][pConnectTime] < 2)
+					if(PlayerInfo[playerid][pConnectTime] < 0)
 				    {
 				        SendClientMessage(playerid, COLOR_LIGHTBLUE, "* You did not receive a weapon bonus since your weapons are currently restricted.");
 				    }
@@ -48157,7 +48154,7 @@ public OnPlayerEnterCheckpoint(playerid)
 				else if(truckdeliver == 15)
 				{
 				    new randomweapon = Random(1, 101);
-					if(PlayerInfo[playerid][pConnectTime] < 2)
+					if(PlayerInfo[playerid][pConnectTime] < 0)
 				    {
 				        SendClientMessage(playerid, COLOR_LIGHTBLUE, "* You did not receive a weapon bonus since your weapons are currently restricted.");
 				    }
@@ -49463,7 +49460,7 @@ OnPlayerChangeWeapon(playerid, newweapon)
         }
         else if(PlayerInfo[playerid][pGuns][2] != 22 && PlayerInfo[playerid][pAGuns][2] != 22 && GetPlayerWeapon(playerid) == 22)
         {
-            if(PlayerInfo[playerid][pConnectTime] < 2)
+            if(PlayerInfo[playerid][pConnectTime] < 0)
 		    {
 			    new WeaponName[32];
 				GetWeaponName(newweapon, WeaponName, sizeof(WeaponName));
@@ -49488,7 +49485,7 @@ OnPlayerChangeWeapon(playerid, newweapon)
         }
         else if(PlayerInfo[playerid][pGuns][2] != 23 && PlayerInfo[playerid][pAGuns][2] != 23 && GetPlayerWeapon(playerid) == 23)
         {
-       		if(PlayerInfo[playerid][pConnectTime] < 2)
+       		if(PlayerInfo[playerid][pConnectTime] < 0)
 			{
    				new WeaponName[32];
 				GetWeaponName(newweapon, WeaponName, sizeof(WeaponName));
@@ -49513,7 +49510,7 @@ OnPlayerChangeWeapon(playerid, newweapon)
         }
         else if(PlayerInfo[playerid][pGuns][2] != 24 && PlayerInfo[playerid][pAGuns][2] != 24 && GetPlayerWeapon(playerid) == 24)
         {
-        	if(PlayerInfo[playerid][pConnectTime] < 2)
+        	if(PlayerInfo[playerid][pConnectTime] < 0)
 	    	{
 		    	new WeaponName[32];
 				GetWeaponName(newweapon, WeaponName, sizeof(WeaponName));
@@ -49538,7 +49535,7 @@ OnPlayerChangeWeapon(playerid, newweapon)
         }
         else if(PlayerInfo[playerid][pGuns][3] != 25 && PlayerInfo[playerid][pAGuns][3] != 25 && GetPlayerWeapon(playerid) == 25)
         {
-       		if(PlayerInfo[playerid][pConnectTime] < 2)
+       		if(PlayerInfo[playerid][pConnectTime] < 0)
 	    	{
 		    	new WeaponName[32];
 				GetWeaponName(newweapon, WeaponName, sizeof(WeaponName));
@@ -49584,7 +49581,7 @@ OnPlayerChangeWeapon(playerid, newweapon)
         }
         else if(PlayerInfo[playerid][pGuns][3] != 27 && PlayerInfo[playerid][pAGuns][3] != 27 && GetPlayerWeapon(playerid) == 27)
         {
-            if(PlayerInfo[playerid][pConnectTime] < 2)
+            if(PlayerInfo[playerid][pConnectTime] < 0)
     		{
 		    	new WeaponName[32];
 				GetWeaponName(newweapon, WeaponName, sizeof(WeaponName));
@@ -49630,7 +49627,7 @@ OnPlayerChangeWeapon(playerid, newweapon)
         }
         else if(PlayerInfo[playerid][pGuns][4] != 29 && PlayerInfo[playerid][pAGuns][4] != 29 && GetPlayerWeapon(playerid) == 29)
         {
-            if(PlayerInfo[playerid][pConnectTime] < 2)
+            if(PlayerInfo[playerid][pConnectTime] < 0)
     		{
 		    	new WeaponName[32];
 				GetWeaponName(newweapon, WeaponName, sizeof(WeaponName));
@@ -49655,7 +49652,7 @@ OnPlayerChangeWeapon(playerid, newweapon)
         }
         else if(PlayerInfo[playerid][pGuns][5] != 30 && PlayerInfo[playerid][pAGuns][5] != 30 && GetPlayerWeapon(playerid) == 30)
         {
-            if(PlayerInfo[playerid][pConnectTime] < 2)
+            if(PlayerInfo[playerid][pConnectTime] < 0)
     		{
 		    	new WeaponName[32];
 				GetWeaponName(newweapon, WeaponName, sizeof(WeaponName));
@@ -49680,7 +49677,7 @@ OnPlayerChangeWeapon(playerid, newweapon)
         }
         else if(PlayerInfo[playerid][pGuns][5] != 31 && PlayerInfo[playerid][pAGuns][5] != 31 && GetPlayerWeapon(playerid) == 31)
         {
-            if(PlayerInfo[playerid][pConnectTime] < 2)
+            if(PlayerInfo[playerid][pConnectTime] < 0)
     		{
 		    	new WeaponName[32];
 				GetWeaponName(newweapon, WeaponName, sizeof(WeaponName));
@@ -49726,7 +49723,7 @@ OnPlayerChangeWeapon(playerid, newweapon)
         }
         else if(PlayerInfo[playerid][pGuns][6] != 33 && PlayerInfo[playerid][pAGuns][6] != 33 && GetPlayerWeapon(playerid) == 33)
         {
-            if(PlayerInfo[playerid][pConnectTime] < 2)
+            if(PlayerInfo[playerid][pConnectTime] < 0)
     		{
 		    	new WeaponName[32];
 				GetWeaponName(newweapon, WeaponName, sizeof(WeaponName));
@@ -49751,7 +49748,7 @@ OnPlayerChangeWeapon(playerid, newweapon)
         }
         else if(PlayerInfo[playerid][pGuns][6] != 34 && PlayerInfo[playerid][pAGuns][6] != 34 && GetPlayerWeapon(playerid) == 34)
         {
-            if(PlayerInfo[playerid][pConnectTime] < 2)
+            if(PlayerInfo[playerid][pConnectTime] < 0)
     		{
 		    	new WeaponName[32];
 				GetWeaponName(newweapon, WeaponName, sizeof(WeaponName));
@@ -49933,7 +49930,7 @@ OnPlayerChangeWeapon(playerid, newweapon)
         }
         else if(PlayerInfo[playerid][pGuns][9] != 41 && PlayerInfo[playerid][pAGuns][9] != 41 && GetPlayerWeapon(playerid) == 41)
         {
-            if(PlayerInfo[playerid][pConnectTime] < 2)
+            if(PlayerInfo[playerid][pConnectTime] < 0)
     		{
 		    	new WeaponName[32];
 				GetWeaponName(newweapon, WeaponName, sizeof(WeaponName));
@@ -49958,7 +49955,7 @@ OnPlayerChangeWeapon(playerid, newweapon)
         }
         else if(PlayerInfo[playerid][pGuns][9] != 42 && PlayerInfo[playerid][pAGuns][9] != 42 && GetPlayerWeapon(playerid) == 42)
         {
-            if(PlayerInfo[playerid][pConnectTime] < 2)
+            if(PlayerInfo[playerid][pConnectTime] < 0)
     		{
 		    	new WeaponName[32];
 				GetWeaponName(newweapon, WeaponName, sizeof(WeaponName));
@@ -50153,143 +50150,121 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 		}
 	}
 	*/
-    if(dialogid == DIALOG_TOKENSHOP)
+  /*  if(dialogid == DIALOG_HERBSMENU)
 	{
 	    if(response)
 	    {
 	        if(listitem == 0)
 			{
-				if(PlayerInfo[playerid][pVIPTokens] >= 2)
-				{
-				    SetPlayerHealth(playerid, 100);
-				    SendClientMessage(playerid, COLOR_WHITE, "You have received a first aid kit and have been fully healed!");
-				    PlayerInfo[playerid][pVIPTokens] -= 2;
-				}
-				else SendClientMessage(playerid, COLOR_WHITE, "You need atleast 2 tokens for this!");
+   			SetPlayerHealth(playerid, 100);
+   			SendClientMessage(playerid, COLOR_WHITE, "You have received a first aid kit and have been fully healed!");
 			}
 	        if(listitem == 1)
 			{
-				if(PlayerInfo[playerid][pVIPTokens] >= 3)
-				{
-				    SetPlayerArmour(playerid, 100);
-				    SendClientMessage(playerid, COLOR_WHITE, "You have received a kelvar vest!");
-				    PlayerInfo[playerid][pVIPTokens] -= 3;
-				}
-				else SendClientMessage(playerid, COLOR_WHITE, "You need atleast 3 tokens for this!");
+   			SetPlayerArmour(playerid, 100);
+		    SendClientMessage(playerid, COLOR_WHITE, "You have received a kelvar vest!");
 			}
 	        if(listitem == 2)
 			{
-				if(PlayerInfo[playerid][pVIPTokens] >= 30)
-				{
-				    SetPlayerArmour(playerid, 100);
-				    SendClientMessage(playerid, COLOR_WHITE, "You have received weapon set 1!");
-				    GivePlayerWeapon(playerid, 24, 99999);
-				    GivePlayerWeapon(playerid, 25, 99999);
-				    GivePlayerWeapon(playerid, 29, 99999);
-				    GivePlayerWeapon(playerid, 33, 99999);
-				    PlayerInfo[playerid][pVIPTokens] -= 30;
-				}
-				else SendClientMessage(playerid, COLOR_WHITE, "You need atleast 30 tokens for this!");
+			SetPlayerArmour(playerid, 100);
+			SendClientMessage(playerid, COLOR_WHITE, "You have received weapon set 1!");
+			GivePlayerWeapon(playerid, 24, 99999);
+			GivePlayerWeapon(playerid, 25, 99999);
+			GivePlayerWeapon(playerid, 29, 99999);
+			GivePlayerWeapon(playerid, 33, 99999);
 			}
 	        if(listitem == 3)
 			{
-				if(PlayerInfo[playerid][pVIPTokens] >= 40)
-				{
-				    SetPlayerArmour(playerid, 100);
-				    SendClientMessage(playerid, COLOR_WHITE, "You have received weapon set 2!");
-				    GivePlayerWeapon(playerid, 24, 99999);
-				    GivePlayerWeapon(playerid, 27, 99999);
-				    GivePlayerWeapon(playerid, 30, 99999);
-				    GivePlayerWeapon(playerid, 34, 99999);
-				    PlayerInfo[playerid][pVIPTokens] -= 40;
-				}
-				else SendClientMessage(playerid, COLOR_WHITE, "You need atleast 40 tokens for this!");
+			SetPlayerArmour(playerid, 100);
+			SendClientMessage(playerid, COLOR_WHITE, "You have received weapon set 2!");
+			GivePlayerWeapon(playerid, 24, 99999);
+			GivePlayerWeapon(playerid, 27, 99999);
+			GivePlayerWeapon(playerid, 30, 99999);
+			GivePlayerWeapon(playerid, 34, 99999);
 			}
 	        if(listitem == 4)
 			{
-				if(PlayerInfo[playerid][pVIPTokens] >= 30)
-				{
-				    SetPlayerArmour(playerid, 100);
-				    SendClientMessage(playerid, COLOR_WHITE, "You have received weapon set 3!");
-				    GivePlayerWeapon(playerid, 24, 99999);
-				    GivePlayerWeapon(playerid, 26, 99999);
-				    GivePlayerWeapon(playerid, 31, 99999);
-				    GivePlayerWeapon(playerid, 34, 99999);
-				    PlayerInfo[playerid][pVIPTokens] -= 30;
-				}
-				else SendClientMessage(playerid, COLOR_WHITE, "You need atleast 30 tokens for this!");
+			SetPlayerArmour(playerid, 100);
+			SendClientMessage(playerid, COLOR_WHITE, "You have received weapon set 3!");
+			GivePlayerWeapon(playerid, 24, 99999);
+			GivePlayerWeapon(playerid, 26, 99999);
+			GivePlayerWeapon(playerid, 31, 99999);
+			GivePlayerWeapon(playerid, 34, 99999);
 			}
 			if(listitem == 5)
 			{
-			    if(PlayerInfo[playerid][pVIPTokens] >= 75)
-			    {
-			        SendClientMessage(playerid, COLOR_WHITE, "You are now flagged for a free car, rules apply.");
-			        SendClientMessage(playerid, COLOR_YELLOW, "The vehicle cannot be an LEO or some sort, it can be a truck. (military is allowed)");
-			        SendClientMessage(playerid, COLOR_YELLOW, "You are not allowed any weaponized vehicles, I.E. Mr. Splashy.");
-			        SendClientMessage(playerid, COLOR_WHITE, "Only a level 4+ administrator can issues these, so be patient and wait for one to come online!");
-			        format(string, sizeof(string), "FLAG: %s has got a free car from the Token Shop(VIP), they are ready to be issued it.", GetPlayerNameEx(playerid));
-			        Log("logs/flags.log", string);
-			        PlayerInfo[playerid][pVIPTokens] -= 75;
-			    }
-			    else SendClientMessage(playerid, COLOR_WHITE, "You need atleast 75 tokens for this!");
+			 SendClientMessage(playerid, COLOR_WHITE, "You are now flagged for a free car, rules apply.");
+			 SendClientMessage(playerid, COLOR_YELLOW, "The vehicle cannot be an LEO or some sort, it can be a truck. (military is allowed)");
+			 SendClientMessage(playerid, COLOR_YELLOW, "You are not allowed any weaponized vehicles, I.E. Mr. Splashy.");
+			 SendClientMessage(playerid, COLOR_WHITE, "Only a level 4+ administrator can issues these, so be patient and wait for one to come online!");
 			}
 		}
 	}
-
+*/
 	if(dialogid == DIALOG_VWEAPONS)
 	{
-	    if(PlayerInfo[playerid][pVip] == 4)
+	    if(PlayerInfo[playerid][pVip] >= 1)
 	    {
-	    	if(response)
+	    		if(response)
 	    	{
-		        if(listitem == 0)
-		        {
-		            SendClientMessage(playerid, COLOR_WHITE, "You have taken a 9MM from the VIP lockers.");
-					GivePlayerWeapon(playerid, 22, 99999);
-		        }
-	 	        if(listitem == 1)
-		        {
-		            SendClientMessage(playerid, COLOR_WHITE, "You have taken a Deagle from the VIP lockers.");
-					GivePlayerWeapon(playerid, 24, 99999);
-		        }
-	 	        if(listitem == 2)
-		        {
-		            SendClientMessage(playerid, COLOR_WHITE, "You have taken a MP5 from the VIP lockers.");
-					GivePlayerWeapon(playerid, 29, 99999);
-		        }
-	 	        if(listitem == 3)
-		        {
-		            SendClientMessage(playerid, COLOR_WHITE, "You have taken a AK-47 from the VIP lockers.");
-					GivePlayerWeapon(playerid, 30, 99999);
-		        }
-	 	        if(listitem == 4)
-		        {
-		            SendClientMessage(playerid, COLOR_WHITE, "You have taken a M4A1 from the VIP lockers.");
-					GivePlayerWeapon(playerid, 31, 99999);
-		        }
-	 	        if(listitem == 5)
-		        {
-		            SendClientMessage(playerid, COLOR_WHITE, "You have taken a SPAS-12 from the VIP lockers.");
-					GivePlayerWeapon(playerid, 27, 99999);
-		        }
-	 	        if(listitem == 6)
-		        {
-		            SendClientMessage(playerid, COLOR_WHITE, "You have taken a Shotgun from the VIP lockers.");
-					GivePlayerWeapon(playerid, 25, 99999);
-		        }
-		        if(listitem == 7)
-		        {
-		            SendClientMessage(playerid, COLOR_WHITE, "You have taken a Sniper from the VIP lockers.");
-					GivePlayerWeapon(playerid, 34, 99999);
-		        }
-	 	        if(listitem == 8)
-		        {
-		            SendClientMessage(playerid, COLOR_WHITE, "You have taken a Parachute from the VIP lockers.");
-					GivePlayerWeapon(playerid, 46, 99999);
-				}
+      		if(listitem == 0)
+	        {
+	            SendClientMessage(playerid, COLOR_WHITE, "You have taken a 9MM from the VIP lockers.");
+				GivePlayerWeapon(playerid, 22, 99999);
+	        }
+ 	        if(listitem == 1)
+	        {
+	            SendClientMessage(playerid, COLOR_WHITE, "You have taken a Parachute from the VIP lockers.");
+				GivePlayerWeapon(playerid, 46, 99999);
+	        }
+ 	        if(listitem == 2)
+	        {
+	            SendClientMessage(playerid, COLOR_WHITE, "You have taken a Shotgun from the VIP lockers.");
+				GivePlayerWeapon(playerid, 25, 99999);
+	        }
+ 	        if(listitem == 3)
+	        {
+	            SendClientMessage(playerid, COLOR_WHITE, "You have taken a MP5 from the VIP lockers.");
+           		GivePlayerWeapon(playerid, 29, 99999);
+	        }
+ 	        if(listitem == 4)
+	        {
+	            SendClientMessage(playerid, COLOR_WHITE, "You have taken a Deagle from the VIP lockers.");
+           		GivePlayerWeapon(playerid, 24, 99999);
+	        }
+ 	        if(listitem == 5)
+	        {
+	            SendClientMessage(playerid, COLOR_WHITE, "You have taken a AK-47 from the VIP lockers.");
+           		GivePlayerWeapon(playerid, 30, 99999);
+	        }
+ 	        if(listitem == 6)
+	        {
+	            SendClientMessage(playerid, COLOR_WHITE, "You have taken a M4A1 from the VIP lockers.");
+           		GivePlayerWeapon(playerid, 31, 99999);
+	        }
+	        if(listitem == 7)
+	        {
+	            SendClientMessage(playerid, COLOR_WHITE, "You have taken a Uzi from the VIP lockers.");
+           		GivePlayerWeapon(playerid, 28, 99999);
+	        }
+	        if(listitem == 8)
+	        {
+	            SendClientMessage(playerid, COLOR_WHITE, "You have taken a Tec-9 from the VIP lockers.");
+           		GivePlayerWeapon(playerid, 32, 99999);
+	        }
+	        if(listitem == 9)
+	        {
+	            SendClientMessage(playerid, COLOR_WHITE, "You have taken a SPAS-12 from the VIP lockers.");
+           		GivePlayerWeapon(playerid, 27, 99999);
+	        }
+ 	        if(listitem == 10)
+	        {
+	            SendClientMessage(playerid, COLOR_WHITE, "You have taken a Sniper from the VIP lockers.");
+           		GivePlayerWeapon(playerid, 34, 99999);
 			}
 		}
-		else SendClientMessage(playerid, COLOR_WHITE, "You must be a platinum VIP to use this feature!");
+	}
+		else SendClientMessage(playerid, COLOR_WHITE, "Thank you for being Vip!");
 	}
 
 	if(dialogid == DIALOG_VIPLOCKER)
@@ -50306,37 +50281,170 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 			    SendClientMessage(playerid, COLOR_WHITE, "You have received a kelvar vest.");
 			    SetPlayerArmour(playerid, 100);
 			}
-			if(listitem == 2)
+   			if(listitem == 2)
 			{
-				if(PlayerInfo[playerid][pVip] == 4)
+				if(PlayerInfo[playerid][pVip] == 1)
 				{
-				    ShowPlayerDialog(playerid, DIALOG_VWEAPONS, DIALOG_STYLE_LIST, "VIP Weapons", "9MM\nDeagle\nMP5\nAK-47\nM4A1\nSPAS-12\nShotgun\nSniper\nParachute", "Select", "Cancel");
-				}
-				else SendClientMessage(playerid, COLOR_WHITE, "You must be a platinum VIP to use this feature!");
-				return 1;
+				    ShowPlayerDialog(playerid, DIALOG_VWEAPONS, DIALOG_STYLE_LIST, "VIP Weapons", "9MM\nParachute\nShotgun", "Select", "Cancel");
+    			}
+
 			}
 			if(listitem == 3)
 			{
-			    if(PlayerInfo[playerid][pVip] >= 3)
+			    if(PlayerInfo[playerid][pVip] >= 2)
 			    {
-			    	ShowPlayerDialog(playerid, DIALOG_VJOBS, DIALOG_STYLE_LIST, "VIP Auto-Job", "Arms Dealer\nMechanic\nTrucker", "Select", "Cancel");
+		    	ShowPlayerDialog(playerid, DIALOG_VJOBS, DIALOG_STYLE_LIST, "VIP Auto-Job", "Arms Dealer\nMechanic\nTrucker", "Select", "Cancel");
 			    }
-			    else SendClientMessage(playerid, COLOR_WHITE, "You must be a Gold VIP to use this feature!");
+			    else SendClientMessage(playerid, COLOR_WHITE, "Thank you for being Vip!");
 			}
 			if(listitem == 4)
 			{
-				if(VIPColor[playerid] == 0)
+			if(VIPColor[playerid] == 0)
+			{
+			VIPColor[playerid] = 1;
+			SendClientMessage(playerid, COLOR_WHITE, "You have enabled your VIP player color! [press TAB to view it.]");
+		    SetPlayerColor(playerid, COLOR_PURPLE);
+		    }
+		    else {
+		    SendClientMessage(playerid, COLOR_WHITE, "You have turned off your VIP player color!");
+		    SetPlayerColor(playerid, COLOR_WHITE);
+		    VIPColor[playerid] = 0;
+		    }
+			}
+		}
+	}
+	if(dialogid == DIALOG_VIPLOCKER)
+	{
+	    if(response)
+		{
+			if(listitem == 0)
+			{
+				SendClientMessage(playerid, COLOR_WHITE, "You have received a first aid kit and have been fully healed.");
+				SetPlayerHealth(playerid, 100);
+			}
+			if(listitem == 1)
+			{
+			    SendClientMessage(playerid, COLOR_WHITE, "You have received a kelvar vest.");
+			    SetPlayerArmour(playerid, 100);
+			}
+   			if(listitem == 2)
+			{
+				if(PlayerInfo[playerid][pVip] == 2)
 				{
-					VIPColor[playerid] = 1;
-					SendClientMessage(playerid, COLOR_WHITE, "You have enabled your VIP player color! [press TAB to view it.]");
-				    SetPlayerColor(playerid, COLOR_PURPLE);
+				    ShowPlayerDialog(playerid, DIALOG_VWEAPONS, DIALOG_STYLE_LIST, "VIP Weapons", "9MM\nParachute\nShotgun\nMP5\nDeagle", "Select", "Cancel");
+    			}
+			}
+			if(listitem == 3)
+			{
+			    if(PlayerInfo[playerid][pVip] >= 2)
+			    {
+		    	ShowPlayerDialog(playerid, DIALOG_VJOBS, DIALOG_STYLE_LIST, "VIP Auto-Job", "Arms Dealer\nMechanic\nTrucker", "Select", "Cancel");
 			    }
-			    else
+			    else SendClientMessage(playerid, COLOR_WHITE, "Thank you for being Vip!");
+			}
+			if(listitem == 4)
+			{
+			if(VIPColor[playerid] == 0)
+			{
+			VIPColor[playerid] = 1;
+			SendClientMessage(playerid, COLOR_WHITE, "You have enabled your VIP player color! [press TAB to view it.]");
+		    SetPlayerColor(playerid, COLOR_PURPLE);
+		    }
+		    else {
+		    SendClientMessage(playerid, COLOR_WHITE, "You have turned off your VIP player color!");
+		    SetPlayerColor(playerid, COLOR_WHITE);
+		    VIPColor[playerid] = 0;
+		    }
+			}
+		}
+	}
+	if(dialogid == DIALOG_VIPLOCKER)
+	{
+	    if(response)
+		{
+			if(listitem == 0)
+			{
+				SendClientMessage(playerid, COLOR_WHITE, "You have received a first aid kit and have been fully healed.");
+				SetPlayerHealth(playerid, 100);
+			}
+			if(listitem == 1)
+			{
+			    SendClientMessage(playerid, COLOR_WHITE, "You have received a kelvar vest.");
+			    SetPlayerArmour(playerid, 100);
+			}
+   			if(listitem == 2)
+			{
+				if(PlayerInfo[playerid][pVip] == 3)
 				{
-				    SendClientMessage(playerid, COLOR_WHITE, "You have turned off your VIP player color!");
-				    SetPlayerColor(playerid, COLOR_WHITE);
-				    VIPColor[playerid] = 0;
+    			ShowPlayerDialog(playerid, DIALOG_VWEAPONS, DIALOG_STYLE_LIST, "VIP Weapons", "9MM\nParachute\nShotgun\nMP5\nDeagle\nAK-47\nM4A1\nUzi\nTec-9", "Select", "Cancel");
+    			}
+			}
+			if(listitem == 3)
+			{
+			    if(PlayerInfo[playerid][pVip] >= 2)
+			    {
+		    	ShowPlayerDialog(playerid, DIALOG_VJOBS, DIALOG_STYLE_LIST, "VIP Auto-Job", "Arms Dealer\nMechanic\nTrucker", "Select", "Cancel");
 			    }
+			    else SendClientMessage(playerid, COLOR_WHITE, "Thank you for being Vip!");
+			}
+			if(listitem == 4)
+			{
+			if(VIPColor[playerid] == 0)
+			{
+			VIPColor[playerid] = 1;
+			SendClientMessage(playerid, COLOR_WHITE, "You have enabled your VIP player color! [press TAB to view it.]");
+		    SetPlayerColor(playerid, COLOR_PURPLE);
+		    }
+		    else {
+		    SendClientMessage(playerid, COLOR_WHITE, "You have turned off your VIP player color!");
+		    SetPlayerColor(playerid, COLOR_WHITE);
+		    VIPColor[playerid] = 0;
+		    }
+			}
+		}
+	}
+	if(dialogid == DIALOG_VIPLOCKER)
+	{
+	    if(response)
+		{
+			if(listitem == 0)
+			{
+				SendClientMessage(playerid, COLOR_WHITE, "You have received a first aid kit and have been fully healed.");
+				SetPlayerHealth(playerid, 100);
+			}
+			if(listitem == 1)
+			{
+			    SendClientMessage(playerid, COLOR_WHITE, "You have received a kelvar vest.");
+			    SetPlayerArmour(playerid, 100);
+			}
+   			if(listitem == 2)
+			{
+				if(PlayerInfo[playerid][pVip] == 4)
+				{
+				    ShowPlayerDialog(playerid, DIALOG_VWEAPONS, DIALOG_STYLE_LIST, "VIP Weapons", "9MM\nParachute\nShotgun\nMP5\nDeagle\nAK-47\nM4A1\nUzi\nTec-9\nSPAS-12\nSniper", "Select", "Cancel");
+    			}
+			}
+			if(listitem == 3)
+			{
+			    if(PlayerInfo[playerid][pVip] >= 2)
+			    {
+		    	ShowPlayerDialog(playerid, DIALOG_VJOBS, DIALOG_STYLE_LIST, "VIP Auto-Job", "Arms Dealer\nMechanic\nTrucker", "Select", "Cancel");
+			    }
+			    else SendClientMessage(playerid, COLOR_WHITE, "Thank you for being Vip!");
+			}
+			if(listitem == 4)
+			{
+			if(VIPColor[playerid] == 0)
+			{
+			VIPColor[playerid] = 1;
+			SendClientMessage(playerid, COLOR_WHITE, "You have enabled your VIP player color! [press TAB to view it.]");
+		    SetPlayerColor(playerid, COLOR_PURPLE);
+		    }
+		    else {
+		    SendClientMessage(playerid, COLOR_WHITE, "You have turned off your VIP player color!");
+		    SetPlayerColor(playerid, COLOR_WHITE);
+		    VIPColor[playerid] = 0;
+		    }
 			}
 		}
 	}
@@ -50363,7 +50471,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 		        }
 			}
 		}
-		else SendClientMessage(playerid, COLOR_WHITE, "You must be a Gold VIP to use this feature!");
+		else SendClientMessage(playerid, COLOR_WHITE, "You must be Vip!");
 	}
 
 	if(dialogid == MAINMENU || dialogid == MAINMENU2) {
@@ -50814,7 +50922,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 			{
 			    if(PlayerInfo[playerid][pRefTokens] >= 1)
 			    {
-			        if(PlayerInfo[playerid][pConnectTime] < 2) return SendClientMessage(playerid, COLOR_WHITE, "You can't get weapons when your weapons are still restricted.");
+			        if(PlayerInfo[playerid][pConnectTime] < 0) return SendClientMessage(playerid, COLOR_WHITE, "You can't get weapons when your weapons are still restricted.");
 		         	PlayerInfo[playerid][pRefTokens] -= 1;
 
 			        GivePlayerValidWeapon(playerid, 24, 60000);
@@ -50839,7 +50947,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 			{
 			    if(PlayerInfo[playerid][pRefTokens] >= 2)
 			    {
-			        if(PlayerInfo[playerid][pConnectTime] < 2) return SendClientMessage(playerid, COLOR_WHITE, "You can't get weapons when your weapons are still restricted.");
+			        if(PlayerInfo[playerid][pConnectTime] < 0) return SendClientMessage(playerid, COLOR_WHITE, "You can't get weapons when your weapons are still restricted.");
 		         	PlayerInfo[playerid][pRefTokens] -= 2;
 
 		        	GivePlayerValidWeapon(playerid, 27, 60000);
@@ -51335,41 +51443,13 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 			}
 		}
 	}
-    else if(dialogid == SIGNCHECK)
+ 	else if(dialogid == SIGNCHECK)
 	{
- 		if(!response) return 1;
-		new
-			szMessage[150];
-   		if(strlen(inputtext) < 1)
-		{
-            format(szMessage, sizeof(szMessage), "You must enter the check code before signing.\n\nCheck code: %d\n\nEnter your check code to receive your paycheck:", PayCheckCode[playerid]);
-			ShowPlayerDialogEx(playerid, SIGNCHECK, DIALOG_STYLE_INPUT, "Sign check", szMessage, "Sign check","Cancel");
-			return 1;
-        }
-		if(!IsNumeric(inputtext))
-		{
- 			format(szMessage, sizeof(szMessage), "Wrong check code. The check code consists out of numbers only.\n\nCheck code: %d\n\nEnter your check code to receive your paycheck:", PayCheckCode[playerid]);
-			ShowPlayerDialogEx(playerid, SIGNCHECK, DIALOG_STYLE_INPUT, "Sign check", szMessage, "Sign check","Cancel");
-			return 1;
-		}
-        if(strlen(inputtext) > 6 || (strlen(inputtext) > 0 && strlen(inputtext) < 6))
-		{
-           	format(szMessage, sizeof(szMessage), "Wrong check code. The check code consists out of 6 digits.\n\nCheck code: %d\n\nEnter your check code to receive your paycheck:", PayCheckCode[playerid]);
-			ShowPlayerDialogEx(playerid, SIGNCHECK, DIALOG_STYLE_INPUT, "Sign check", szMessage, "Sign check","Cancel");
-			return 1;
-        }
 
-        new code = strval(inputtext);
-        if(code == PayCheckCode[playerid])
+        
+        if(IsPlayerConnected(playerid))
 		{
             PayCheckCode[playerid] = 0;
-
-			// VIP Disabled
-			/*if(PlayerInfo[i][pVip] > 0)
-			{
-    			PlayerInfo[i][pPayCheck] += PlayerInfo[i][pPayCheck] / 2;
-			}*/
-
             new PayCheck = PlayerInfo[playerid][pPayCheck] / 10;
 
 
@@ -51494,6 +51574,26 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 				else
 				{
 	    			SendClientMessage(playerid, COLOR_YELLOW, "* You have only gained one respect point since it's not within the double experience hours.");
+					PlayerInfo[playerid][pRespect]++;
+				}
+            #else
+            	PlayerInfo[playerid][pRespect]++;
+            #endif
+
+            PlayerInfo[playerid][pConnectTime]++;
+            SignedPaycheck[playerid] = 1;
+            MissedPaychecks[playerid] = 0;
+            #if defined DOUBLE_EXP_ENABLED
+				new hour,minuite,second;
+				gettime(hour,minuite,second);
+				if(PlayerInfo[playerid][pVip] >= 3)
+				{
+				    PlayerInfo[playerid][pRespect] += 2;
+				    SendClientMessage(playerid, COLOR_YELLOW, "* You have gained two respect points due to double experience.");
+				}
+				else
+				{
+	    			SendClientMessage(playerid, COLOR_YELLOW, "* You have only gained one respect point Since you are not VIP Gold+");
 					PlayerInfo[playerid][pRespect]++;
 				}
             #else
@@ -52443,7 +52543,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 	{
 		if(response)
 		{
-		    if(PlayerInfo[playerid][pConnectTime] < 2)
+		    if(PlayerInfo[playerid][pConnectTime] < 0)
 				return SendClientMessage(playerid, COLOR_GRAD2, "You can't use this as you're currently restricted from possessing weapons!");
 
 			switch(listitem) {
@@ -55459,7 +55559,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 	if(dialogid == SAN_DUTYMENU)
 	{
  		if(response){
-			if(PlayerInfo[playerid][pConnectTime] < 2)
+			if(PlayerInfo[playerid][pConnectTime] < 0)
 				return SendClientMessage(playerid, COLOR_GRAD2, "You can't use this as you're currently restricted from possessing weapons!");
 
 		    switch(listitem) {
@@ -55557,7 +55657,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 	{
  		if(response)
 		{
- 			if(PlayerInfo[playerid][pConnectTime] < 2) return SendClientMessage(playerid, COLOR_GRAD2, "You can't use this as you're currently restricted from possessing weapons!");
+ 			if(PlayerInfo[playerid][pConnectTime] < 0) return SendClientMessage(playerid, COLOR_GRAD2, "You can't use this as you're currently restricted from possessing weapons!");
 		    switch(listitem)
 			{
 				case 0: // LSPD Mace
@@ -55889,7 +55989,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 	{
  		if(response)
 		{
- 			if(PlayerInfo[playerid][pConnectTime] < 2) return SendClientMessage(playerid, COLOR_GRAD2, "You can't use this as you're currently restricted from possessing weapons!");
+ 			if(PlayerInfo[playerid][pConnectTime] < 0) return SendClientMessage(playerid, COLOR_GRAD2, "You can't use this as you're currently restricted from possessing weapons!");
 				else switch(listitem) {
 				case 0: // FBI Weapons
 				{
@@ -56520,36 +56620,6 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 				TogglePlayerControllable(playerid, 1);
 				return 1;
             }
-            if(CarDealershipInfo[d][cdDonator] == 1 && PlayerInfo[playerid][pVip] < 1)
-            {
- 				SendClientMessage(playerid, COLOR_GREY, "The vehicles in this dealership are only available for Bronze VIP.");
-				RemovePlayerFromVehicle(playerid);
-				new Float:slx, Float:sly, Float:slz;
-				GetPlayerPos(playerid, slx, sly, slz);
-				SetPlayerPos(playerid, slx, sly, slz+1.2);
-				TogglePlayerControllable(playerid, 1);
-				return 1;
-            }
-            if(CarDealershipInfo[d][cdDonator] == 2 && PlayerInfo[playerid][pVip] < 2)
-            {
- 				SendClientMessage(playerid, COLOR_GREY, "The vehicles in this dealership are only available for Silver VIP.");
-				RemovePlayerFromVehicle(playerid);
-				new Float:slx, Float:sly, Float:slz;
-				GetPlayerPos(playerid, slx, sly, slz);
-				SetPlayerPos(playerid, slx, sly, slz+1.2);
-				TogglePlayerControllable(playerid, 1);
-				return 1;
-            }
-            if(CarDealershipInfo[d][cdDonator] == 3 && PlayerInfo[playerid][pVip] < 3)
-            {
- 				SendClientMessage(playerid, COLOR_GREY, "The vehicles in this dealership are only available for Gold VIP.");
-				RemovePlayerFromVehicle(playerid);
-				new Float:slx, Float:sly, Float:slz;
-				GetPlayerPos(playerid, slx, sly, slz);
-				SetPlayerPos(playerid, slx, sly, slz+1.2);
-				TogglePlayerControllable(playerid, 1);
-				return 1;
-            }
 
             new playervehicleid = GetPlayerFreeVehicleId(playerid),
 				totalvehicles = GetPlayerVehicleCountEx(playerid);
@@ -56698,7 +56768,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 	        }
 	        else
 	        {
-				if(CarDealershipInfo[d][cdDonator] > 0) cost = CarDealershipInfo[d][cdVehicleCost][v];
+				if(CarDealershipInfo[d][cdOwned]>= 0) cost = CarDealershipInfo[d][cdVehicleCost][v];
 				else cost = (CarDealershipInfo[d][cdVehicleCost][v] * 80) / (100);
 	            if(PlayerInfo[playerid][pCash] < cost)
 	            {
@@ -58851,7 +58921,7 @@ PayDay()
 
  	foreach(Player, i) {
 		if(PlayerInfo[i][pLevel] > 0) {
-			if(PlayerInfo[i][pPayReady] >= 6) {
+			if(PlayerInfo[i][pPayReady] >= 0) {
 				new code = Random(100000, 999999);
 				PayCheckCode[i] = code;
 				SendClientMessage(i, COLOR_GREY,"_______________________________________________________________");
@@ -58950,7 +59020,7 @@ public DestroyChecks()
 
         if(WasHereForPaycheck[i] == 1 && SignedPaycheck[i] == 0)
         {
-            SendClientMessage(i, COLOR_WHITE, "Your paycheck code expired. Please remember to /signcheck next time.");
+            SendClientMessage(i, COLOR_WHITE, "Your paycheck expired. Please remember to /signcheck next time.");
 
 			if(AdminDuty[i] == 0)
 			{
@@ -60585,22 +60655,8 @@ Timer:EMSUpdate[5000]()
 	{
 		new Float:posX, Float:posY, Float:posZ;
  		GetPlayerPos(i, posX, posY, posZ);
-		if(GetPlayerInterior(i) == 0 && !IsPlayerInAnyVehicle(i) && MP3Station[i] == 0)
-		{
-	    	StopAudioStreamForPlayer(i);
-		}
-
 		new Float:iArmor;
 		GetPlayerArmour(i, iArmor);
-		if(iArmor > ValidArmor[i] && AdminDuty[i] == 0)
-		{
-		    new string[128];
-			format(string, sizeof(string), "%s may have hacked their armor.", GetPlayerNameEx(i));
-			AddAutomatedFlag(i, string);
-			format(string, sizeof(string), "{AA3333}AdmWarning{FFFF00}: %s (ID %d) may possibly be armor hacking.", GetPlayerNameEx(i), i);
-			ABroadCast(COLOR_YELLOW, string, 2);
-		}
-
 	    if(GetPVarType(i, "Injured"))
 	    {
 	        if(GetPVarInt(i, "EMSAttempt") != 0)
@@ -60968,26 +61024,21 @@ Timer:ServerTime[1000]()
 	return true;
 }
 
-CMD:tokenshop(playerid, params[])
+/*CMD:herbsmenu(playerid, params[])
 {
-	if(PlayerInfo[playerid][pVip] >= 2)
-	{
-	    ShowPlayerDialog(playerid, DIALOG_TOKENSHOP, DIALOG_STYLE_LIST, "VIP Token Shop", "First Aid Kit(2 Tokens)\nKelvar Vest(3 Tokens)\nWeapon Set 1(30 Tokens)\nWeapon Set 2(40 Tokens)\nWeapon Set 3(50 Tokens)\n\nFree Car(75 Tokens)", "Select", "Cancel");
-	}
-	else SendClientMessage(playerid, COLOR_WHITE, "You must be atleast a Silver VIP to use this feature!");
-	return 1;
-}
+ShowPlayerDialog(playerid, DIALOG_HERBSMENU, DIALOG_STYLE_LIST, "hmenue", "First Aid Kit\nKelvar Vest\nWeapon Set 1\nWeapon Set 2\nWeapon Set 3\n\ndontclick)", "Select", "Cancel");
+}*/
 CMD:viplocker(playerid, params[])
 {
-	if(PlayerInfo[playerid][pVip] >= 2)
+	if(PlayerInfo[playerid][pVip] >= 1)
 	{
-	if(IsPlayerInRangeOfPoint(playerid, 2.0, 2561.32519531,1403.24609375,7699.56640625))
+	if(IsPlayerInRangeOfPoint(playerid, 4.0, 2556.66, 1403.92, 7699.58))
 	{
 	    ShowPlayerDialog(playerid, DIALOG_VIPLOCKER, DIALOG_STYLE_LIST, "VIP Locker", "Medical Kit(free)\nKelvar Vest(free)\nWeapons\nJob Picker\nVIP Color", "Select", "Cancel");
 	}
 	else SendClientMessage(playerid, COLOR_WHITE, "You are not at the VIP Lockers, they are inside the VIP Lounge!");
 	}
-	else SendClientMessage(playerid, COLOR_WHITE, "You must be atleast a Silver VIP to use this feature!");
+	else SendClientMessage(playerid, COLOR_WHITE, "You must be atleast a Bronze VIP to use this feature!");
 	return 1;
 }
 //makevip commands
