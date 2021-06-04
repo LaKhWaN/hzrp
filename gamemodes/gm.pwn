@@ -42,7 +42,7 @@
 
 //--------------------------------[ DEFINES ]--------------------------------
 			/*  ---------------- ENTITIES ----------------- */
-//#define 					DOUBLE_EXP_ENABLED
+#define 					DOUBLE_EXP_ENABLED
 //#define 					TREASURE_HUNT_ENABLED
 #define 					TimeFactor 							(20) // Calculation: timeratio = 86400/tf*60*24 = times faster than a Real day - Fastest is -6. Slowest is 500. Realtime is 60. Default is 20.
 #define 					MAX_HOUSES 							(1000)
@@ -336,7 +336,6 @@
 #define						SOUND_OFF 		 					(1098)
 #define 					DIALOG_VIPLOCKER 					(7832)
 #define 					DIALOG_VWEAPONS 					(7833)
-//#define                     DIALOG_HERBSMENU                    (18340)
 #define                     DIALOG_VJOBS                        (18341)
 #define 					COLOR_VIP 							0xC93CCE00
 
@@ -2804,12 +2803,12 @@ stock DoubleEXPcheck(hour) {
     FixHour(hour);
     hour = shifthour;
 
-	if(hour >= 13 && hour <= 15)
+	if(hour >= 0 && hour <= 24)
 		return 1; // EU timezone
-	else if(hour >= 18 && hour <= 20)
-		return 1; // US timezone
-    else if(hour >= 0 && hour <= 2)
-		return 1; // OC timezone
+	//else if(hour >= 18 && hour <= 20)
+	//	return 1; // US timezone
+   // else if(hour >= 0 && hour <= 2)
+	//	return 1; // OC timezone
 
 	return 0;
 }
@@ -7743,7 +7742,7 @@ stock ShowStats(playerid,targetid)
 		}
    		format(coordsstring, sizeof(coordsstring),"(Crimes: %d) - (Arrests: %d) - (Wanted Level: %d) - (Materials: %d) - (Pot: %d) - (Crack: %d) - (Packages: %d) - (Crates: %d)", crimes, arrests, wanted, mats, pot, crack, packages, crates);
    		SendClientMessage(playerid, COLOR_WHITE, coordsstring);
-   		format(coordsstring, sizeof(coordsstring),"(Rope: %d) - (Cigars: %d) - (Sprunk: %d) - (Spray: %d) - (Seeds: %d) -  (Biggest fish: %d) - (Referral Tokens: %d) - (ViP: %s)", rope, cigars, sprunk, spray, PlayerInfo[targetid][pWSeeds], bigfish, reftokens, drank);
+   		format(coordsstring, sizeof(coordsstring),"(Rope: %d) - (Cigars: %d) - (Sprunk: %d) - (Spray: %d) - (Seeds: %d) -  (Biggest fish: %d) - (Referral Tokens: %d) - (Donator: %s)", rope, cigars, sprunk, spray, PlayerInfo[targetid][pWSeeds], bigfish, reftokens, drank);
         SendClientMessage(playerid, COLOR_GREY, coordsstring);
 
 		if(PlayerInfo[playerid][pAdmin] >= 1) {
@@ -18034,10 +18033,7 @@ CMD:pickupbb(playerid, params[])
 		if(IsABoomboxNearby(posX, posY, posZ, i) < 3.0) {
 			if(IsPlayerInRangeOfPoint(i,150.0,BoomboxInfo[i][bbPosX],BoomboxInfo[i][bbPosY],BoomboxInfo[i][bbPosZ]) && GetPlayerInterior(i) == BoomboxInfo[i][bbInt] && GetPlayerVirtualWorld(i) == BoomboxInfo[i][bbVW])
 			{
-				foreach(Player, x) {
-					if(GetDistanceBetweenPlayers(x, i) < 150.0) StopAudioStreamForPlayer(x);
-				}
-				StopAudioStreamForPlayer(i);
+			foreach(Player, x)
 			}
 
 			BoomBoxSet[i] = 0;
@@ -43393,7 +43389,7 @@ stock SaveAccount(playerid) {
 		mysql_escape_string(szPlayerName, szPlayerName2,MAX_PLAYER_NAME,sqldb);
 		mysql_escape_string(PlayerInfo[playerid][pAdminName], szAdminName,MAX_PLAYER_NAME,sqldb);
 
-		mysql_format(sqldb,szQuery, sizeof(szQuery), "UPDATE players SET Password = '%s', Level = %d, AdminLevel = %d, AdminName = '%s', BanAppealer = %d, ViP = %d, Banned = %d, Permabanned = %d, Disabled = %d, LastIP = '%s', Registered = %d, \
+		mysql_format(sqldb,szQuery, sizeof(szQuery), "UPDATE players SET Password = '%s', Level = %d, AdminLevel = %d, AdminName = '%s', BanAppealer = %d, Donator = %d, Banned = %d, Permabanned = %d, Disabled = %d, LastIP = '%s', Registered = %d, \
 		Tutorial = %i, Sex = %d, Age = %d, Skin = %d, PosX = '%f', PosY = '%f', PosZ = '%f', PosR = '%f', ConnectTime = %d, Respect = %d, PhoneNumber = %d, Warnings = %d, Gang = %d, Faction = %d, Leader = %d, Rankk = %d WHERE Username = '%s'",
 		PlayerInfo[playerid][pKey], PlayerInfo[playerid][pLevel], PlayerInfo[playerid][pAdmin], szAdminName, PlayerInfo[playerid][pBanAppealer], PlayerInfo[playerid][pVip], PlayerInfo[playerid][pBanned],
 		PlayerInfo[playerid][pPermaBanned], PlayerInfo[playerid][pDisabled], PlayerInfo[playerid][pIP], PlayerInfo[playerid][pReg], PlayerInfo[playerid][pTut], PlayerInfo[playerid][pSex], PlayerInfo[playerid][pAge], PlayerInfo[playerid][pSkin], PlayerInfo[playerid][pPos_x],
@@ -43622,7 +43618,7 @@ public OnQueryFinished(resultid, extraid)
 			}
 
 			if(PlayerInfo[extraid][pVip] >= 1) {
-				format(string, sizeof(string), "[VIP NAMECHANGES] %s has changed their name to %s.", GetPlayerNameEx(extraid), szPlayerName);
+				format(string, sizeof(string), "[DONATOR NAMECHANGES] %s has changed their name to %s.", GetPlayerNameEx(extraid), szPlayerName);
 				Log("logs/donatornames.log", string);
 			}
 
@@ -44238,7 +44234,7 @@ public OnQueryFinished(resultid, extraid)
 					SendClientMessage(extraid, COLOR_FORSTATS, coordsstring);
 			   		format(coordsstring, sizeof(coordsstring),"(Crimes: %d) - (Arrests: %d) - (Wanted Level: %d) - (Materials: %d) - (Pot: %d) - (Crack: %d)", crimes, arrests, wanted, mats, pot, crack);
 			   		SendClientMessage(extraid, COLOR_WHITE, coordsstring);
-			   		format(coordsstring, sizeof(coordsstring),"(Rope: %d) - (Cigars: %d) - (Sprunk: %d) - (Spray: %d) -  (Biggest fish: %d) - (Referral Tokens: %d) - (ViP: %s)", rope, cigars, sprunk, spray, bigfish, reftokens, donatortxt);
+			   		format(coordsstring, sizeof(coordsstring),"(Rope: %d) - (Cigars: %d) - (Sprunk: %d) - (Spray: %d) -  (Biggest fish: %d) - (Referral Tokens: %d) - (Donator: %s)", rope, cigars, sprunk, spray, bigfish, reftokens, donatortxt);
 			        SendClientMessage(extraid, COLOR_FORSTATS, coordsstring);
 					format(coordsstring, sizeof(coordsstring), "(Admin Level: %d) - (Banned: %d) - (Permabanned: %d) - (Account disabled: %d)", adminlevel, banned, permabanned, disabled);
 			  		SendClientMessage(extraid, COLOR_WHITE,coordsstring);
@@ -47078,7 +47074,7 @@ public OnPlayerStateChange(playerid, newstate, oldstate) {
 	if(newstate == PLAYER_STATE_ONFOOT)
 	{
 		if(MP3Station[playerid] == 0) {
-			StopAudioStreamForPlayer(playerid);
+   		StopAudioStreamForPlayer(playerid);
 		} else {
 			new
 				t = MP3Station[playerid]-1;
@@ -50150,57 +50146,6 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 		}
 	}
 	*/
-  /*  if(dialogid == DIALOG_HERBSMENU)
-	{
-	    if(response)
-	    {
-	        if(listitem == 0)
-			{
-   			SetPlayerHealth(playerid, 100);
-   			SendClientMessage(playerid, COLOR_WHITE, "You have received a first aid kit and have been fully healed!");
-			}
-	        if(listitem == 1)
-			{
-   			SetPlayerArmour(playerid, 100);
-		    SendClientMessage(playerid, COLOR_WHITE, "You have received a kelvar vest!");
-			}
-	        if(listitem == 2)
-			{
-			SetPlayerArmour(playerid, 100);
-			SendClientMessage(playerid, COLOR_WHITE, "You have received weapon set 1!");
-			GivePlayerWeapon(playerid, 24, 99999);
-			GivePlayerWeapon(playerid, 25, 99999);
-			GivePlayerWeapon(playerid, 29, 99999);
-			GivePlayerWeapon(playerid, 33, 99999);
-			}
-	        if(listitem == 3)
-			{
-			SetPlayerArmour(playerid, 100);
-			SendClientMessage(playerid, COLOR_WHITE, "You have received weapon set 2!");
-			GivePlayerWeapon(playerid, 24, 99999);
-			GivePlayerWeapon(playerid, 27, 99999);
-			GivePlayerWeapon(playerid, 30, 99999);
-			GivePlayerWeapon(playerid, 34, 99999);
-			}
-	        if(listitem == 4)
-			{
-			SetPlayerArmour(playerid, 100);
-			SendClientMessage(playerid, COLOR_WHITE, "You have received weapon set 3!");
-			GivePlayerWeapon(playerid, 24, 99999);
-			GivePlayerWeapon(playerid, 26, 99999);
-			GivePlayerWeapon(playerid, 31, 99999);
-			GivePlayerWeapon(playerid, 34, 99999);
-			}
-			if(listitem == 5)
-			{
-			 SendClientMessage(playerid, COLOR_WHITE, "You are now flagged for a free car, rules apply.");
-			 SendClientMessage(playerid, COLOR_YELLOW, "The vehicle cannot be an LEO or some sort, it can be a truck. (military is allowed)");
-			 SendClientMessage(playerid, COLOR_YELLOW, "You are not allowed any weaponized vehicles, I.E. Mr. Splashy.");
-			 SendClientMessage(playerid, COLOR_WHITE, "Only a level 4+ administrator can issues these, so be patient and wait for one to come online!");
-			}
-		}
-	}
-*/
 	if(dialogid == DIALOG_VWEAPONS)
 	{
 	    if(PlayerInfo[playerid][pVip] >= 1)
@@ -50244,20 +50189,10 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 	        }
 	        if(listitem == 7)
 	        {
-	            SendClientMessage(playerid, COLOR_WHITE, "You have taken a Uzi from the VIP lockers.");
-           		GivePlayerWeapon(playerid, 28, 99999);
-	        }
-	        if(listitem == 8)
-	        {
-	            SendClientMessage(playerid, COLOR_WHITE, "You have taken a Tec-9 from the VIP lockers.");
-           		GivePlayerWeapon(playerid, 32, 99999);
-	        }
-	        if(listitem == 9)
-	        {
 	            SendClientMessage(playerid, COLOR_WHITE, "You have taken a SPAS-12 from the VIP lockers.");
            		GivePlayerWeapon(playerid, 27, 99999);
 	        }
- 	        if(listitem == 10)
+ 	        if(listitem == 8)
 	        {
 	            SendClientMessage(playerid, COLOR_WHITE, "You have taken a Sniper from the VIP lockers.");
            		GivePlayerWeapon(playerid, 34, 99999);
@@ -50376,7 +50311,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 			{
 				if(PlayerInfo[playerid][pVip] == 3)
 				{
-    			ShowPlayerDialog(playerid, DIALOG_VWEAPONS, DIALOG_STYLE_LIST, "VIP Weapons", "9MM\nParachute\nShotgun\nMP5\nDeagle\nAK-47\nM4A1\nUzi\nTec-9", "Select", "Cancel");
+    			ShowPlayerDialog(playerid, DIALOG_VWEAPONS, DIALOG_STYLE_LIST, "VIP Weapons", "9MM\nParachute\nShotgun\nMP5\nDeagle\nAK-47\nM4A1", "Select", "Cancel");
     			}
 			}
 			if(listitem == 3)
@@ -50421,7 +50356,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 			{
 				if(PlayerInfo[playerid][pVip] == 4)
 				{
-				    ShowPlayerDialog(playerid, DIALOG_VWEAPONS, DIALOG_STYLE_LIST, "VIP Weapons", "9MM\nParachute\nShotgun\nMP5\nDeagle\nAK-47\nM4A1\nUzi\nTec-9\nSPAS-12\nSniper", "Select", "Cancel");
+				    ShowPlayerDialog(playerid, DIALOG_VWEAPONS, DIALOG_STYLE_LIST, "VIP Weapons", "9MM\nParachute\nShotgun\nMP5\nDeagle\nAK-47\nM4A1\nSPAS-12\nSniper", "Select", "Cancel");
     			}
 			}
 			if(listitem == 3)
@@ -51446,7 +51381,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
  	else if(dialogid == SIGNCHECK)
 	{
 
-        
+
         if(IsPlayerConnected(playerid))
 		{
             PayCheckCode[playerid] = 0;
@@ -51566,7 +51501,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
             #if defined DOUBLE_EXP_ENABLED
 				new hour,minuite,second;
 				gettime(hour,minuite,second);
-				if(DoubleEXPcheck(hour))
+				if(DoubleEXPcheck(hour) || PlayerInfo[playerid][pVip] >= 1))
 				{
 				    PlayerInfo[playerid][pRespect] += 2;
 				    SendClientMessage(playerid, COLOR_YELLOW, "* You have gained two respect points due to double experience.");
@@ -51574,26 +51509,6 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
 				else
 				{
 	    			SendClientMessage(playerid, COLOR_YELLOW, "* You have only gained one respect point since it's not within the double experience hours.");
-					PlayerInfo[playerid][pRespect]++;
-				}
-            #else
-            	PlayerInfo[playerid][pRespect]++;
-            #endif
-
-            PlayerInfo[playerid][pConnectTime]++;
-            SignedPaycheck[playerid] = 1;
-            MissedPaychecks[playerid] = 0;
-            #if defined DOUBLE_EXP_ENABLED
-				new hour,minuite,second;
-				gettime(hour,minuite,second);
-				if(PlayerInfo[playerid][pVip] >= 3)
-				{
-				    PlayerInfo[playerid][pRespect] += 2;
-				    SendClientMessage(playerid, COLOR_YELLOW, "* You have gained two respect points due to double experience.");
-				}
-				else
-				{
-	    			SendClientMessage(playerid, COLOR_YELLOW, "* You have only gained one respect point Since you are not VIP Gold+");
 					PlayerInfo[playerid][pRespect]++;
 				}
             #else
@@ -60655,6 +60570,10 @@ Timer:EMSUpdate[5000]()
 	{
 		new Float:posX, Float:posY, Float:posZ;
  		GetPlayerPos(i, posX, posY, posZ);
+		if(GetPlayerInterior(i) == 0 && !IsPlayerInAnyVehicle(i) && MP3Station[i] == 0)
+		{
+		}
+
 		new Float:iArmor;
 		GetPlayerArmour(i, iArmor);
 	    if(GetPVarType(i, "Injured"))
@@ -61024,10 +60943,7 @@ Timer:ServerTime[1000]()
 	return true;
 }
 
-/*CMD:herbsmenu(playerid, params[])
-{
-ShowPlayerDialog(playerid, DIALOG_HERBSMENU, DIALOG_STYLE_LIST, "hmenue", "First Aid Kit\nKelvar Vest\nWeapon Set 1\nWeapon Set 2\nWeapon Set 3\n\ndontclick)", "Select", "Cancel");
-}*/
+
 CMD:viplocker(playerid, params[])
 {
 	if(PlayerInfo[playerid][pVip] >= 1)
@@ -61345,3 +61261,4 @@ CMD:travel(playerid, params[])
 	else SendClientMessage(playerid, COLOR_WHITE, "You must be VIP to use this feature!");
 	return 1;
 	}
+
